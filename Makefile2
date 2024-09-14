@@ -1,0 +1,40 @@
+TESTCLASS_BASE = $(shell basename --suffix=.picoc $(TESTCLASS))
+CXX = gcc -g -Wall
+SRC_DIR = ./src
+OBJ_DIR = ./obj
+BIN_DIR = ./bin
+MAIN_BINARIES = $(basename $(wildcard $(SRC_DIR)/*_main.c))
+HEADERS = $(wildcard $(SRC_DIR)/*.h)
+OBJECTS = $(addsuffix .o, $(basename $(filter-out %_main.c %_test.c, $(wildcard $(SRC_DIR)/*.c))))
+LIBRARIES =
+
+.PRECIOUS: %.o
+.SUFFIXES:
+.PHONY: clean compile test
+
+all: compile test
+
+compile: $(MAIN_BINARIES) $(TEST_BINARIES)
+
+test: $(TEST_BINARIES)
+	# for T in $(TEST_BINARIES); do ./$$T; done
+	# start with 'make test-arg ARG=file_basename'
+	# DEBUG=-d for debugging
+	./run_tests.sh $${COLUMNS} $(TESTCLASS_BASE) $(VERBOSE) $(DEBUG);
+
+test-clean: test clean
+
+clean:
+	rm -f $(SRC_DIR)/*.o
+	rm -f $(MAIN_BINARIES)
+	rm -f $(TEST_BINARIES)
+
+%_main: %_main.o $(OBJECTS)
+	@mkdir -p $(OBJ_DIR)
+	$(CXX) -o $@ $^ $(LIBRARIES)
+
+%.o: %.c $(HEADERS)
+	$(CXX) -o $(OBJ_DIR)/$@ -c $<
+
+print-main-binaries:
+	@echo "MAIN_BINARIES: $(MAIN_BINARIES)"

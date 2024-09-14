@@ -1,40 +1,34 @@
-TESTCLASS_BASE = $(shell basename --suffix=.picoc $(TESTCLASS))
-CXX = gcc -g -Wall
-MAIN_BINARIES = $(basename $(wildcard ./src/*_main.c))
-TEST_BINARIES = $(basename $(wildcard ./src/*_test.c))
-HEADERS = $(wildcard ./src/*.h)
-OBJECTS = $(addsuffix .o, $(basename $(filter-out %_main.c %_test.c, $(wildcard ./src/*.c))))
-LIBRARIES =
+# source: https://stackoverflow.com/a/30602701
 
-.PRECIOUS: %.o
-.SUFFIXES:
-.PHONY: clean compile test
+SRC_DIR := src
+OBJ_DIR := obj
+BIN_DIR := bin
+INCLUDE_DIR := include
+LIB_DIR := lib
 
-all: compile test
+BIN := $(BIN_DIR)/$(basename $(notdir $(wildcard $(SRC_DIR)/*_main.c)))
+SRC := $(wildcard $(SRC_DIR)/*.c)
+OBJ := $(SRC:$(SRC_DIR)/%.c=$(OBJ_DIR)/%.o)
 
-compile: $(MAIN_BINARIES) $(TEST_BINARIES)
+CPPFLAGS := -I$(INCLUDE_DIR) -MMD -MP
+CFLAGS   := -Wall
+LDFLAGS  := -L$(LIB_DIR)
+LDLIBS   := -lm
 
-test: $(TEST_BINARIES)
-	# for T in $(TEST_BINARIES); do ./$$T; done
-	# start with 'make test-arg ARG=file_basename'
-	# DEBUG=-d for debugging
-	./run_tests.sh $${COLUMNS} $(TESTCLASS_BASE) $(VERBOSE) $(DEBUG);
+.PHONY: all clean
 
-test-clean: test clean
+all: $(BIN)
+
+$(BIN): $(OBJ) | $(BIN_DIR)
+	$(CC) $(LDFLAGS) $^ $(LDLIBS) -o $@
+
+$(OBJ_DIR)/%.o: $(SRC_DIR)/%.c | $(OBJ_DIR)
+	$(CC) $(CPPFLAGS) $(CFLAGS) -c $< -o $@
+
+$(BIN_DIR) $(OBJ_DIR):
+	mkdir -p $@
 
 clean:
-	rm -f ./src/*.o
-	rm -f $(MAIN_BINARIES)
-	rm -f $(TEST_BINARIES)
+	@$(RM) -rv $(BIN_DIR) $(OBJ_DIR)
 
-%_main: ./src/%_main.o $(OBJECTS)
-	$(CXX) -o $@ $^ $(LIBRARIES)
-
-%_test: ./src/%_test.o $(OBJECTS)
-	$(CXX) -o $@ $^ $(LIBRARIES)
-
-%.o: ./src/%.c $(HEADERS)
-	$(CXX) -c $<
-
-print-main-binaries:
-	@echo "MAIN_BINARIES: $(MAIN_BINARIES)"
+-include $(OBJ:.o=.d)
