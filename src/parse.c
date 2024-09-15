@@ -1,7 +1,8 @@
+#include "../include/parse.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "../include/parse.h"
+#include <ctype.h>
 
 // Function to identify the operation
 Operation parse_operation(const char *op_str) {
@@ -44,19 +45,74 @@ void process_instruction(Instruction instr) {
     }
 }
 
-// Function to split the input by semicolons and parse each instruction
-void parse_program(const char *program) {
-    char *program_copy = strdup(program);  // Make a mutable copy of the program
-    char *instr_str = strtok(program_copy, ";");
-    
-    while (instr_str != NULL || instr_str == "") {
-        // Parse and process each instruction
-        Instruction instr = parse_instruction(instr_str);
-        process_instruction(instr);
-        
-        // Get the next instruction
-        instr_str = strtok(NULL, ";");
+// // Function to split the input by semicolons and parse each instruction
+// void parse_program(const char *program) {
+//     char *program_copy = strdup(program);  // Make a mutable copy of the program
+//     char *instr_str = strtok(program_copy, ";");
+//
+//     while (instr_str != NULL || instr_str == "") {
+//         // Parse and process each instruction
+//         Instruction instr = parse_instruction(instr_str);
+//         process_instruction(instr);
+//
+//         // Get the next instruction
+//         instr_str = strtok(NULL, ";");
+//     }
+//
+//     free(program_copy);
+// }
+
+// Function to trim leading and trailing white spaces
+char *trim_whitespace(char *str) {
+    char *end;
+
+    // Trim leading space
+    while (isspace((unsigned char)*str)) str++;
+
+    if (*str == 0)  // All spaces?
+        return str;
+
+    // Trim trailing space
+    end = str + strlen(str) - 1;
+    while (end > str && isspace((unsigned char)*end)) end--;
+
+    // Write new null terminator
+    *(end + 1) = '\0';
+
+    return str;
+}
+
+// Function to tokenize the input string based on delimiters "\n" and ";"
+char **tokenize(const char *input, const char *delimiters, int *count) {
+    char *input_copy = strdup(input);
+    char *token;
+    char **tokens = NULL;
+    int tokens_count = 0;
+
+    token = strtok(input_copy, delimiters);
+    while (token != NULL) {
+        tokens = realloc(tokens, sizeof(char *) * (tokens_count + 1));
+        tokens[tokens_count++] = strdup(token);
+        token = strtok(NULL, delimiters);
     }
-    
-    free(program_copy);
+
+    free(input_copy);
+    *count = tokens_count;
+    return tokens;
+}
+
+// Function to parse the program
+void parse_program(const char *program) {
+    int count;
+    char **instructions = tokenize(program, "\n;", &count);
+
+    for (int i = 0; i < count; i++) {
+        char *instruction = trim_whitespace(instructions[i]);
+        if (strlen(instruction) > 0) {
+            // Parse the instruction
+            printf("Parsed instruction: '%s'\n", instruction);
+        }
+        free(instructions[i]);
+    }
+    free(instructions);
 }
