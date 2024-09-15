@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "parse.h"
+#include "../include/parse.h"
 
 // Function to identify the operation
 Operation parse_operation(const char *op_str) {
@@ -31,13 +31,13 @@ Instruction parse_instruction(const char *instr_str) {
 void process_instruction(Instruction instr) {
     switch (instr.op) {
         case MOV:
-            printf("MOV %s, %s\n", instr.operand1, instr.operand2);
+            printf("MOV %s %s\n", instr.operand1, instr.operand2);
             break;
         case ADD:
-            printf("ADD %s, %s\n", instr.operand1, instr.operand2);
+            printf("ADD %s %s\n", instr.operand1, instr.operand2);
             break;
         case SUB:
-            printf("SUB %s, %s\n", instr.operand1, instr.operand2);
+            printf("SUB %s %s\n", instr.operand1, instr.operand2);
             break;
         default:
             printf("Unknown instruction\n");
@@ -49,7 +49,7 @@ void parse_program(const char *program) {
     char *program_copy = strdup(program);  // Make a mutable copy of the program
     char *instr_str = strtok(program_copy, ";");
     
-    while (instr_str != NULL) {
+    while (instr_str != NULL || instr_str == "") {
         // Parse and process each instruction
         Instruction instr = parse_instruction(instr_str);
         process_instruction(instr);

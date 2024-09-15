@@ -15,7 +15,7 @@ CFLAGS   := -Wall
 LDFLAGS  := -L$(LIB_DIR)
 LDLIBS   := -lm
 
-.PHONY: all clean
+.PHONY: all test clean
 
 all: $(BIN)
 
@@ -27,6 +27,9 @@ $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c | $(OBJ_DIR)
 
 $(BIN_DIR) $(OBJ_DIR):
 	mkdir -p $@
+
+test:
+	./run_tests.sh $${COLUMNS} $(TESTCLASS_BASE) $(VERBOSE) $(DEBUG);
 
 clean:
 	@$(RM) -rv $(BIN_DIR) $(OBJ_DIR)
