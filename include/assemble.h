@@ -31,12 +31,12 @@ typedef enum {
   OPLUSM, // 0b0010101
   ORM,    // 0b0010110
   ANDM,   // 0b0010111
-  LOAD = 0b0100,
-  LOADIN = 0b0101,
-  LOADI = 0b0111,
-  STORE = 0b1000,
-  STOREIN = 0b1001,
-  MOVE = 0b1011,
+  LOAD = 0b0100000,
+  LOADIN = 0b0101000,
+  LOADI = 0b0111000,
+  STORE = 0b1000000,
+  STOREIN = 0b1001000,
+  MOVE = 0b1011000,
   NOP = 0b1100000,
   INT = 0b1100001,
   RTI = 0b1100010,
@@ -77,6 +77,6 @@ typedef struct {
 int get_register_code(const char *reg);
 const char *get_register_name(int code);
 unsigned int assembly_to_machine(String_Instruction *instruction);
-Instruction *machine_to_assembly(unsigned int machine_instruction, char *assembly) ;
+Instruction *machine_to_assembly(unsigned int machine_instruction);
 
 #endif // ASSEMBLE_H

@@ -118,3 +118,4 @@ int main(int argc, char *argv[]) {
 // - reti, eprom, uart, sram, sata
 //   - Befehle am Anfang reinladen ins CS
 // - paging table generieren
+// - eprom, regs und uart keine Dateien, nur sram und hdd

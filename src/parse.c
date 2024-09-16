@@ -4,18 +4,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-// Function to identify the operation
-// Operation parse_operation(const char *op_str) {
-//   if (strcmp(op_str, "MOV") == 0)
-//     return MOV;
-//   if (strcmp(op_str, "ADD") == 0)
-//     return ADD;
-//   if (strcmp(op_str, "SUB") == 0)
-//     return SUB;
-//   return UNKNOWN;
-// }
-
-// Function to parse a single instruction string
 String_Instruction *parse_instruction(const char *instr_str) {
   String_Instruction *instr = malloc(sizeof(String_Instruction));
   char op[8] = {'\0'};
@@ -38,40 +26,6 @@ String_Instruction *parse_instruction(const char *instr_str) {
 
   return instr;
 }
-
-// Function to process the instruction (for now, just print it)
-// void process_instruction(Instruction instr) {
-//   switch (instr.op) {
-//   case MOV:
-//     printf("MOV %s %s\n", instr.operand1, instr.operand2);
-//     break;
-//   case ADD:
-//     printf("ADD %s %s\n", instr.operand1, instr.operand2);
-//     break;
-//   case SUB:
-//     printf("SUB %s %s\n", instr.operand1, instr.operand2);
-//     break;
-//   default:
-//     printf("Unknown instruction\n");
-//   }
-// }
-
-// // Function to split the input by semicolons and parse each instruction
-// void parse_program(const char *program) {
-//     char *program_copy = strdup(program);  // Make a mutable copy of the
-//     program char *instr_str = strtok(program_copy, ";");
-//
-//     while (instr_str != NULL || instr_str == "") {
-//         // Parse and process each instruction
-//         Instruction instr = parse_instruction(instr_str);
-//         process_instruction(instr);
-//
-//         // Get the next instruction
-//         instr_str = strtok(NULL, ";");
-//     }
-//
-//     free(program_copy);
-// }
 
 char *trim_whitespace(char *str) {
   char *end;
@@ -117,12 +71,106 @@ char **tokenize(const char *input, const char *delimiters, int *count) {
 
 void parse_program(const char *program) {
   int count;
-  char **instruction_strings = tokenize(program, "\n;", &count);
+  char **instr_strings = tokenize(program, "\n;", &count);
 
   for (int i = 0; i < count; i++) {
-    String_Instruction *instruction = parse_instruction(instruction_strings[i]);
-    unsigned int machine_instr = assembly_to_machine(instruction);
-    free(instruction_strings[i]);
+    String_Instruction *string_instr = parse_instruction(instr_strings[i]);
+    unsigned int machine_instr = assembly_to_machine(string_instr);
+    Instruction *assembly_instr = machine_to_assembly(machine_instr);
+
+    process_instruction(assembly_instr);
+
+    free(assembly_instr);
+    free(instr_strings[i]);
   }
-  free(instruction_strings);
+  free(instr_strings);
+}
+
+void process_instruction(Instruction *assembly_instr) {
+  switch (assembly_instr->op) {
+  case ADDI:
+    assembly_instr->opd1 + assembly_instr->opd2;
+    break;
+  case SUBI:
+    break;
+  case MULTI:
+    break;
+  case DIVI:
+    break;
+  case MODI:
+    break;
+  case OPLUSI:
+    break;
+  case ORI:
+    break;
+  case ANDI:
+    break;
+  case ADDR:
+    break;
+  case SUBR:
+    break;
+  case MULTR:
+    break;
+  case DIVR:
+    break;
+  case MODR:
+    break;
+  case OPLUSR:
+    break;
+  case ORR:
+    break;
+  case ANDR:
+    break;
+  case ADDM:
+    break;
+  case SUBM:
+    break;
+  case MULTM:
+    break;
+  case DIVM:
+    break;
+  case MODM:
+    break;
+  case OPLUSM:
+    break;
+  case ORM:
+    break;
+  case ANDM:
+    break;
+  case LOAD:
+    break;
+  case LOADIN:
+    break;
+  case LOADI:
+    break;
+  case STORE:
+    break;
+  case STOREIN:
+    break;
+  case MOVE:
+    break;
+  case NOP:
+    break;
+  case INT:
+    break;
+  case RTI:
+    break;
+  case JUMPGT:
+    break;
+  case JUMPEQ:
+    break;
+  case JUMPGE:
+    break;
+  case JUMPLT:
+    break;
+  case JUMPNE:
+    break;
+  case JUMPLE:
+    break;
+  case JUMP:
+    break;
+  default:
+    perror("Error a instruction with this opcode doesn't exist yet");
+    exit(EXIT_FAILURE);
+  }
 }

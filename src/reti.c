@@ -2,18 +2,7 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <string.h>
-
-// Define the registers
-typedef struct {
-    uint32_t PC;  // Program Counter
-    uint32_t ACC; // Accumulator
-    uint32_t IN1; // Input Register 1
-    uint32_t IN2; // Input Register 2
-    uint32_t SP;  // Stack Pointer
-    uint32_t BAF; // Base Address Register
-    uint32_t CS;  // Code Segment
-    uint32_t DS;  // Data Segment
-} Registers;
+#include "../include/reti.h"
 
 Registers regs;
 
