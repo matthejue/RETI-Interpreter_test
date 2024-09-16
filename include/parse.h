@@ -1,20 +1,12 @@
 #ifndef PARSE_H
 #define PARSE_H
-
-// Define some basic operations
-typedef enum {MOV, ADD, SUB, UNKNOWN} Operation;
-
-// Structure to hold a parsed instruction
-typedef struct {
-    Operation op;
-    char operand1[10];
-    char operand2[10];
-} Instruction;
+#include "../include/assemble.h"
 
 // Function declarations
-Operation parse_operation(const char *op_str);
-Instruction parse_instruction(const char *instr_str);
-void process_instruction(Instruction instr);
+Unique_Mnemonic parse_operation(const char *op_str);
+Instruction *parse_instruction(const char *instr_str);
 void parse_program(const char *program);
+char *trim_whitespace(char *str);
+char **tokenize(const char *input, const char *delimiters, int *count);
 
 #endif
