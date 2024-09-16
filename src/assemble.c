@@ -5,7 +5,7 @@
 #include <string.h>
 
 const char *register_name_to_code[] = {"PC", "ACC", "IN1", "IN2",
-                                         "SP", "BAF", "CS",  "DS"};
+                                       "SP", "BAF", "CS",  "DS"};
 
 String_to_Mnemonic mnemonic_to_opcode[] = {
     {"ADDI", ADDI},     {"SUBI", SUBI},     {"MULTI", MULTI},
@@ -20,10 +20,10 @@ String_to_Mnemonic mnemonic_to_opcode[] = {
     {"JUMP!=", JUMPNE}, {"JUMP<>", JUMPNE}, {"JUMP<", JUMPLE},
     {"JUMP", JUMP},     {"INT", INT},       {"RTI", RTI}};
 
-// #define IMMEDIATE_MASK 0x3FFFFF // 22 bits for immediate value
-
 int get_register_code(const char *reg) {
-  for (int i = 0; i < NUM_REGISTERS; i++) {
+  for (int i = 0;
+       i < sizeof(register_name_to_code) / sizeof(register_name_to_code[0]);
+       i++) {
     if (strcmp(reg, register_name_to_code[i]) == 0) {
       return i;
     }
@@ -38,7 +38,7 @@ int get_register_code(const char *reg) {
 //   return NULL; // Invalid code
 // }
 
-Unique_Mnemonic get_mnemonic(const char *mnemonic) {
+Unique_Opcode get_mnemonic(const char *mnemonic) {
   for (int i = 0;
        i < sizeof(mnemonic_to_opcode) / sizeof(mnemonic_to_opcode[0]); ++i) {
     if (strcmp(mnemonic, mnemonic_to_opcode[i].name) == 0) {
@@ -48,7 +48,7 @@ Unique_Mnemonic get_mnemonic(const char *mnemonic) {
   return UNKNOWN;
 }
 
-unsigned int assembly_to_machine(Instruction *instr) {
+unsigned int assembly_to_machine(String_Instruction *instr) {
   unsigned int machine_instruction = 0;
   unsigned int op = get_mnemonic(instr->op);
   if (ADDR <= op && op <= ANDR) {
@@ -89,99 +89,102 @@ unsigned int assembly_to_machine(Instruction *instr) {
 
   if ((ADDI <= op && op <= ANDI) || (ADDM <= op && op <= ANDM)) {
     machine_instruction = op << 25 || opd1 << 22 || opd2;
-  }
-  if (ADDR <= op && op <= ANDR) {
+  } else if (ADDR <= op && op <= ANDR) {
     machine_instruction = op << 25 || opd1 << 22 || opd2 << 19;
-  }
-  if (op == LOAD || op == LOADI) {
+  } else if (op == LOAD || op == LOADI) {
     machine_instruction = op << 28 || opd1 << 22 || opd2;
-  }
-  if (op == LOADIN) {
+  } else if (op == LOADIN) {
     machine_instruction = op << 28 || opd1 << 25 || opd2 << 22 || opd3;
-  }
-  if (op == STORE) {
+  } else if (op == STORE) {
     machine_instruction = op << 28 || opd1 << 25 || opd2;
-  }
-  if (op == STOREIN) {
+  } else if (op == STOREIN) {
     machine_instruction = op << 28 || opd1 << 22 || opd2 << 25 || opd3;
-  }
-  if (op == MOVE) {
+  } else if (op == MOVE) {
     machine_instruction = op << 28 || opd1 << 25 || opd2 << 22;
-  }
-  if (NOP <= op && op <= JUMP){
+  } else if (NOP <= op && op <= JUMP) {
     machine_instruction = op << 25 || opd1;
   }
 
   return machine_instruction;
 }
 
-// if (num_operands >= 2) {
-//   int reg_code = get_register_code(operand1);
-//   if (reg_code != -1) {
-//     machine_instruction |= reg_code << 24;
-//   } else {
-//     fprintf(stderr, "Invalid register: %s\n", operand1);
-//     exit(1);
-//   }
-// }
-//
-// if (num_operands >= 3) {
-//   int reg_code = get_register_code(operand2);
-//   if (reg_code != -1) {
-//     machine_instruction |= reg_code << 20;
-//   } else {
-//     unsigned int immediate = atoi(operand2) & IMMEDIATE_MASK;
-//     machine_instruction |= immediate;
-//   }
-// }
-//
-// if (num_operands == 4) {
-//   int reg_code = get_register_code(operand3);
-//   if (reg_code != -1) {
-//     machine_instruction |= reg_code << 16;
-//   } else {
-//     fprintf(stderr, "Invalid register: %s\n", operand3);
-//     exit(1);
-//   }
-// }
+Instruction *machine_to_assembly(unsigned int machine_instruction,
+                                 char *assembly) {
+  Instruction *instr = malloc(sizeof(Instruction));
+  unsigned char mode = machine_instruction >> 30;
 
-// return machine_instruction;
-// }
+  if (mode == 0) {
+    unsigned char compute_mode = machine_instruction >> 24;
+    Register d = (machine_instruction >> 21) & REGISTER_MASK;
+    Register s = (machine_instruction >> 18) & REGISTER_MASK;
+    unsigned int i = machine_instruction & IMMEDIATE_MASK;
 
-// void machine_to_assembly(unsigned int machine_instruction, char *assembly) {
-//   unsigned int op_code = (machine_instruction >> 28) & 0xF;
-//   unsigned int reg1_code = (machine_instruction >> 24) & 0xF;
-//   unsigned int reg2_code = (machine_instruction >> 20) & 0xF;
-//   unsigned int reg3_code = (machine_instruction >> 16) & 0xF;
-//   unsigned int immediate = machine_instruction & IMMEDIATE_MASK;
-//
-//   // Assuming op_code 0 is "MOV"
-//   if (op_code == 0) {
-//     strcpy(assembly, "MOV ");
-//   }
-//
-//   const char *reg1_name = get_register_name(reg1_code);
-//   const char *reg2_name = get_register_name(reg2_code);
-//   const char *reg3_name = get_register_name(reg3_code);
-//
-//   if (reg1_name) {
-//     strcat(assembly, reg1_name);
-//   }
-//
-//   if (reg2_name) {
-//     strcat(assembly, " ");
-//     strcat(assembly, reg2_name);
-//   } else {
-//     char immediate_str[12];
-//     sprintf(immediate_str, " %u", immediate);
-//     strcat(assembly, immediate_str);
-//   }
-//
-//   if (reg3_name) {
-//     strcat(assembly, " ");
-//     strcat(assembly, reg3_name);
-//   }
-// }
+    instr->op = compute_mode;
+
+    if ((ADDI <= compute_mode && compute_mode <= ANDI) ||
+        (ADDM <= compute_mode && compute_mode <= ANDM)) {
+      instr->opd1 = (Reg_or_Im)d;
+      instr->opd2 = (Reg_or_Im)i;
+    } else if (ADDR <= compute_mode && compute_mode <= ANDR) {
+      instr->opd1 = (Reg_or_Im)d;
+      instr->opd2 = (Reg_or_Im)s;
+    } else {
+      perror("Error a instruction with this opcode doesn't exist yet");
+      exit(EXIT_FAILURE);
+    }
+
+  } else if (mode == 1 || mode == 2) {
+    Unique_Opcode load_store_mode = machine_instruction >> 27;
+    Register s = (machine_instruction >> 24) & REGISTER_MASK;
+    Register d = (machine_instruction >> 21) & REGISTER_MASK;
+    unsigned int i = machine_instruction & IMMEDIATE_MASK;
+
+    instr->op = load_store_mode;
+
+    switch (load_store_mode) {
+    case LOAD:
+      instr->opd1 = (Reg_or_Im)d;
+      instr->opd2 = (Reg_or_Im)i;
+      break;
+    case LOADIN:
+      instr->opd1 = (Reg_or_Im)s;
+      instr->opd2 = (Reg_or_Im)d;
+      instr->opd3 = (Reg_or_Im)i;
+      break;
+    case LOADI:
+      instr->opd1 = (Reg_or_Im)d;
+      instr->opd2 = (Reg_or_Im)i;
+      break;
+    case STORE:
+      instr->opd1 = (Reg_or_Im)s;
+      instr->opd2 = (Reg_or_Im)i;
+      break;
+    case STOREIN:
+      instr->opd1 = (Reg_or_Im)d;
+      instr->opd1 = (Reg_or_Im)s;
+      instr->opd2 = (Reg_or_Im)i;
+      break;
+    case MOVE:
+      instr->opd1 = (Reg_or_Im)s;
+      instr->opd1 = (Reg_or_Im)d;
+      break;
+    default:
+      perror("Error a instruction with this opcode doesn't exist yet");
+      exit(EXIT_FAILURE);
+      break;
+    }
+  } else { // mode == 3
+    unsigned char jump_mode = machine_instruction >> 24;
+    unsigned int i = machine_instruction & IMMEDIATE_MASK;
+
+    instr->op = jump_mode;
+
+    if (jump_mode != RTI) {
+      instr->opd1 = (Reg_or_Im)i;
+    }
+  }
+  return instr;
+}
 
 // int main() {
 //     const char *assembly_instruction = "MOV ACC IN1 12345";

@@ -1,18 +1,10 @@
 #ifndef ASSEMBLE_H
 #define ASSEMBLE_H
 
-typedef enum { PC, ACC, IN1, IN2, SP, BAF, CS, DS, NUM_REGISTERS } Register;
+#define IMMEDIATE_MASK 0x3FFFFF // 22 bits for immediate value
+#define REGISTER_MASK 0x7       // 22 bits for immediate value
 
-// mapping from regster to enum value
-
-extern const char* register_name_to_code[];
-
-typedef struct {
-  char op[8];
-  char opd1[23];
-  char opd2[23];
-  char opd3[23];
-} Instruction;
+typedef enum { PC, ACC, IN1, IN2, SP, BAF, CS, DS } Register;
 
 typedef enum {
   ADDI,   // 0b0000000
@@ -42,7 +34,7 @@ typedef enum {
   LOAD = 0b0100,
   LOADIN = 0b0101,
   LOADI = 0b0111,
-  STORE = 0b100,
+  STORE = 0b1000,
   STOREIN = 0b1001,
   MOVE = 0b1011,
   NOP = 0b1100000,
@@ -56,19 +48,35 @@ typedef enum {
   JUMPLE = 0b1111000,
   JUMP = 0b1111100,
   UNKNOWN,
-  NUM_Mnemonics
-} Unique_Mnemonic;
+} Unique_Opcode;
 
 typedef struct {
   const char *name;
-  Unique_Mnemonic value;
+  Unique_Opcode value;
 } String_to_Mnemonic;
 
-extern String_to_Mnemonic mnemonic_to_opcode[];
+typedef struct {
+  char op[8];
+  char opd1[23];
+  char opd2[23];
+  char opd3[23];
+} String_Instruction;
+
+typedef union {
+  Register reg;
+  unsigned int im;
+} Reg_or_Im;
+
+typedef struct {
+  Unique_Opcode op;
+  Reg_or_Im opd1;
+  Reg_or_Im opd2;
+  Reg_or_Im opd3;
+} Instruction;
 
 int get_register_code(const char *reg);
 const char *get_register_name(int code);
-unsigned int assembly_to_machine(Instruction *instruction);
-void machine_to_assembly(unsigned int machine_instruction, char *assembly);
+unsigned int assembly_to_machine(String_Instruction *instruction);
+Instruction *machine_to_assembly(unsigned int machine_instruction, char *assembly) ;
 
 #endif // ASSEMBLE_H

@@ -16,8 +16,8 @@
 // }
 
 // Function to parse a single instruction string
-Instruction *parse_instruction(const char *instr_str) {
-  Instruction *instr = malloc(sizeof(Instruction));
+String_Instruction *parse_instruction(const char *instr_str) {
+  String_Instruction *instr = malloc(sizeof(String_Instruction));
   char op[8] = {'\0'};
   char opd1[23] = {'\0'};
   char opd2[23] = {'\0'};
@@ -120,7 +120,7 @@ void parse_program(const char *program) {
   char **instruction_strings = tokenize(program, "\n;", &count);
 
   for (int i = 0; i < count; i++) {
-    Instruction *instruction = parse_instruction(instruction_strings[i]);
+    String_Instruction *instruction = parse_instruction(instruction_strings[i]);
     unsigned int machine_instr = assembly_to_machine(instruction);
     free(instruction_strings[i]);
   }
