@@ -4,8 +4,8 @@
 typedef enum { PC, ACC, IN1, IN2, SP, BAF, CS, DS, NUM_REGISTERS } Register;
 
 // mapping from regster to enum value
-const char *register_name_to_code[] = {"PC", "ACC", "IN1", "IN2",
-                                         "SP", "BAF", "CS",  "DS"};
+
+extern const char* register_name_to_code[];
 
 typedef struct {
   char op[8];
@@ -64,18 +64,7 @@ typedef struct {
   Unique_Mnemonic value;
 } String_to_Mnemonic;
 
-String_to_Mnemonic mnemonic_to_opcode[] = {
-    {"ADDI", ADDI},     {"SUBI", SUBI},     {"MULTI", MULTI},
-    {"DIVI", DIVI},     {"MODI", MODI},     {"OPLUSI", OPLUSI},
-    {"ORI", ORI},       {"ANDI", ANDI},     {"ADD", ADDR},
-    {"SUB", SUBR},      {"MULT", MULTR},    {"DIV", DIVR},
-    {"MOD", MODR},      {"OPLUS", OPLUSR},  {"OR", ORR},
-    {"AND", ANDR},      {"LOAD", LOAD},     {"LOADIN", LOADIN},
-    {"LOADI", LOAD},    {"STORE", STORE},   {"STOREIN", STOREIN},
-    {"MOVE", MOVE},     {"JUMP>", JUMPGT},  {"JUMP==", JUMPEQ},
-    {"JUMP=", JUMPEQ},  {"JUMP>=", JUMPGE}, {"JUMP<", JUMPLT},
-    {"JUMP!=", JUMPNE}, {"JUMP<>", JUMPNE}, {"JUMP<", JUMPLE},
-    {"JUMP", JUMP},     {"INT", INT},       {"RTI", RTI}};
+extern String_to_Mnemonic mnemonic_to_opcode[];
 
 int get_register_code(const char *reg);
 const char *get_register_name(int code);

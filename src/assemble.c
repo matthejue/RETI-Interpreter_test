@@ -1,9 +1,24 @@
-#include "assemble.h"
 #include "../include/parse.h"
 #include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
+const char *register_name_to_code[] = {"PC", "ACC", "IN1", "IN2",
+                                         "SP", "BAF", "CS",  "DS"};
+
+String_to_Mnemonic mnemonic_to_opcode[] = {
+    {"ADDI", ADDI},     {"SUBI", SUBI},     {"MULTI", MULTI},
+    {"DIVI", DIVI},     {"MODI", MODI},     {"OPLUSI", OPLUSI},
+    {"ORI", ORI},       {"ANDI", ANDI},     {"ADD", ADDR},
+    {"SUB", SUBR},      {"MULT", MULTR},    {"DIV", DIVR},
+    {"MOD", MODR},      {"OPLUS", OPLUSR},  {"OR", ORR},
+    {"AND", ANDR},      {"LOAD", LOAD},     {"LOADIN", LOADIN},
+    {"LOADI", LOAD},    {"STORE", STORE},   {"STOREIN", STOREIN},
+    {"MOVE", MOVE},     {"JUMP>", JUMPGT},  {"JUMP==", JUMPEQ},
+    {"JUMP=", JUMPEQ},  {"JUMP>=", JUMPGE}, {"JUMP<", JUMPLT},
+    {"JUMP!=", JUMPNE}, {"JUMP<>", JUMPNE}, {"JUMP<", JUMPLE},
+    {"JUMP", JUMP},     {"INT", INT},       {"RTI", RTI}};
 
 // #define IMMEDIATE_MASK 0x3FFFFF // 22 bits for immediate value
 
