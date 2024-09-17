@@ -2,34 +2,32 @@
 #include "../include/reti.h"
 #include <stdlib.h>
 
-// TODO: das Sign muss manchmal noch beachtet werden bei immediates und
-// vielleicht auch manchmal bei Registern
 void interpr_instruction(Instruction *assembly_instr) {
   switch (assembly_instr->op) {
   case ADDI:
     write_storage(regs, assembly_instr->opd1,
-                  read_storage(regs, assembly_instr->opd1) +
-                      assembly_instr->opd2);
+                  (int32_t)read_storage(regs, assembly_instr->opd1) +
+                      (int32_t)assembly_instr->opd2);
     break;
   case SUBI:
     write_storage(regs, assembly_instr->opd1,
                   read_storage(regs, assembly_instr->opd1) -
-                      assembly_instr->opd2);
+                      (int32_t)assembly_instr->opd2);
     break;
   case MULTI:
     write_storage(regs, assembly_instr->opd1,
-                  read_storage(regs, assembly_instr->opd1) *
-                      assembly_instr->opd2);
+                  (int32_t)read_storage(regs, assembly_instr->opd1) *
+                      (int32_t)assembly_instr->opd2);
     break;
   case DIVI:
     write_storage(regs, assembly_instr->opd1,
-                  read_storage(regs, assembly_instr->opd1) /
-                      assembly_instr->opd2);
+                  (int32_t)read_storage(regs, assembly_instr->opd1) /
+                      (int32_t)assembly_instr->opd2);
     break;
   case MODI:
     write_storage(regs, assembly_instr->opd1,
-                  read_storage(regs, assembly_instr->opd1) %
-                      assembly_instr->opd2);
+                  (int32_t)read_storage(regs, assembly_instr->opd1) %
+                      (int32_t)assembly_instr->opd2);
     break;
   case OPLUSI:
     write_storage(regs, assembly_instr->opd1,
@@ -48,28 +46,28 @@ void interpr_instruction(Instruction *assembly_instr) {
     break;
   case ADDR:
     write_storage(regs, assembly_instr->opd1,
-                  read_storage(regs, assembly_instr->opd1) +
-                      read_storage(regs, assembly_instr->opd2));
+                  (int32_t)read_storage(regs, assembly_instr->opd1) +
+                      (int32_t)read_storage(regs, assembly_instr->opd2));
     break;
   case SUBR:
     write_storage(regs, assembly_instr->opd1,
-                  read_storage(regs, assembly_instr->opd1) -
-                      read_storage(regs, assembly_instr->opd2));
+                  (int32_t)read_storage(regs, assembly_instr->opd1) -
+                      (int32_t)read_storage(regs, assembly_instr->opd2));
     break;
   case MULTR:
     write_storage(regs, assembly_instr->opd1,
-                  read_storage(regs, assembly_instr->opd1) *
-                      read_storage(regs, assembly_instr->opd2));
+                  (int32_t)read_storage(regs, assembly_instr->opd1) *
+                      (int32_t)read_storage(regs, assembly_instr->opd2));
     break;
   case DIVR:
     write_storage(regs, assembly_instr->opd1,
-                  read_storage(regs, assembly_instr->opd1) /
-                      read_storage(regs, assembly_instr->opd2));
+                  (int32_t)read_storage(regs, assembly_instr->opd1) /
+                      (int32_t)read_storage(regs, assembly_instr->opd2));
     break;
   case MODR:
     write_storage(regs, assembly_instr->opd1,
-                  read_storage(regs, assembly_instr->opd1) %
-                      read_storage(regs, assembly_instr->opd2));
+                  (int32_t)read_storage(regs, assembly_instr->opd1) %
+                      (int32_t)read_storage(regs, assembly_instr->opd2));
     break;
   case OPLUSR:
     write_storage(regs, assembly_instr->opd1,
@@ -88,28 +86,28 @@ void interpr_instruction(Instruction *assembly_instr) {
     break;
   case ADDM:
     write_storage(regs, assembly_instr->opd1,
-                  read_storage(regs, assembly_instr->opd1) +
-                      read_file(sram, assembly_instr->opd2));
+                  (int32_t)read_storage(regs, assembly_instr->opd1) +
+                      (int32_t)read_file(sram, assembly_instr->opd2));
     break;
   case SUBM:
     write_storage(regs, assembly_instr->opd1,
-                  read_storage(regs, assembly_instr->opd1) -
-                      read_file(sram, assembly_instr->opd2));
+                  (int32_t)read_storage(regs, assembly_instr->opd1) -
+                      (int32_t)read_file(sram, assembly_instr->opd2));
     break;
   case MULTM:
     write_storage(regs, assembly_instr->opd1,
-                  read_storage(regs, assembly_instr->opd1) *
-                      read_file(sram, assembly_instr->opd2));
+                  (int32_t)read_storage(regs, assembly_instr->opd1) *
+                      (int32_t)read_file(sram, assembly_instr->opd2));
     break;
   case DIVM:
     write_storage(regs, assembly_instr->opd1,
-                  read_storage(regs, assembly_instr->opd1) /
-                      read_file(sram, assembly_instr->opd2));
+                  (int32_t)read_storage(regs, assembly_instr->opd1) /
+                      (int32_t)read_file(sram, assembly_instr->opd2));
     break;
   case MODM:
     write_storage(regs, assembly_instr->opd1,
-                  read_storage(regs, assembly_instr->opd1) %
-                      read_file(sram, assembly_instr->opd2));
+                  (int32_t)read_storage(regs, assembly_instr->opd1) %
+                      (int32_t)read_file(sram, assembly_instr->opd2));
     break;
   case OPLUSM:
     write_storage(regs, assembly_instr->opd1,
@@ -133,7 +131,7 @@ void interpr_instruction(Instruction *assembly_instr) {
   case LOADIN:
     write_storage(regs, assembly_instr->opd2,
                   read_file(sram, read_storage(regs, assembly_instr->opd1) +
-                                      assembly_instr->opd3));
+                                      (int32_t)assembly_instr->opd3));
     break;
   case LOADI:
     write_storage(regs, assembly_instr->opd1, assembly_instr->opd2);
@@ -144,7 +142,7 @@ void interpr_instruction(Instruction *assembly_instr) {
     break;
   case STOREIN:
     write_file(sram,
-               read_storage(regs, assembly_instr->opd1) + assembly_instr->opd3,
+               read_storage(regs, assembly_instr->opd1) + (int32_t)assembly_instr->opd3,
                read_storage(regs, assembly_instr->opd2));
     break;
   case MOVE:
@@ -162,41 +160,41 @@ void interpr_instruction(Instruction *assembly_instr) {
   case JUMPGT:
     if (ACC > 0) {
       write_storage(regs, PC,
-                    read_storage(regs, PC) + assembly_instr->opd1 - 1);
+                    read_storage(regs, PC) + (int32_t)assembly_instr->opd1 - 1);
     }
     break;
   case JUMPEQ:
     if (ACC == 0) {
       write_storage(regs, PC,
-                    read_storage(regs, PC) + assembly_instr->opd1 - 1);
+                    read_storage(regs, PC) + (int32_t)assembly_instr->opd1 - 1);
     }
     break;
   case JUMPGE:
     if (ACC >= 0) {
       write_storage(regs, PC,
-                    read_storage(regs, PC) + assembly_instr->opd1 - 1);
+                    read_storage(regs, PC) + (int32_t)assembly_instr->opd1 - 1);
     }
     break;
   case JUMPLT:
     if (ACC < 0) {
       write_storage(regs, PC,
-                    read_storage(regs, PC) + assembly_instr->opd1 - 1);
+                    read_storage(regs, PC) + (int32_t)assembly_instr->opd1 - 1);
     }
     break;
   case JUMPNE:
     if (ACC != 0) {
       write_storage(regs, PC,
-                    read_storage(regs, PC) + assembly_instr->opd1 - 1);
+                    read_storage(regs, PC) + (int32_t)assembly_instr->opd1 - 1);
     }
     break;
   case JUMPLE:
     if (ACC <= 0) {
       write_storage(regs, PC,
-                    read_storage(regs, PC) + assembly_instr->opd1 - 1);
+                    read_storage(regs, PC) + (int32_t)assembly_instr->opd1 - 1);
     }
     break;
   case JUMP:
-    write_storage(regs, PC, read_storage(regs, PC) + assembly_instr->opd1 - 1);
+    write_storage(regs, PC, read_storage(regs, PC) + (int32_t)assembly_instr->opd1 - 1);
     break;
   default:
     perror("Error a instruction with this opcode doesn't exist yet");
