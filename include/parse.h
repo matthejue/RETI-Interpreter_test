@@ -7,6 +7,5 @@ String_Instruction *parse_instruction(const char *instr_str);
 char *trim_whitespace(char *str);
 char **tokenize(const char *input, const char *delimiters, int *count);
 void parse_program(const char *program);
-void process_instruction(Instruction *assembly_instr);
 
 #endif

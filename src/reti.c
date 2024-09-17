@@ -1,36 +1,49 @@
+#include "../include/reti.h"
+#include "../include/globals.h"
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <stdint.h>
 #include <string.h>
-#include "../include/reti.h"
 
-Registers regs;
+uint32_t *regs, *eprom, *uart;
 
 // File pointers for peripheral devices
-FILE *eprom, *uart, *sram, *hdd;
+FILE *sram, *hdd;
 
 // Initialize file-backed storage
-void init_storage() {
-    eprom = fopen("eprom.bin", "w+b");
-    uart = fopen("uart.bin", "w+b");
-    sram = fopen("sram.bin", "w+b");
-    hdd = fopen("hdd.bin", "w+b");
-    if (!eprom || !uart || !sram || !hdd) {
-        perror("Failed to open storage files");
-        exit(EXIT_FAILURE);
-    }
+void init_reti() {
+  regs = malloc(sizeof(uint32_t) * NUM_REGISTERS);
+  eprom = malloc(sizeof(uint32_t) * NUM_INSTRUCTIONS_START_PROGRAM);
+  uart = malloc(sizeof(uint32_t) * NUM_UART_ADDRESSES);
+  memset(regs, 0, sizeof(uint32_t) * NUM_REGISTERS);
+  memset(eprom, 0, sizeof(uint32_t) * NUM_INSTRUCTIONS_START_PROGRAM);
+  memset(uart, 0, sizeof(uint32_t) * NUM_UART_ADDRESSES);
+  sram = fopen("sram.bin", "w+b");
+  hdd = fopen("hdd.bin", "w+b");
+  if (!sram || !hdd) {
+    perror("Failed to open storage files");
+    exit(EXIT_FAILURE);
+  }
 }
 
-// Read from a device
-void read_device(FILE *device, uint32_t address, void *buffer, size_t size) {
-    fseek(device, address, SEEK_SET);
-    fread(buffer, size, 1, device);
+uint32_t read_storage(uint32_t *stor, uint16_t addr) {
+  return stor[addr];
 }
 
-// Write to a device
-void write_device(FILE *device, uint32_t address, void *buffer, size_t size) {
-    fseek(device, address, SEEK_SET);
-    fwrite(buffer, size, 1, device);
+void write_storage(uint32_t *stor, uint16_t addr, uint32_t buffer) {
+  stor[addr] = buffer;
+}
+
+uint32_t read_file(FILE *dev, uint64_t address) {
+  uint32_t buffer;
+  fseek(dev, address * sizeof(uint32_t), SEEK_SET);
+  fread(&buffer, sizeof(uint32_t), 1, dev);
+  return buffer;
+}
+
+void write_file(FILE *dev, uint64_t address, uint32_t buffer) {
+  fseek(dev, address * sizeof(uint32_t), SEEK_SET);
+  fwrite(&buffer, sizeof(uint32_t), 1, dev);
 }
 
 // Example function to emulate processor operation
@@ -45,15 +58,7 @@ void write_device(FILE *device, uint32_t address, void *buffer, size_t size) {
 //     write_device(sram, 0x00, &value, sizeof(value));
 // }
 
-void initialize_reti() {
-    memset(&regs, 0, sizeof(Registers));
-
-    init_storage();
-}
-
-void finalize() {
-    fclose(eprom);
-    fclose(uart);
-    fclose(sram);
-    fclose(hdd);
+void fin_reti() {
+  fclose(sram);
+  fclose(hdd);
 }

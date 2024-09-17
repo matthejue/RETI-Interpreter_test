@@ -5,29 +5,19 @@
 #include <stdint.h>
 #include <stdio.h>
 
-// Define the structure for registers
-typedef struct {
-  uint32_t PC;  // Program Counter
-  uint32_t ACC; // Accumulator
-  uint32_t IN1; // Input Register 1
-  uint32_t IN2; // Input Register 2
-  uint32_t SP;  // Stack Pointer
-  uint32_t BAF; // Base Address Register
-  uint32_t CS;  // Code Segment
-  uint32_t DS;  // Data Segment
-} Registers;
-
-// Declare external variables for the registers and peripheral devices
-extern Registers regs;
-extern FILE *eprom;
-extern FILE *uart;
+extern uint32_t *regs;
+extern uint32_t *eprom;
+extern uint32_t *uart;
 extern FILE *sram;
 extern FILE *hdd;
 
-void read_device(FILE *device, uint32_t address, void *buffer, size_t size) ;
-void write_device(FILE *device, uint32_t address, void *buffer, size_t size) ;
+void write_storage(uint32_t *stor, uint16_t addr, uint32_t buffer) ;
+uint32_t read_storage(uint32_t *stor, uint16_t addr) ;
 
-void initialize_reti();
-void finalize();
+uint32_t read_file(FILE *dev, uint64_t address);
+void write_file(FILE *dev, uint64_t address, uint32_t buffer);
+
+void init_reti();
+void fin_reti();
 
 #endif // RETI_H

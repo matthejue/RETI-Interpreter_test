@@ -1,6 +1,8 @@
 #ifndef ASSEMBLE_H
 #define ASSEMBLE_H
 
+#include <stdint.h>
+
 #define IMMEDIATE_MASK 0x3FFFFF // 22 bits for immediate value
 #define REGISTER_MASK 0x7       // 22 bits for immediate value
 
@@ -62,21 +64,16 @@ typedef struct {
   char opd3[23];
 } String_Instruction;
 
-typedef union {
-  Register reg;
-  unsigned int im;
-} Reg_or_Im;
-
 typedef struct {
-  Unique_Opcode op;
-  Reg_or_Im opd1;
-  Reg_or_Im opd2;
-  Reg_or_Im opd3;
+  uint8_t op;
+  uint32_t opd1;
+  uint32_t opd2;
+  uint32_t opd3;
 } Instruction;
 
-int get_register_code(const char *reg);
-const char *get_register_name(int code);
-unsigned int assembly_to_machine(String_Instruction *instruction);
-Instruction *machine_to_assembly(unsigned int machine_instruction);
+uint8_t get_register_code(char *reg);
+uint8_t get_mnemonic(char *mnemonic) ;
+Instruction *machine_to_assembly(uint32_t machine_instruction);
+uint32_t assembly_to_machine(String_Instruction *instr);
 
 #endif // ASSEMBLE_H

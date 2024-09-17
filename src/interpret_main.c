@@ -7,8 +7,9 @@
 #include <string.h>
 #include <unistd.h>
 
-int ram_size = 0;
-int page_size = 0;
+uint32_t ram_size = 4294967295;
+uint16_t page_size = 4096;
+uint32_t hdd_size = 4294967295;
 
 char *read_file_content(const char *file_path) {
   FILE *file = fopen(file_path, "r");
@@ -36,7 +37,7 @@ char *read_file_content(const char *file_path) {
 
 char *read_stdin_content() {
   size_t len = 0;
-  ssize_t read;
+  size_t read;
   char *line = NULL;
   char *content = NULL;
 
@@ -53,21 +54,23 @@ char *read_stdin_content() {
   return content;
 }
 
-void parse_arguments(int argc, char *argv[], int *ram_size, int *page_size,
-                     char **input) {
-  int opt;
+void parse_arguments(uint8_t argc, char *argv[], char **input) {
+  uint32_t opt;
   *input = NULL;
 
-  while ((opt = getopt(argc, argv, "r:p:")) != -1) {
+  while ((opt = getopt(argc, argv, "r:p:h:")) != -1) {
     switch (opt) {
     case 'r':
-      *ram_size = atoi(optarg);
+      ram_size = atoi(optarg);
       break;
     case 'p':
-      *page_size = atoi(optarg);
+      page_size = atoi(optarg);
+      break;
+    case 'h':
+      hdd_size = atoi(optarg);
       break;
     default:
-      fprintf(stderr, "Usage: %s -r ram_size -p page_size input\n", argv[0]);
+      fprintf(stderr, "Usage: %s -r ram_size -p page_size -h hdd_size input\n", argv[0]);
       exit(EXIT_FAILURE);
     }
   }
@@ -97,15 +100,18 @@ void parse_arguments(int argc, char *argv[], int *ram_size, int *page_size,
 int main(int argc, char *argv[]) {
   char *input = NULL;
 
-  parse_arguments(argc, argv, &ram_size, &page_size, &input);
+  parse_arguments(argc, argv, &input);
 
   printf("RAM Size: %d\n", ram_size);
   printf("Page Size: %d\n", page_size);
+  printf("HDD Size: %d\n", hdd_size);
   printf("Input: %s\n", input);
 
-  initialize_reti();
+  init_reti();
 
   parse_program(input);
+
+  fin_reti();
 
   free(input);
   return 0;
@@ -119,3 +125,4 @@ int main(int argc, char *argv[]) {
 //   - Befehle am Anfang reinladen ins CS
 // - paging table generieren
 // - eprom, regs und uart keine Dateien, nur sram und hdd
+// - Startprogram bei der Kompilierung schon vorher erstellen

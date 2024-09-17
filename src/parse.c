@@ -1,4 +1,5 @@
 #include "../include/parse.h"
+#include "../include/interpret.h"
 #include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -78,99 +79,10 @@ void parse_program(const char *program) {
     unsigned int machine_instr = assembly_to_machine(string_instr);
     Instruction *assembly_instr = machine_to_assembly(machine_instr);
 
-    process_instruction(assembly_instr);
+    interpr_instruction(assembly_instr);
 
     free(assembly_instr);
     free(instr_strings[i]);
   }
   free(instr_strings);
-}
-
-void process_instruction(Instruction *assembly_instr) {
-  switch (assembly_instr->op) {
-  case ADDI:
-    assembly_instr->opd1 + assembly_instr->opd2;
-    break;
-  case SUBI:
-    break;
-  case MULTI:
-    break;
-  case DIVI:
-    break;
-  case MODI:
-    break;
-  case OPLUSI:
-    break;
-  case ORI:
-    break;
-  case ANDI:
-    break;
-  case ADDR:
-    break;
-  case SUBR:
-    break;
-  case MULTR:
-    break;
-  case DIVR:
-    break;
-  case MODR:
-    break;
-  case OPLUSR:
-    break;
-  case ORR:
-    break;
-  case ANDR:
-    break;
-  case ADDM:
-    break;
-  case SUBM:
-    break;
-  case MULTM:
-    break;
-  case DIVM:
-    break;
-  case MODM:
-    break;
-  case OPLUSM:
-    break;
-  case ORM:
-    break;
-  case ANDM:
-    break;
-  case LOAD:
-    break;
-  case LOADIN:
-    break;
-  case LOADI:
-    break;
-  case STORE:
-    break;
-  case STOREIN:
-    break;
-  case MOVE:
-    break;
-  case NOP:
-    break;
-  case INT:
-    break;
-  case RTI:
-    break;
-  case JUMPGT:
-    break;
-  case JUMPEQ:
-    break;
-  case JUMPGE:
-    break;
-  case JUMPLT:
-    break;
-  case JUMPNE:
-    break;
-  case JUMPLE:
-    break;
-  case JUMP:
-    break;
-  default:
-    perror("Error a instruction with this opcode doesn't exist yet");
-    exit(EXIT_FAILURE);
-  }
 }

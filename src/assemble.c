@@ -20,8 +20,8 @@ String_to_Mnemonic mnemonic_to_opcode[] = {
     {"JUMP!=", JUMPNE}, {"JUMP<>", JUMPNE}, {"JUMP<", JUMPLE},
     {"JUMP", JUMP},     {"INT", INT},       {"RTI", RTI}};
 
-int get_register_code(const char *reg) {
-  for (int i = 0;
+uint8_t get_register_code(char *reg) {
+  for (uint8_t i = 0;
        i < sizeof(register_name_to_code) / sizeof(register_name_to_code[0]);
        i++) {
     if (strcmp(reg, register_name_to_code[i]) == 0) {
@@ -31,19 +31,19 @@ int get_register_code(const char *reg) {
   return -1; // Invalid register
 }
 
-Unique_Opcode get_mnemonic(const char *mnemonic) {
-  for (int i = 0;
+uint8_t get_mnemonic(char *mnemonic) {
+  for (uint8_t i = 0;
        i < sizeof(mnemonic_to_opcode) / sizeof(mnemonic_to_opcode[0]); ++i) {
     if (strcmp(mnemonic, mnemonic_to_opcode[i].name) == 0) {
-      return mnemonic_to_opcode[i].value;
+      return (uint8_t)mnemonic_to_opcode[i].value;
     }
   }
-  return UNKNOWN;
+  return (uint8_t)UNKNOWN;
 }
 
-unsigned int assembly_to_machine(String_Instruction *instr) {
-  unsigned int machine_instruction = 0;
-  unsigned int op = get_mnemonic(instr->op);
+uint32_t assembly_to_machine(String_Instruction *instr) {
+  uint32_t machine_instruction = 0;
+  uint8_t op = get_mnemonic(instr->op);
 
   if (ADDR <= op && op <= ANDR) {
     if (isdigit(instr->opd2[0])) {
@@ -51,7 +51,7 @@ unsigned int assembly_to_machine(String_Instruction *instr) {
     }
   }
 
-  unsigned opd1, opd2, opd3;
+  uint32_t opd1, opd2, opd3;
   if (strcmp(instr->opd1, "") != 0) {
     if (isalpha(instr->opd1[0])) {
       opd1 = get_register_code(instr->opd1);
@@ -103,78 +103,78 @@ unsigned int assembly_to_machine(String_Instruction *instr) {
   return machine_instruction;
 }
 
-Instruction *machine_to_assembly(unsigned int machine_instruction) {
+Instruction *machine_to_assembly(uint32_t machine_instruction) {
   Instruction *instr = malloc(sizeof(Instruction));
-  unsigned char mode = machine_instruction >> 30;
+  uint8_t mode = machine_instruction >> 30;
 
   if (mode == 0) {
-    unsigned char compute_mode = machine_instruction >> 24;
-    Register d = (machine_instruction >> 21) & REGISTER_MASK;
-    Register s = (machine_instruction >> 18) & REGISTER_MASK;
-    unsigned int i = machine_instruction & IMMEDIATE_MASK;
+    uint8_t compute_mode = machine_instruction >> 24;
+    uint8_t d = (machine_instruction >> 21) & REGISTER_MASK;
+    uint8_t s = (machine_instruction >> 18) & REGISTER_MASK;
+    uint32_t i = machine_instruction & IMMEDIATE_MASK;
 
     instr->op = compute_mode;
 
     if ((ADDI <= compute_mode && compute_mode <= ANDI) ||
         (ADDM <= compute_mode && compute_mode <= ANDM)) {
-      instr->opd1 = (Reg_or_Im)d;
-      instr->opd2 = (Reg_or_Im)i;
+      instr->opd1 = (uint32_t)d;
+      instr->opd2 = (uint32_t)i;
     } else if (ADDR <= compute_mode && compute_mode <= ANDR) {
-      instr->opd1 = (Reg_or_Im)d;
-      instr->opd2 = (Reg_or_Im)s;
+      instr->opd1 = (uint32_t)d;
+      instr->opd2 = (uint32_t)s;
     } else {
       perror("Error a instruction with this opcode doesn't exist yet");
       exit(EXIT_FAILURE);
     }
 
   } else if (mode == 1 || mode == 2) {
-    Unique_Opcode load_store_mode = machine_instruction >> 27;
-    Register s = (machine_instruction >> 24) & REGISTER_MASK;
-    Register d = (machine_instruction >> 21) & REGISTER_MASK;
-    unsigned int i = machine_instruction & IMMEDIATE_MASK;
+    uint8_t load_store_mode = machine_instruction >> 27;
+    uint8_t s = (machine_instruction >> 24) & REGISTER_MASK;
+    uint8_t d = (machine_instruction >> 21) & REGISTER_MASK;
+    uint32_t i = machine_instruction & IMMEDIATE_MASK;
 
     instr->op = load_store_mode;
 
     switch (load_store_mode) {
     case LOAD:
-      instr->opd1 = (Reg_or_Im)d;
-      instr->opd2 = (Reg_or_Im)i;
+      instr->opd1 = d;
+      instr->opd2 = i;
       break;
     case LOADIN:
-      instr->opd1 = (Reg_or_Im)s;
-      instr->opd2 = (Reg_or_Im)d;
-      instr->opd3 = (Reg_or_Im)i;
+      instr->opd1 = s;
+      instr->opd2 = d;
+      instr->opd3 = i;
       break;
     case LOADI:
-      instr->opd1 = (Reg_or_Im)d;
-      instr->opd2 = (Reg_or_Im)i;
+      instr->opd1 = d;
+      instr->opd2 = i;
       break;
     case STORE:
-      instr->opd1 = (Reg_or_Im)s;
-      instr->opd2 = (Reg_or_Im)i;
+      instr->opd1 = s;
+      instr->opd2 = i;
       break;
     case STOREIN:
-      instr->opd1 = (Reg_or_Im)d;
-      instr->opd1 = (Reg_or_Im)s;
-      instr->opd2 = (Reg_or_Im)i;
+      instr->opd1 = d;
+      instr->opd1 = s;
+      instr->opd2 = i;
       break;
     case MOVE:
-      instr->opd1 = (Reg_or_Im)s;
-      instr->opd1 = (Reg_or_Im)d;
+      instr->opd1 = s;
+      instr->opd1 = d;
       break;
     default:
       perror("Error a instruction with this opcode doesn't exist yet");
       exit(EXIT_FAILURE);
     }
   } else { // mode == 3
-    unsigned char jump_mode = machine_instruction >> 24;
-    unsigned int i = machine_instruction & IMMEDIATE_MASK;
+    uint8_t jump_mode = machine_instruction >> 24;
+    uint32_t i = machine_instruction & IMMEDIATE_MASK;
 
     instr->op = jump_mode;
 
     if ((JUMPGT <= jump_mode && jump_mode <= JUMP) ||
         (jump_mode == NOP && jump_mode == INT)) {
-      instr->opd1 = (Reg_or_Im)i;
+      instr->opd1 = i;
     } else if (jump_mode != RTI) {
     } else {
       perror("Error a instruction with this opcode doesn't exist yet");
