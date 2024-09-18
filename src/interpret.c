@@ -1,6 +1,7 @@
 #include "../include/interpret.h"
 #include "../include/reti.h"
 #include <stdlib.h>
+#include <stdbool.h>
 
 void interpr_instruction(Instruction *assembly_instr) {
   switch (assembly_instr->op) {
@@ -142,7 +143,8 @@ void interpr_instruction(Instruction *assembly_instr) {
     break;
   case STOREIN:
     write_file(sram,
-               read_storage(regs, assembly_instr->opd1) + (int32_t)assembly_instr->opd3,
+               read_storage(regs, assembly_instr->opd1) +
+                   (int32_t)assembly_instr->opd3,
                read_storage(regs, assembly_instr->opd2));
     break;
   case MOVE:
@@ -194,11 +196,27 @@ void interpr_instruction(Instruction *assembly_instr) {
     }
     break;
   case JUMP:
-    write_storage(regs, PC, read_storage(regs, PC) + (int32_t)assembly_instr->opd1 - 1);
+    write_storage(regs, PC,
+                  read_storage(regs, PC) + (int32_t)assembly_instr->opd1 - 1);
     break;
   default:
     perror("Error a instruction with this opcode doesn't exist yet");
     exit(EXIT_FAILURE);
   }
   write_storage(regs, PC, read_storage(regs, PC) + 1);
+}
+
+void interpr_program() {
+  while (true) {
+    uint32_t machine_instr = read_file(sram, read_storage(regs, PC));
+    Instruction *assembly_instr = machine_to_assembly(machine_instr);
+
+    if (assembly_instr->op == JUMP && assembly_instr->opd1 == 0) {
+      free(assembly_instr);
+      break;
+    } else {
+      interpr_instruction(assembly_instr);
+      free(assembly_instr);
+    }
+  }
 }

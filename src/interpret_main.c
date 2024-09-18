@@ -2,6 +2,7 @@
 #include "../include/globals.h"
 #include "../include/parse.h"
 #include "../include/reti.h"
+#include "../include/interpret.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -70,7 +71,8 @@ void parse_arguments(uint8_t argc, char *argv[], char **input) {
       hdd_size = atoi(optarg);
       break;
     default:
-      fprintf(stderr, "Usage: %s -r ram_size -p page_size -h hdd_size input\n", argv[0]);
+      fprintf(stderr, "Usage: %s -r ram_size -p page_size -h hdd_size input\n",
+              argv[0]);
       exit(EXIT_FAILURE);
     }
   }
@@ -109,7 +111,9 @@ int main(int argc, char *argv[]) {
 
   init_reti();
 
-  parse_program(input);
+  parse_and_load_program(input);
+
+  interpr_program();
 
   fin_reti();
 

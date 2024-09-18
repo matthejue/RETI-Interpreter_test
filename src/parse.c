@@ -1,5 +1,6 @@
 #include "../include/parse.h"
 #include "../include/interpret.h"
+#include "../include/reti.h"
 #include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -70,18 +71,15 @@ char **tokenize(const char *input, const char *delimiters, int *count) {
   return tokens;
 }
 
-void parse_program(const char *program) {
+void parse_and_load_program(const char *program) {
   int count;
   char **instr_strings = tokenize(program, "\n;", &count);
 
-  for (int i = 0; i < count; i++) {
+  for (uint32_t i = 0; i < count; i++) {
     String_Instruction *string_instr = parse_instruction(instr_strings[i]);
     unsigned int machine_instr = assembly_to_machine(string_instr);
-    Instruction *assembly_instr = machine_to_assembly(machine_instr);
+    write_file(sram, i, machine_instr);
 
-    interpr_instruction(assembly_instr);
-
-    free(assembly_instr);
     free(instr_strings[i]);
   }
   free(instr_strings);
