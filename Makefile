@@ -11,11 +11,11 @@ SRC := $(wildcard $(SRC_DIR)/*.c)
 OBJ := $(SRC:$(SRC_DIR)/%.c=$(OBJ_DIR)/%.o)
 
 CPPFLAGS := -I$(INCLUDE_DIR) -MMD -MP
-CFLAGS   := -Wall
+CFLAGS   := -Wall -g
 LDFLAGS  := -L$(LIB_DIR)
 LDLIBS   := -lm
 
-.PHONY: all test clean
+.PHONY: all test clean debug
 
 all: $(BIN)
 
@@ -33,5 +33,10 @@ test:
 
 clean:
 	@$(RM) -rv $(BIN_DIR) $(OBJ_DIR)
+
+debug:
+	# p/x $pc
+	make
+	gdb --tui -n -x ./.gdbinit --args ./bin/interpret_main ./tests/basic_arith_ops_simple.reti
 
 -include $(OBJ:.o=.d)

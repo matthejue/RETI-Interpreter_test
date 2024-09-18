@@ -50,7 +50,7 @@ char *trim_whitespace(char *str) {
   return str;
 }
 
-char **tokenize(const char *input, const char *delimiters, int *count) {
+char **tokenize(const char *input, const char *delimiters, uint32_t *count) {
   char *input_copy = strdup(input);
   char *token;
   char **tokens = NULL;
@@ -72,12 +72,12 @@ char **tokenize(const char *input, const char *delimiters, int *count) {
 }
 
 void parse_and_load_program(const char *program) {
-  int count;
+  uint32_t count;
   char **instr_strings = tokenize(program, "\n;", &count);
 
   for (uint32_t i = 0; i < count; i++) {
     String_Instruction *string_instr = parse_instruction(instr_strings[i]);
-    unsigned int machine_instr = assembly_to_machine(string_instr);
+    uint32_t machine_instr = assembly_to_machine(string_instr);
     write_file(sram, i, machine_instr);
 
     free(instr_strings[i]);

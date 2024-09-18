@@ -42,7 +42,7 @@ uint8_t get_mnemonic(char *mnemonic) {
 }
 
 uint32_t assembly_to_machine(String_Instruction *instr) {
-  uint32_t machine_instruction = 0;
+  uint32_t machine_instr = 0;
   uint8_t op = get_mnemonic(instr->op);
 
   if (ADDR <= op && op <= ANDR) {
@@ -66,7 +66,7 @@ uint32_t assembly_to_machine(String_Instruction *instr) {
     if (isalpha(instr->opd2[0])) {
       opd2 = get_register_code(instr->opd2);
     } else {
-      opd1 = atoi(instr->opd2);
+      opd2 = atoi(instr->opd2);
     }
   } else {
     opd2 = 0;
@@ -83,35 +83,35 @@ uint32_t assembly_to_machine(String_Instruction *instr) {
   }
 
   if ((ADDI <= op && op <= ANDI) || (ADDM <= op && op <= ANDM)) {
-    machine_instruction = op << 25 || opd1 << 22 || opd2;
+    machine_instr = op << 25 | opd1 << 22 | opd2;
   } else if (ADDR <= op && op <= ANDR) {
-    machine_instruction = op << 25 || opd1 << 22 || opd2 << 19;
+    machine_instr = op << 25 | opd1 << 22 | opd2 << 19;
   } else if (op == LOAD || op == LOADI) {
-    machine_instruction = op << 25 || opd1 << 22 || opd2;
+    machine_instr = op << 25 | opd1 << 22 | opd2;
   } else if (op == LOADIN) {
-    machine_instruction = op << 25 || opd1 << 25 || opd2 << 22 || opd3;
+    machine_instr = op << 25 | opd1 << 25 | opd2 << 22 | opd3;
   } else if (op == STORE) {
-    machine_instruction = op << 25 || opd1 << 25 || opd2;
+    machine_instr = op << 25 | opd1 << 25 | opd2;
   } else if (op == STOREIN) {
-    machine_instruction = op << 25 || opd1 << 22 || opd2 << 25 || opd3;
+    machine_instr = op << 25 | opd1 << 22 | opd2 << 25 | opd3;
   } else if (op == MOVE) {
-    machine_instruction = op << 28 || opd1 << 25 || opd2 << 22;
+    machine_instr = op << 28 | opd1 << 25 | opd2 << 22;
   } else if (NOP <= op && op <= JUMP) {
-    machine_instruction = op << 25 || opd1;
+    machine_instr = op << 25 | opd1;
   }
 
-  return machine_instruction;
+  return machine_instr;
 }
 
-Instruction *machine_to_assembly(uint32_t machine_instruction) {
+Instruction *machine_to_assembly(uint32_t machine_instr) {
   Instruction *instr = malloc(sizeof(Instruction));
-  uint8_t mode = machine_instruction >> 30;
+  uint8_t mode = machine_instr >> 30;
 
   if (mode == 0) {
-    uint8_t compute_mode = machine_instruction >> 24;
-    uint8_t d = (machine_instruction >> 21) & REGISTER_MASK;
-    uint8_t s = (machine_instruction >> 18) & REGISTER_MASK;
-    uint32_t i = machine_instruction & IMMEDIATE_MASK;
+    uint8_t compute_mode = machine_instr >> 25;
+    uint8_t d = (machine_instr >> 22) & REGISTER_MASK;
+    uint8_t s = (machine_instr >> 19) & REGISTER_MASK;
+    uint32_t i = machine_instr & IMMEDIATE_MASK;
 
     instr->op = compute_mode;
 
@@ -128,10 +128,12 @@ Instruction *machine_to_assembly(uint32_t machine_instruction) {
     }
 
   } else if (mode == 1 || mode == 2) {
-    uint8_t load_store_mode = machine_instruction >> 27;
-    uint8_t s = (machine_instruction >> 24) & REGISTER_MASK;
-    uint8_t d = (machine_instruction >> 21) & REGISTER_MASK;
-    uint32_t i = machine_instruction & IMMEDIATE_MASK;
+    uint8_t load_store_mode = machine_instr >> 28;
+    uint8_t s = (machine_instr >> 25) & REGISTER_MASK;
+    uint8_t d = (machine_instr >> 22) & REGISTER_MASK;
+    uint32_t i = machine_instr & IMMEDIATE_MASK;
+
+    load_store_mode = load_store_mode << 3;
 
     instr->op = load_store_mode;
 
@@ -167,8 +169,8 @@ Instruction *machine_to_assembly(uint32_t machine_instruction) {
       exit(EXIT_FAILURE);
     }
   } else { // mode == 3
-    uint8_t jump_mode = machine_instruction >> 24;
-    uint32_t i = machine_instruction & IMMEDIATE_MASK;
+    uint8_t jump_mode = machine_instr >> 25;
+    uint32_t i = machine_instr & IMMEDIATE_MASK;
 
     instr->op = jump_mode;
 

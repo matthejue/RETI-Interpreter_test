@@ -44,6 +44,7 @@ uint32_t read_file(FILE *dev, uint64_t address) {
 void write_file(FILE *dev, uint64_t address, uint32_t buffer) {
   fseek(dev, address * sizeof(uint32_t), SEEK_SET);
   fwrite(&buffer, sizeof(uint32_t), 1, dev);
+  fflush(dev);
 }
 
 // Example function to emulate processor operation
