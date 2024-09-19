@@ -2,3 +2,5 @@
 obj/
 bin/
 compile_commands.json
+hdd.bin
+sram.bin
