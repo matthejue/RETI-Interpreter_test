@@ -11,8 +11,10 @@ extern uint32_t *uart;
 extern FILE *sram;
 extern FILE *hdd;
 
-void write_storage(uint32_t *stor, uint16_t addr, uint32_t buffer) ;
-uint32_t read_storage(uint32_t *stor, uint16_t addr) ;
+void write_storage(uint32_t *stor, uint16_t addr, uint32_t buffer);
+uint32_t read_storage(uint32_t *stor, uint16_t addr);
+
+uint32_t swap_endian_32(uint32_t value);
 
 uint32_t read_file(FILE *dev, uint64_t address);
 void write_file(FILE *dev, uint64_t address, uint32_t buffer);

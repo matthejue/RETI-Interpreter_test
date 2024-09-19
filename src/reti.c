@@ -34,17 +34,25 @@ void write_storage(uint32_t *stor, uint16_t addr, uint32_t buffer) {
   stor[addr] = buffer;
 }
 
+uint32_t swap_endian_32(uint32_t value) {
+    return (value >> 24) |
+           ((value >> 8) & 0x0000FF00) |
+           ((value << 8) & 0x00FF0000) |
+           (value << 24);
+}
+
 uint32_t read_file(FILE *dev, uint64_t address) {
-  uint32_t buffer;
+  uint32_t big_endian_buffer;
   fseek(dev, address * sizeof(uint32_t), SEEK_SET);
-  fread(&buffer, sizeof(uint32_t), 1, dev);
-  return buffer;
+  fread(&big_endian_buffer, sizeof(uint32_t), 1, dev);
+  return swap_endian_32(big_endian_buffer);;
 }
 
 void write_file(FILE *dev, uint64_t address, uint32_t buffer) {
-  fseek(dev, address * sizeof(uint32_t), SEEK_SET);
-  fwrite(&buffer, sizeof(uint32_t), 1, dev);
-  fflush(dev);
+    uint32_t big_endian_buffer = swap_endian_32(buffer);
+    fseek(dev, address * sizeof(uint32_t), SEEK_SET);
+    fwrite(&big_endian_buffer, sizeof(uint32_t), 1, dev);
+    fflush(dev);
 }
 
 // Example function to emulate processor operation

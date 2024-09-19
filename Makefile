@@ -37,6 +37,6 @@ clean:
 debug:
 	# p/x $pc
 	make
-	gdb --tui -n -x ./.gdbinit --args ./bin/interpret_main ./tests/basic_arith_ops_simple.reti
+	gdb --tui -n -x ./.gdbinit --args ./bin/interpret_main ./tests/all_operations.reti
 
 -include $(OBJ:.o=.d)

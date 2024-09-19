@@ -130,3 +130,7 @@ int main(int argc, char *argv[]) {
 // - paging table generieren
 // - eprom, regs und uart keine Dateien, nur sram und hdd
 // - Startprogram bei der Kompilierung schon vorher erstellen
+// - Kommentare supporten
+// - INT und RETI
+// - Test machen, der alle Instructions einmal ausführt
+// - Memory Map über DS Register steuerbar machen

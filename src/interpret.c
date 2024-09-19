@@ -1,7 +1,7 @@
 #include "../include/interpret.h"
 #include "../include/reti.h"
-#include <stdlib.h>
 #include <stdbool.h>
+#include <stdlib.h>
 
 void interpr_instruction(Instruction *assembly_instr) {
   switch (assembly_instr->op) {
@@ -154,10 +154,13 @@ void interpr_instruction(Instruction *assembly_instr) {
   case NOP:
     break;
   case INT:
-    // TODO:
+    write_storage(regs, SP, read_storage(regs, SP) - 1);
+    write_file(sram, read_storage(regs, SP) + 1, read_storage(regs, PC));
+    write_storage(regs, PC, read_file(sram, assembly_instr->opd1));
     break;
   case RTI:
-    // TODO:
+    write_storage(regs, PC, read_file(sram, read_storage(regs, SP) + 1));
+    write_storage(regs, SP, read_storage(regs, SP) + 1);
     break;
   case JUMPGT:
     if (ACC > 0) {

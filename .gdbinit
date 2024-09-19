@@ -38,7 +38,9 @@
 # break src/interpret_main.c:114
 # run
 
-break src/assemble.c:172
+break src/parse.c:79
 run
+display *string_instr
+display/t machine_instr
 
 set pagination off

@@ -4,7 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-const char *register_name_to_code[] = {"PC", "ACC", "IN1", "IN2",
+const char *register_name_to_code[] = {"PC", "IN1", "IN2", "ACC",
                                        "SP", "BAF", "CS",  "DS"};
 
 String_to_Mnemonic mnemonic_to_opcode[] = {
@@ -14,7 +14,7 @@ String_to_Mnemonic mnemonic_to_opcode[] = {
     {"SUB", SUBR},      {"MULT", MULTR},    {"DIV", DIVR},
     {"MOD", MODR},      {"OPLUS", OPLUSR},  {"OR", ORR},
     {"AND", ANDR},      {"LOAD", LOAD},     {"LOADIN", LOADIN},
-    {"LOADI", LOAD},    {"STORE", STORE},   {"STOREIN", STOREIN},
+    {"LOADI", LOADI},   {"STORE", STORE},   {"STOREIN", STOREIN},
     {"MOVE", MOVE},     {"JUMP>", JUMPGT},  {"JUMP==", JUMPEQ},
     {"JUMP=", JUMPEQ},  {"JUMP>=", JUMPGE}, {"JUMP<", JUMPLT},
     {"JUMP!=", JUMPNE}, {"JUMP<>", JUMPNE}, {"JUMP<", JUMPLE},
@@ -174,8 +174,8 @@ Instruction *machine_to_assembly(uint32_t machine_instr) {
 
     instr->op = jump_mode;
 
-    if ((JUMPGT <= jump_mode && jump_mode <= JUMP) ||
-        (jump_mode == NOP && jump_mode == INT)) {
+    if ((JUMPGT <= jump_mode && jump_mode <= JUMP) || jump_mode == NOP ||
+        jump_mode == INT) {
       instr->opd1 = i;
     } else if (jump_mode != RTI) {
     } else {
