@@ -1,8 +1,8 @@
 // #include <stdio.h>
 #include "../include/globals.h"
+#include "../include/interpret.h"
 #include "../include/parse.h"
 #include "../include/reti.h"
-#include "../include/interpret.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -11,6 +11,7 @@
 uint32_t ram_size = 4294967295;
 uint16_t page_size = 4096;
 uint32_t hdd_size = 4294967295;
+bool daemon_mode = false;
 
 char *read_file_content(const char *file_path) {
   FILE *file = fopen(file_path, "r");
@@ -59,7 +60,7 @@ void parse_arguments(uint8_t argc, char *argv[], char **input) {
   uint32_t opt;
   *input = NULL;
 
-  while ((opt = getopt(argc, argv, "r:p:h:")) != -1) {
+  while ((opt = getopt(argc, argv, "r:p:h:d:")) != -1) {
     switch (opt) {
     case 'r':
       ram_size = atoi(optarg);
@@ -70,8 +71,11 @@ void parse_arguments(uint8_t argc, char *argv[], char **input) {
     case 'h':
       hdd_size = atoi(optarg);
       break;
+    case 'd':
+      daemon_mode = atoi(optarg);
+      break;
     default:
-      fprintf(stderr, "Usage: %s -r ram_size -p page_size -h hdd_size input\n",
+      fprintf(stderr, "Usage: %s -r ram_size -p page_size -h hdd_size -d daemon_mode input\n",
               argv[0]);
       exit(EXIT_FAILURE);
     }
@@ -134,3 +138,4 @@ int main(int argc, char *argv[]) {
 // - INT und RETI
 // - Test machen, der alle Instructions einmal ausführt
 // - Memory Map über DS Register steuerbar machen
+// - Error cases, division by zero usw. hinzufügen

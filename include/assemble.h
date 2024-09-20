@@ -52,6 +52,8 @@ typedef enum {
   UNKNOWN,
 } Unique_Opcode;
 
+extern const char *register_name_to_code[];
+
 typedef struct {
   const char *name;
   Unique_Opcode value;

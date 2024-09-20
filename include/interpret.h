@@ -3,7 +3,8 @@
 
 #include "../include/assemble.h"
 
-void interpr_instruction(Instruction *assembly_instr) ;
+uint32_t mod(int32_t a, int32_t b);
+void interpr_instruction(Instruction *assembly_instr);
 void interpr_program();
 
 #endif // INTERPRET_H

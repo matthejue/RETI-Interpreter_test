@@ -35,7 +35,7 @@ clean:
 	@$(RM) -rv $(BIN_DIR) $(OBJ_DIR)
 
 debug:
-	# p/x $pc
+	# p/x $pc with # break *0x555555556543 or break src/interpret.c:234 or break exit
 	make
 	gdb --tui -n -x ./.gdbinit --args ./bin/interpret_main ./tests/all_operations.reti
 

@@ -54,7 +54,7 @@ char **tokenize(const char *input, const char *delimiters, uint32_t *count) {
   char *input_copy = strdup(input);
   char *token;
   char **tokens = NULL;
-  int tokens_count = 0;
+  uint32_t tokens_count = 0;
 
   token = strtok(input_copy, delimiters);
   while (token != NULL) {

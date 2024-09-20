@@ -1,5 +1,7 @@
 #include "../include/interpret.h"
 #include "../include/reti.h"
+#include "../include/globals.h"
+#include "../include/daemon.h"
 #include <stdbool.h>
 #include <stdlib.h>
 
@@ -11,9 +13,9 @@
 // 7 % -3 = 7 - (-3) * (7 / -3) = 1 (if we ignore m € N/0), but that is only for truncated division, for floor it is 7 - (-3) * (7 / -3) = 7 - (-3) * -3 = 7 - 9 = -2 (if we ignore 0 <= r < m and say -m < r < m)
 // -7 % -3 = -7 - (-3) * (-7 / -3) = -1 (if we ignore m € N/0 and 0 =< r < m and thus -m < r < m), for floor it is the same: -7 - (-3) * (-7 / -3) = -7 - (-3) * 2 = -7 - (-6) = -1, -1 + 3 = 2 (if don't want to also ignore 0 =< r < m)
 
-int mod(int a, int b) {
+uint32_t mod(int32_t a, int32_t b) {
   // r = a − m x trunc(a/m)
-  int result = a % b;
+  int32_t result = a % b;
   if (result < 0) {
     result += b;
   }
@@ -230,6 +232,10 @@ void interpr_program() {
   while (true) {
     uint32_t machine_instr = read_file(sram, read_storage(regs, PC));
     Instruction *assembly_instr = machine_to_assembly(machine_instr);
+
+    if (daemon_mode) {
+      cont();
+    }
 
     if (assembly_instr->op == JUMP && assembly_instr->opd1 == 0) {
       free(assembly_instr);
