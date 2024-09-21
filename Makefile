@@ -3,7 +3,7 @@
 SRC_DIR := src
 OBJ_DIR := obj
 BIN_DIR := bin
-TEST_DIR := test
+TEST_DIR := unit_test
 OBJ_TEST_DIR := obj_test
 INCLUDE_DIR := include
 LIB_DIR := lib
@@ -18,7 +18,8 @@ CFLAGS   := -Wall -g -O2
 LDFLAGS  := -L$(LIB_DIR)
 LDLIBS   := -lm
 
-.PHONY: all test unit-test clean debug
+.PRECIOUS: $(OBJ_DIR)/%.o $(OBJ_TEST_DIR)/%.o
+.PHONY: all test test-full clean debug
 
 all: $(BIN_SRC)
 
@@ -40,11 +41,11 @@ $(OBJ_TEST_DIR)/%.o: $(TEST_DIR)/%.c | $(OBJ_TEST_DIR)
 $(BIN_DIR) $(OBJ_DIR) $(OBJ_TEST_DIR):
 	mkdir -p $@
 
-final-test:
+sys-test:
 	./run_tests.sh $${COLUMNS} $(TESTCLASS_BASE) $(VERBOSE) $(DEBUG);
 
 clean:
-	@$(RM) -rv $(BIN_DIR) $(OBJ_DIR)
+	@$(RM) -rv $(BIN_DIR) $(OBJ_DIR) $(OBJ_TEST_DIR)
 
 debug:
 	# p/x $pc with # break *0x555555556543 or break src/interpret.c:234 or break exit
