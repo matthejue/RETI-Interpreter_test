@@ -8,7 +8,7 @@
 #include <string.h>
 #include <unistd.h>
 
-uint32_t ram_size = 4294967295;
+uint32_t sram_size = 4294967295;
 uint16_t page_size = 4096;
 uint32_t hdd_size = 4294967295;
 bool daemon_mode = false;
@@ -60,10 +60,10 @@ void parse_arguments(uint8_t argc, char *argv[], char **input) {
   uint32_t opt;
   *input = NULL;
 
-  while ((opt = getopt(argc, argv, "r:p:h:d:")) != -1) {
+  while ((opt = getopt(argc, argv, "r:p:h:d:R:")) != -1) {
     switch (opt) {
     case 'r':
-      ram_size = atoi(optarg);
+      sram_size = atoi(optarg);
       break;
     case 'p':
       page_size = atoi(optarg);
@@ -74,8 +74,13 @@ void parse_arguments(uint8_t argc, char *argv[], char **input) {
     case 'd':
       daemon_mode = atoi(optarg);
       break;
+    case 'R':
+      radius = atoi(optarg);
+      break;
     default:
-      fprintf(stderr, "Usage: %s -r ram_size -p page_size -h hdd_size -d daemon_mode input\n",
+      fprintf(stderr,
+              "Usage: %s -r ram_size -p page_size -h hdd_size -d daemon_mode "
+              "-r radius input\n",
               argv[0]);
       exit(EXIT_FAILURE);
     }
@@ -108,7 +113,7 @@ int main(int argc, char *argv[]) {
 
   parse_arguments(argc, argv, &input);
 
-  printf("RAM Size: %d\n", ram_size);
+  printf("RAM Size: %d\n", sram_size);
   printf("Page Size: %d\n", page_size);
   printf("HDD Size: %d\n", hdd_size);
   printf("Input: %s\n", input);

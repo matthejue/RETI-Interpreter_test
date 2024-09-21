@@ -174,10 +174,9 @@ Instruction *machine_to_assembly(uint32_t machine_instr) {
 
     instr->op = jump_mode;
 
-    if ((JUMPGT <= jump_mode && jump_mode <= JUMP) || jump_mode == NOP ||
-        jump_mode == INT) {
+    if ((JUMPGT <= jump_mode && jump_mode <= JUMP) || jump_mode == INT) {
       instr->opd1 = i;
-    } else if (jump_mode != RTI) {
+    } else if (jump_mode == RTI || jump_mode == NOP) {
     } else {
       perror("Error a instruction with this opcode doesn't exist yet");
       exit(EXIT_FAILURE);

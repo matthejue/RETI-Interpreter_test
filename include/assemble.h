@@ -74,8 +74,8 @@ typedef struct {
 } Instruction;
 
 uint8_t get_register_code(char *reg);
-uint8_t get_mnemonic(char *mnemonic) ;
-Instruction *machine_to_assembly(uint32_t machine_instruction);
+uint8_t get_mnemonic(char *mnemonic);
+Instruction *machine_to_assembly(uint32_t machine_instr);
 uint32_t assembly_to_machine(String_Instruction *instr);
 
 #endif // ASSEMBLE_H

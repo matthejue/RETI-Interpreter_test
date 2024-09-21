@@ -1,4 +1,6 @@
 #include "../include/daemon.h"
+#include "../include/globals.h"
+#include "../include/reti.h"
 #include <ctype.h>
 #include <stdbool.h>
 #include <stdint.h>
@@ -78,30 +80,70 @@ char *assembly_to_str(Instruction *instr, uint32_t machine_instr) {
     } else if (ADDR <= instr->op && instr->op <= ANDR) {
       copy_reg_into_str(dest, instr->opd1);
       copy_reg_into_str(dest, instr->opd2);
-    } else {
-      goto else_branch;
+    } else if (instr->op == LOAD || instr->op == STORE || instr->op == LOADI) {
+      copy_reg_into_str(dest, instr->opd1);
+      copy_im_into_str(dest, instr->opd2);
+    } else if (instr->op == LOADIN || instr->op == STOREIN) {
+      copy_reg_into_str(dest, instr->opd1);
+      copy_reg_into_str(dest, instr->opd2);
+      copy_im_into_str(dest, instr->opd3);
+    } else if (instr->op == MOVE) {
+      copy_reg_into_str(dest, instr->opd1);
+      copy_reg_into_str(dest, instr->opd2);
+    } else if ((JUMPGT <= instr->op && instr->op <= JUMP) || instr->op == INT) {
+      copy_im_into_str(dest, instr->opd1);
     }
+    // else if (instr->op == RTI || instr->op == NOP)
     return instr_str;
   } else {
-  else_branch:
     sprintf(instr_str, "%d", machine_instr);
     return instr_str;
   }
 }
 
-void print_array(uint32_t *ar, size_t length) {
+void print_assembly_instr_with_idx(uint64_t idx, uint32_t machine_instr) {
+  char idx_str[6];
+  snprintf(idx_str, sizeof(idx_str), "%05zu", idx);
+
+  const char *assembly_str =
+      assembly_to_str(machine_to_assembly(machine_instr), machine_instr);
+
+  printf("%s: %s\n", idx_str, assembly_str);
+}
+
+void print_array(uint32_t *ar, uint8_t length) {
   for (size_t i = 0; i < length; i++) {
-    // Format the index with leading zeros to fit 5 characters
-    char index_str[6]; // 5 characters + null terminator
-    snprintf(index_str, sizeof(index_str), "%05zu", i);
-
-    // Get the assembly representation of the current value
-    const char *assembly_str =
-        assembly_to_str(machine_to_assembly(ar[i]), ar[i]);
-
-    // Print the formatted index and the assembly string
-    printf("%s: %s\n", index_str, assembly_str);
+    print_assembly_instr_with_idx(i, ar[i]);
   }
 }
 
-void cont(void) {}
+void print_file(FILE *file, uint64_t start, uint64_t end) {
+  for (size_t i = start; i <= end; i++) {
+    print_assembly_instr_with_idx(i, read_file(file, i));
+  }
+}
+
+inline int max(int a, int b) { return (a > b) ? a : b; }
+
+inline int min(int a, int b) { return (a < b) ? a : b; }
+
+void cont(void) {
+  uint64_t center_sram = 0;
+  uint64_t center_hdd = 0;
+  print_array(regs, NUM_REGISTERS);
+  print_array(eprom, NUM_INSTRUCTIONS_START_PROGRAM);
+  print_array(uart, NUM_UART_ADDRESSES);
+  print_file(sram, max(0, center_sram - radius),
+             min(center_sram + radius, sram_size));
+  print_file(hdd, max(0, center_hdd - radius),
+             min(center_hdd + radius, hdd_size));
+  while (true) {
+    char *stdin = read_stdin_content();
+
+    if (strcmp(stdin, "next") == 0) {
+      break;
+    } else if (strcmp(stdin, "set") == 0) {
+      break;
+    }
+  }
+}

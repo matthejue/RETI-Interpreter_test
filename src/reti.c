@@ -13,10 +13,10 @@ FILE *sram, *hdd;
 // Initialize file-backed storage
 void init_reti() {
   regs = malloc(sizeof(uint32_t) * NUM_REGISTERS);
-  eprom = malloc(sizeof(uint32_t) * NUM_INSTRUCTIONS_START_PROGRAM);
+  // eprom = malloc(sizeof(uint32_t) * NUM_INSTRUCTIONS_START_PROGRAM);
   uart = malloc(sizeof(uint32_t) * NUM_UART_ADDRESSES);
   memset(regs, 0, sizeof(uint32_t) * NUM_REGISTERS);
-  memset(eprom, 0, sizeof(uint32_t) * NUM_INSTRUCTIONS_START_PROGRAM);
+  // memset(eprom, 0, sizeof(uint32_t) * NUM_INSTRUCTIONS_START_PROGRAM);
   memset(uart, 0, sizeof(uint32_t) * NUM_UART_ADDRESSES);
   sram = fopen("sram.bin", "w+b");
   hdd = fopen("hdd.bin", "w+b");
