@@ -1,7 +1,7 @@
 #include "../include/daemon.h"
-#include "../include/stdlib.h"
+#include <stdlib.h>
 
-int main() {
+void test_split_string() {
   const char *str = "This is a test string";
   int count;
   char **words = split_string(str, &count);
@@ -11,6 +11,10 @@ int main() {
     free(words[i]); // Free each word
   }
   free(words); // Free the array of words
+}
+
+int main() {
+  test_split_string();
 
   return 0;
 }

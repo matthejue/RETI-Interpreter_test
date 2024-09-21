@@ -1,4 +1,4 @@
-#include "../include/parse.h"
+#include "../include/parse_instrs.h"
 #include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>

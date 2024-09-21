@@ -1,5 +1,6 @@
 .cache/
 obj/
+obj_test/
 bin/
 compile_commands.json
 hdd.bin
