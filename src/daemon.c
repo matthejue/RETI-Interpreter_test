@@ -1,7 +1,7 @@
 #include "../include/daemon.h"
 #include "../include/globals.h"
 #include "../include/reti.h"
-#include <ctype.h>
+#include "../include/utils.h"
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -24,7 +24,7 @@ Mnemonic_to_String opcode_to_mnemonic[] = {
     {JUMPNE, "JUMP<>"}, {JUMPLE, "JUMP<"},    {JUMP, "JUMP"},
     {INT, "INT"},       {RTI, "RTI"}};
 
-char *read_stdin_content() {
+char *read_stdin() {
   size_t len = 0;
   size_t read;
   char *line = NULL;
@@ -63,7 +63,6 @@ void copy_im_into_str(char *dest, const uint32_t im) {
 char *assembly_to_str(Instruction *instr, uint32_t machine_instr) {
   char *instr_str = malloc(23);
   char *dest = instr_str;
-  char *mnemonic_str = malloc(8);
   bool is_instruction = false;
   for (size_t i = 0;
        i < sizeof(opcode_to_mnemonic) / sizeof(opcode_to_mnemonic[0]); i++) {
@@ -123,9 +122,55 @@ void print_file(FILE *file, uint64_t start, uint64_t end) {
   }
 }
 
-inline int max(int a, int b) { return (a > b) ? a : b; }
+char **split_string(const char *str, int *count) {
+  // Copy the input string to avoid modifying the original
+  char *str_copy = strdup(str);
+  if (str_copy == NULL) {
+    perror("strdup was not successful");
+    exit(EXIT_FAILURE);
+  }
 
-inline int min(int a, int b) { return (a < b) ? a : b; }
+  // Count the number of words
+  int words = 0;
+  char *token = strtok(str_copy, " \t\n");
+  while (token != NULL) {
+    words++;
+    token = strtok(NULL, " \t\n");
+  }
+
+  // Allocate memory for the array of words
+  char **result = malloc((words + 1) * sizeof(void *));
+  if (result == NULL) {
+    perror("malloc was not successful");
+    exit(EXIT_FAILURE);
+  }
+
+  // Reset the copy of the string
+  strcpy(str_copy, str);
+
+  // Split the string and store the words in the array
+  int idx = 0;
+  token = strtok(str_copy, " \t\n");
+  while (token != NULL) {
+    result[idx] = strdup(token);
+    if (result[idx] == NULL) {
+      perror("strdup was not successful");
+      exit(EXIT_FAILURE);
+    }
+    idx++;
+    token = strtok(NULL, " \t\n");
+  }
+  result[idx] = NULL;
+
+  // Set the count of words
+  *count = words;
+
+  // Free the copy of the string
+  free(str_copy);
+
+  return result;
+}
+
 
 void cont(void) {
   uint64_t center_sram = 0;
@@ -138,7 +183,7 @@ void cont(void) {
   print_file(hdd, max(0, center_hdd - radius),
              min(center_hdd + radius, hdd_size));
   while (true) {
-    char *stdin = read_stdin_content();
+    char *stdin = read_stdin();
 
     if (strcmp(stdin, "next") == 0) {
       break;

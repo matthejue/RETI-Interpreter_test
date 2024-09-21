@@ -3,32 +3,48 @@
 SRC_DIR := src
 OBJ_DIR := obj
 BIN_DIR := bin
+TEST_DIR := unit_test
 INCLUDE_DIR := include
 LIB_DIR := lib
 
-BIN := $(BIN_DIR)/$(basename $(notdir $(wildcard $(SRC_DIR)/*_main.c)))
+BIN_SRC := $(BIN_DIR)/$(basename $(notdir $(wildcard $(SRC_DIR)/*_main.c)))
+BIN_TEST := $(BIN_DIR)/$(basename $(notdir $(wildcard $(TEST_DIR)/*_test.c)))
 SRC := $(wildcard $(SRC_DIR)/*.c)
-OBJ := $(SRC:$(SRC_DIR)/%.c=$(OBJ_DIR)/%.o)
+TEST := $(wildcard $(TEST_DIR)/*.c)
+OBJ_SRC := $(SRC:$(SRC_DIR)/%.c=$(OBJ_DIR)/%.o)
+OBJ_TEST := $(TEST:$(TEST_DIR)/%.c=$(OBJ_DIR)/%.o) # TODO: exclude mains
 
 CPPFLAGS := -I$(INCLUDE_DIR) -MMD -MP
-CFLAGS   := -Wall -g
+CFLAGS   := -Wall -g -O2
 LDFLAGS  := -L$(LIB_DIR)
 LDLIBS   := -lm
 
-.PHONY: all test clean debug
+.PHONY: all test unit-test clean debug
 
-all: $(BIN)
+all: $(BIN_SRC)
 
-$(BIN): $(OBJ) | $(BIN_DIR)
+unit-test: $(BIN_TEST)
+		for T in $(BIN_TEST); do ./$$T; done
+
+$(BIN_SRC): $(OBJ_SRC) | $(BIN_DIR)
+	$(CC) $(LDFLAGS) $^ $(LDLIBS) -o $@
+
+$(BIN_TEST): $(OBJ_TEST) | $(BIN_DIR)
+	$(CC) $(LDFLAGS) $^ $(LDLIBS) -o $@
+
+$(BIN_TEST): $(OBJ_SRC) | $(BIN_DIR)
 	$(CC) $(LDFLAGS) $^ $(LDLIBS) -o $@
 
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c | $(OBJ_DIR)
 	$(CC) $(CPPFLAGS) $(CFLAGS) -c $< -o $@
 
+$(OBJ_DIR)/%.o: $(TEST_DIR)/%.c | $(OBJ_DIR)
+	$(CC) $(CPPFLAGS) $(CFLAGS) -c $< -o $@
+
 $(BIN_DIR) $(OBJ_DIR):
 	mkdir -p $@
 
-test:
+final-test:
 	./run_tests.sh $${COLUMNS} $(TESTCLASS_BASE) $(VERBOSE) $(DEBUG);
 
 clean:
