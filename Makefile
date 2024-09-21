@@ -37,6 +37,6 @@ clean:
 debug:
 	# p/x $pc with # break *0x555555556543 or break src/interpret.c:234 or break exit
 	make
-	gdb --tui -n -x ./.gdbinit --args ./bin/interpret_main ./tests/all_operations.reti
+	gdb --tui -n -x ./.gdbinit --args ./bin/interpret_main -f /tmp ./tests/all_operations.reti
 
 -include $(OBJ:.o=.d)

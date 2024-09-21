@@ -18,8 +18,8 @@ void init_reti() {
   memset(regs, 0, sizeof(uint32_t) * NUM_REGISTERS);
   // memset(eprom, 0, sizeof(uint32_t) * NUM_INSTRUCTIONS_START_PROGRAM);
   memset(uart, 0, sizeof(uint32_t) * NUM_UART_ADDRESSES);
-  sram = fopen("sram.bin", "w+b");
-  hdd = fopen("hdd.bin", "w+b");
+  sram = fopen(strcat(file_dir, "/sram.bin"), "w+b");
+  hdd = fopen(strcat(file_dir, "/hdd.bin"), "w+b");
   if (!sram || !hdd) {
     perror("Failed to open storage files");
     exit(EXIT_FAILURE);

@@ -3,6 +3,8 @@
 #include "../include/interpret.h"
 #include "../include/parse.h"
 #include "../include/reti.h"
+#include <errno.h>
+#include <limits.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -12,6 +14,8 @@ uint32_t sram_size = 4294967295;
 uint16_t page_size = 4096;
 uint32_t hdd_size = 4294967295;
 bool daemon_mode = false;
+uint8_t radius = 32;
+char *file_dir = ".";
 
 char *read_file_content(const char *file_path) {
   FILE *file = fopen(file_path, "r");
@@ -60,28 +64,72 @@ void parse_arguments(uint8_t argc, char *argv[], char **input) {
   uint32_t opt;
   *input = NULL;
 
-  while ((opt = getopt(argc, argv, "r:p:h:d:R:")) != -1) {
+  while ((opt = getopt(argc, argv, "s:p:h:d:r:f:")) != -1) {
+    char *endptr;
+    errno = 0;
+    long tmp_val;
+
     switch (opt) {
-    case 'r':
-      sram_size = atoi(optarg);
+    case 's':
+      tmp_val = strtol(optarg, &endptr, 10);
+      if (endptr == optarg || *endptr != '\0' || errno == ERANGE) {
+        perror("Error: Invalid sram size");
+        exit(EXIT_FAILURE);
+      }
+      if (tmp_val < 0 || tmp_val > UINT32_MAX) {
+        perror("Error: SRAM size must be between 0 and 4294967295");
+        exit(EXIT_FAILURE);
+      }
+      sram_size = tmp_val;
       break;
     case 'p':
-      page_size = atoi(optarg);
+      tmp_val = strtol(optarg, &endptr, 10);
+      if (endptr == optarg || *endptr != '\0' || errno == ERANGE) {
+        perror("Error: Invalid page size");
+        exit(EXIT_FAILURE);
+      }
+      if (page_size < 0 || page_size > UINT16_MAX) {
+        perror("Error: Page size must be between 0 and 65535");
+        exit(EXIT_FAILURE);
+      }
+      page_size = tmp_val;
       break;
     case 'h':
-      hdd_size = atoi(optarg);
+      hdd_size = strtol(optarg, &endptr, 10);
+      if (endptr == optarg || *endptr != '\0' || errno == ERANGE) {
+        perror("Error: Invalid hdd size");
+        exit(EXIT_FAILURE);
+      }
+      if (tmp_val < 0 || tmp_val > UINT32_MAX) {
+        perror("Error: HDD size must be between 0 and 4294967295");
+        exit(EXIT_FAILURE);
+      }
+      hdd_size = tmp_val;
       break;
     case 'd':
-      daemon_mode = atoi(optarg);
+      daemon_mode = true;
       break;
-    case 'R':
-      radius = atoi(optarg);
+    case 'r':
+      tmp_val = strtol(optarg, &endptr, 10);
+      if (endptr == optarg || *endptr != '\0' || errno == ERANGE) {
+        perror("Error: Invalid radius size");
+        exit(EXIT_FAILURE);
+      }
+      if (tmp_val < 8 || tmp_val > UINT8_MAX) {
+        perror("Error: Radius must be between 8 and 255");
+        exit(EXIT_FAILURE);
+      }
+      radius = tmp_val;
+      break;
+    case 'f':
+      file_dir = optarg;
       break;
     default:
-      fprintf(stderr,
-              "Usage: %s -r ram_size -p page_size -h hdd_size -d daemon_mode "
-              "-r radius input\n",
-              argv[0]);
+      fprintf(
+          stderr,
+          "Usage: %s -r ram_size -p page_size -h hdd_size -d (run as daemon)"
+          "-r radius -f file_dir input\n",
+          argv[0]);
       exit(EXIT_FAILURE);
     }
   }
