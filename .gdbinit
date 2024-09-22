@@ -38,9 +38,11 @@
 # break src/interpret_main.c:114
 # run
 
-break src/interpret.c:234
+#break src/interpret.c:234
+#run
+#display/t machine_instr
+#display *assembly_instr
+
 run
-display/t machine_instr
-display *assembly_instr
 
 set pagination off

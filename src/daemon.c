@@ -1,7 +1,6 @@
 #include "../include/daemon.h"
 #include "../include/globals.h"
 #include "../include/reti.h"
-#include "../include/utils.h"
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -41,61 +40,61 @@ char *read_stdin() {
   return content;
 }
 
-void copy_str_into_str(char *dest, const char *src) {
-  strncpy(dest, src, strlen(src));
-  dest = dest + strlen(src);
+char *copy_mnemonic_into_str(char *dest, const uint8_t opcode) {
+  strcat(dest, opcode_to_mnemonic[opcode].name);
+  return dest + strlen(dest);
 }
 
-void copy_mnemonic_into_str(char *dest, const uint8_t opcode) {
-  copy_str_into_str(dest, opcode_to_mnemonic[opcode].name);
+char *copy_reg_into_str(char *dest, const uint8_t reg) {
+  strcat(dest, " ");
+  dest = strcat(dest, register_name_to_code[reg]);
+  return dest + strlen(dest);
 }
 
-void copy_reg_into_str(char *dest, const uint8_t reg) {
-  copy_str_into_str(dest, strcat(" ", register_name_to_code[reg]));
+char *copy_im_into_str(char *dest, const uint32_t im) {
+  strcpy(dest, " ");
+  sprintf(dest + 1, "%d", im);
+  return dest + strlen(dest);
 }
 
-void copy_im_into_str(char *dest, const uint32_t im) {
-  char *src_str = malloc(8);
-  sprintf(src_str, "%d", im);
-  copy_str_into_str(dest, strcat(" ", src_str));
-}
-
-char *assembly_to_str(Instruction *instr, uint32_t machine_instr) {
+char *assembly_to_str(Instruction *instr, uint32_t mem_content) {
   char *instr_str = malloc(23);
+  instr_str[0] = '\0';
   char *dest = instr_str;
   bool is_instruction = false;
   for (size_t i = 0;
        i < sizeof(opcode_to_mnemonic) / sizeof(opcode_to_mnemonic[0]); i++) {
     if (opcode_to_mnemonic[i].value == instr->op) {
-      copy_mnemonic_into_str(dest, i);
+      dest = copy_mnemonic_into_str(dest, i);
       is_instruction = true;
+      break;
     }
   }
   if (is_instruction) {
     if ((ADDI <= instr->op && instr->op <= ANDI) ||
         (ADDM <= instr->op && instr->op <= ANDM)) {
-      copy_reg_into_str(dest, instr->opd1);
-      copy_im_into_str(dest, instr->opd2);
+      dest = copy_reg_into_str(dest, instr->opd1);
+      dest = copy_im_into_str(dest, instr->opd2);
     } else if (ADDR <= instr->op && instr->op <= ANDR) {
-      copy_reg_into_str(dest, instr->opd1);
-      copy_reg_into_str(dest, instr->opd2);
+      dest = copy_reg_into_str(dest, instr->opd1);
+      dest = copy_reg_into_str(dest, instr->opd2);
     } else if (instr->op == LOAD || instr->op == STORE || instr->op == LOADI) {
-      copy_reg_into_str(dest, instr->opd1);
-      copy_im_into_str(dest, instr->opd2);
+      dest = copy_reg_into_str(dest, instr->opd1);
+      dest = copy_im_into_str(dest, instr->opd2);
     } else if (instr->op == LOADIN || instr->op == STOREIN) {
-      copy_reg_into_str(dest, instr->opd1);
-      copy_reg_into_str(dest, instr->opd2);
-      copy_im_into_str(dest, instr->opd3);
+      dest = copy_reg_into_str(dest, instr->opd1);
+      dest = copy_reg_into_str(dest, instr->opd2);
+      dest = copy_im_into_str(dest, instr->opd3);
     } else if (instr->op == MOVE) {
-      copy_reg_into_str(dest, instr->opd1);
-      copy_reg_into_str(dest, instr->opd2);
+      dest = copy_reg_into_str(dest, instr->opd1);
+      dest = copy_reg_into_str(dest, instr->opd2);
     } else if ((JUMPGT <= instr->op && instr->op <= JUMP) || instr->op == INT) {
-      copy_im_into_str(dest, instr->opd1);
+      dest = copy_im_into_str(dest, instr->opd1);
     }
     // else if (instr->op == RTI || instr->op == NOP)
     return instr_str;
   } else {
-    sprintf(instr_str, "%d", machine_instr);
+    sprintf(instr_str, "%d", mem_content);
     return instr_str;
   }
 }
@@ -171,6 +170,10 @@ char **split_string(const char *str, int *count) {
   return result;
 }
 
+
+int32_t max(int32_t a, int32_t b) { return (a > b) ? a : b; }
+
+int32_t min(int32_t a, int32_t b) { return (a < b) ? a : b; }
 
 void cont(void) {
   uint64_t center_sram = 0;

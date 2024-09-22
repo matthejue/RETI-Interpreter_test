@@ -6,7 +6,7 @@
 
 typedef struct {
   Unique_Opcode value;
-  char *name;
+  const char *name;
 } Mnemonic_to_String;
 
 void cont(void);
