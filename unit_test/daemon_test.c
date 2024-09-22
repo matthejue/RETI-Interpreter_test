@@ -5,7 +5,7 @@
 
 void test_split_string() {
   const char *str = "This is a test string";
-  int count;
+  uint8_t count;
   char **words = split_string(str, &count);
 
   char *expected_words[] = {"This", "is", "a", "test", "string"};
@@ -24,9 +24,27 @@ void test_assembly_to_str() {
   assert(strcmp(instr_str, "DIV ACC 42") == 0);
 }
 
+
+void test_read_stdin() {
+    FILE *inputFile = fopen("input.txt", "w");
+    if (inputFile == NULL) {
+        perror("Failed to create input file");
+        exit(EXIT_FAILURE);
+    }
+    fprintf(inputFile, "Simulated user input\n");
+    fclose(inputFile);
+
+    freopen("input.txt", "r", stdin);
+
+    read_stdin();
+
+    freopen("/dev/tty", "r", stdin);
+}
+
 int main() {
   test_split_string();
   test_assembly_to_str();
+  test_read_stdin();
 
   return 0;
 }

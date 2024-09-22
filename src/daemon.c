@@ -121,7 +121,7 @@ void print_file(FILE *file, uint64_t start, uint64_t end) {
   }
 }
 
-char **split_string(const char *str, int *count) {
+char **split_string(const char *str, uint8_t *count) {
   // Copy the input string to avoid modifying the original
   char *str_copy = strdup(str);
   if (str_copy == NULL) {
@@ -186,11 +186,13 @@ void cont(void) {
   print_file(hdd, max(0, center_hdd - radius),
              min(center_hdd + radius, hdd_size));
   while (true) {
-    char *stdin = read_stdin();
+    uint8_t count;
+    char **stdin = split_string(read_stdin(), &count);
+    // TODO: count not used
 
-    if (strcmp(stdin, "next") == 0) {
+    if (strcmp(stdin[0], "next") == 0) {
       break;
-    } else if (strcmp(stdin, "set") == 0) {
+    } else if (strcmp(stdin[0], "set") == 0) {
       break;
     }
   }

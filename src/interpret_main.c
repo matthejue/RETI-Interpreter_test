@@ -42,3 +42,4 @@ int main(int argc, char *argv[]) {
 // - Test machen, der alle Instructions einmal ausführt
 // - Memory Map über DS Register steuerbar machen
 // - Error cases, division by zero usw. hinzufügen
+// - eigene utils.c und utils.h mit mod und max und min

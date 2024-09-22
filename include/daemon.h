@@ -13,6 +13,6 @@ void cont(void);
 char *read_stdin();
 void process_and_print_array(uint32_t *array, size_t length);
 char *assembly_to_str(Instruction *instr, uint32_t machine_instr);
-char **split_string(const char *str, int *count);
+char **split_string(const char *str, uint8_t *count) ;
 
 #endif // DAEMON_H

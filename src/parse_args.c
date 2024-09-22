@@ -95,7 +95,7 @@ void parse_arguments(uint8_t argc, char *argv[], char **input) {
       page_size = tmp_val;
       break;
     case 'h':
-      hdd_size = strtol(optarg, &endptr, 10);
+      tmp_val = strtol(optarg, &endptr, 10);
       if (endptr == optarg || *endptr != '\0' || errno == ERANGE) {
         perror("Error: Invalid hdd size");
         exit(EXIT_FAILURE);
