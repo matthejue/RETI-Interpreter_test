@@ -24,21 +24,27 @@ void test_assembly_to_str() {
   assert(strcmp(instr_str, "DIV ACC 42") == 0);
 }
 
-
 void test_read_stdin() {
-    FILE *inputFile = fopen("input.txt", "w");
-    if (inputFile == NULL) {
-        perror("Failed to create input file");
-        exit(EXIT_FAILURE);
-    }
-    fprintf(inputFile, "Simulated user input\n");
-    fclose(inputFile);
+  FILE *input_file = fopen("input.txt", "w");
+  if (input_file == NULL) {
+    perror("Failed to create input file");
+    exit(EXIT_FAILURE);
+  }
+  fprintf(input_file, "Simulated user input\n");
+  fclose(input_file);
 
-    freopen("input.txt", "r", stdin);
+  freopen("input.txt", "r", stdin);
 
-    read_stdin();
+  char *input = read_stdin();
+  assert(strcmp(input, "Simulated user input\n") == 0);
 
-    freopen("/dev/tty", "r", stdin);
+  freopen("/dev/tty", "r", stdin);
+
+  // remove the created file
+  if (remove("input.txt") != 0) {
+    perror("Failed to remove input file");
+    exit(EXIT_FAILURE);
+  }
 }
 
 int main() {
