@@ -1,6 +1,7 @@
 #include "../include/parse_instrs.h"
 #include "../include/interpret.h"
 #include "../include/reti.h"
+#include "../include/globals.h"
 #include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -9,6 +10,7 @@
 uint32_t num_instrs_prgrm = 0;
 
 // TODO: Unit tests für parse_instrs usw.
+// TODO: Irgendwie durch untere Funktionen dafür sorgen, dass immer nur ein space zwischhen den %s ist
 String_Instruction *parse_instr(const char *instr_str) {
   String_Instruction *instr = malloc(sizeof(String_Instruction));
   char op[8] = {'\0'};
@@ -25,6 +27,7 @@ String_Instruction *parse_instr(const char *instr_str) {
   strcpy(instr->opd2, opd2);
 
   // check if if operation3 is the empty string and then copy
+  // TODO: nen check machen, ob Zahl nicht zu lang, später in ner anderen Funktion dann check, ob Zahl nicht zu groß ist
   if (strcmp(opd3, "") != 0) {
     strcpy(instr->opd3, opd3);
   }
@@ -53,6 +56,7 @@ char *trim_whitespace(char *str) {
   return str;
 }
 
+// TODO: Was ist mid LOADI   ACC   12 usw.?
 char **tokenize(const char *input, const char *delimiters, uint32_t *count) {
   char *input_copy = strdup(input);
   char *token;

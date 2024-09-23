@@ -19,7 +19,7 @@ extern uint64_t hdd_watchpoint;
 #define NUM_INSTRUCTIONS_START_PROGRAM 16
 #define NUM_UART_ADDRESSES 8
 
-extern uint32_t *num_instrs_prgrm;
+extern uint32_t num_instrs_prgrm;
 
 
 #endif // GLOBALS_H

@@ -45,5 +45,6 @@ int main(int argc, char *argv[]) {
 // - eigene utils.c und utils.h mit mod, max und min und sign extension
 // - vergessen, dass längster 22 bit Integer -4194304 bis 9 characters braucht
 // TODO: Tobias fragen wegen strings und readonly data segment
+// TODO: Tobias fragen, ob padding und alignment für structs notwendig
 // TODO: Tobias: memory contant that corresponds to utf8 / ascii letter print as ascii or just number?
 // TODO: Tobias: Was wenn man negative 22 Bit 2er Komplementzahl bitwise, xor, and oder or nimmt?

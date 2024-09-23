@@ -22,6 +22,11 @@ uint32_t mod(int32_t a, int32_t b) {
   return result;
 }
 
+// TODO: Problem, dass immediates sign extended werden, aber bitweise xor, and und or auf das nicht sign extendete mit 0en drangefügt angewandt werden
+// TODO: Alernative Lösung ohne sign extension mit:
+// typedef struct {
+//     uint32_t value : 22;
+// } uint22_t;
 void interpr_instruction(Instruction *assembly_instr) {
   switch (assembly_instr->op) {
   case ADDI:
@@ -52,17 +57,17 @@ void interpr_instruction(Instruction *assembly_instr) {
   case OPLUSI:
     write_storage(regs, assembly_instr->opd1,
                   read_storage(regs, assembly_instr->opd1) ^
-                      assembly_instr->opd2);
+                      (assembly_instr->opd2 & IMMEDIATE_MASK));
     break;
   case ORI:
     write_storage(regs, assembly_instr->opd1,
                   read_storage(regs, assembly_instr->opd1) |
-                      assembly_instr->opd2);
+                      (assembly_instr->opd2 & IMMEDIATE_MASK));
     break;
   case ANDI:
     write_storage(regs, assembly_instr->opd1,
                   read_storage(regs, assembly_instr->opd1) &
-                      assembly_instr->opd2);
+                      (assembly_instr->opd2 & IMMEDIATE_MASK));
     break;
   case ADDR:
     write_storage(regs, assembly_instr->opd1,
