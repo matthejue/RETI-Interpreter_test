@@ -40,7 +40,6 @@ void test_read_stdin() {
 
   freopen("/dev/tty", "r", stdin);
 
-  // remove the created file
   if (remove("input.txt") != 0) {
     perror("Failed to remove input file");
     exit(EXIT_FAILURE);

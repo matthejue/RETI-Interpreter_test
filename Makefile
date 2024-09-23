@@ -9,7 +9,7 @@ INCLUDE_DIR := include
 LIB_DIR := lib
 
 BIN_SRC := $(BIN_DIR)/$(basename $(notdir $(wildcard $(SRC_DIR)/*_main.c)))
-BIN_TEST := $(BIN_DIR)/$(basename $(notdir $(wildcard $(TEST_DIR)/*_test.c)))
+BIN_TEST := $(patsubst $(TEST_DIR)/%.c,$(BIN_DIR)/%,$(wildcard $(TEST_DIR)/*_test.c))
 SRC := $(filter-out %_main.c %_test.c, $(wildcard $(SRC_DIR)/*.c))
 OBJ_SRC := $(SRC:$(SRC_DIR)/%.c=$(OBJ_DIR)/%.o)
 
