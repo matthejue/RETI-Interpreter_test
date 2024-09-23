@@ -76,7 +76,7 @@ uint32_t assembly_to_machine(String_Instruction *instr) {
     if (isalpha(instr->opd3[0])) {
       opd3 = get_register_code(instr->opd3);
     } else {
-      opd3 = atoi(instr->opd3);
+      opd3 = atoi(instr->opd3) & IMMEDIATE_MASK;
     }
   } else {
     opd3 = 0;
@@ -157,8 +157,8 @@ Instruction *machine_to_assembly(uint32_t machine_instr) {
       break;
     case STOREIN:
       instr->opd1 = d;
-      instr->opd1 = s;
-      instr->opd2 = i;
+      instr->opd2 = s;
+      instr->opd3 = i;
       break;
     case MOVE:
       instr->opd1 = s;
