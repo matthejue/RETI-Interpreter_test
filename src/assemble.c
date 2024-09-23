@@ -122,9 +122,13 @@ Instruction *machine_to_assembly(uint32_t machine_instr) {
     uint8_t compute_mode = machine_instr >> 25;
     uint8_t d = (machine_instr >> 22) & REGISTER_MASK;
     uint8_t s = (machine_instr >> 19) & REGISTER_MASK;
-    // TODO: Sign extend and not überall hinzfügen
-    // TODO: Tobias fragen ob LOADI das i signed ist
-    uint32_t i = sign_extend_22_to_32(machine_instr & IMMEDIATE_MASK);
+    uint32_t i;
+    if (ADDI <= compute_mode && compute_mode <= ANDI) {
+      i = sign_extend_22_to_32(machine_instr & IMMEDIATE_MASK);
+    } else if (ADDM <= compute_mode && compute_mode <= ANDM) {
+      i = machine_instr & IMMEDIATE_MASK;
+    } else if (ADDR <= compute_mode && compute_mode <= ANDR) {
+    }
 
     instr->op = compute_mode;
 
@@ -139,19 +143,21 @@ Instruction *machine_to_assembly(uint32_t machine_instr) {
       perror("Error a instruction with this opcode doesn't exist yet");
       exit(EXIT_FAILURE);
     }
-
   } else if (mode == 1 || mode == 2) {
     uint8_t load_store_mode = machine_instr >> 28;
+    load_store_mode = load_store_mode << 3;
     uint8_t s = (machine_instr >> 25) & REGISTER_MASK;
     uint8_t d = (machine_instr >> 22) & REGISTER_MASK;
     uint32_t i;
-    // if () {
-    //   i = machine_instr & IMMEDIATE_MASK;
-    // } else {
-      i = sign_extend_22_to_32(machine_instr & IMMEDIATE_MASK);
-    // }
 
-    load_store_mode = load_store_mode << 3;
+    if (load_store_mode == LOAD || load_store_mode == STORE ||
+        load_store_mode == LOADI) {
+      i = machine_instr & IMMEDIATE_MASK;
+    } else if (load_store_mode == LOADIN || load_store_mode == STOREIN) {
+      i = sign_extend_22_to_32(machine_instr & IMMEDIATE_MASK);
+    }
+    // TODO: Tobias fragen, ob es nicht mehr Sinn ergibt, wenn LOADI das i
+    // signed ist
 
     instr->op = load_store_mode;
 

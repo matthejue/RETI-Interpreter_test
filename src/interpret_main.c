@@ -42,6 +42,8 @@ int main(int argc, char *argv[]) {
 // - Test machen, der alle Instructions einmal ausführt
 // - Memory Map über DS Register steuerbar machen
 // - Error cases, division by zero usw. hinzufügen
-// - eigene utils.c und utils.h mit mod und max und min
+// - eigene utils.c und utils.h mit mod, max und min und sign extension
 // - vergessen, dass längster 22 bit Integer -4194304 bis 9 characters braucht
 // TODO: Tobias fragen wegen strings und readonly data segment
+// TODO: Tobias: memory contant that corresponds to utf8 / ascii letter print as ascii or just number?
+// TODO: Tobias: Was wenn man negative 22 Bit 2er Komplementzahl bitwise, xor, and oder or nimmt?
