@@ -44,3 +44,4 @@ int main(int argc, char *argv[]) {
 // - Error cases, division by zero usw. hinzufügen
 // - eigene utils.c und utils.h mit mod und max und min
 // - vergessen, dass längster 22 bit Integer -4194304 bis 9 characters braucht
+// TODO: Tobias fragen wegen strings und readonly data segment

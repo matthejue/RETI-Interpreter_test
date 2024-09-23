@@ -103,15 +103,28 @@ uint32_t assembly_to_machine(String_Instruction *instr) {
   return machine_instr;
 }
 
+uint32_t sign_extend_22_to_32(uint32_t num) {
+  // Check if the number is negative by checking the 21st bit
+  if (num & (1 << 21)) {
+    // If negative, set the upper bits to 1
+    num |= ~((1 << 22) - 1);
+  } else {
+    // If positive, ensure the upper bits are 0
+    num &= (1 << 22) - 1;
+  }
+  return num;
+}
+
 Instruction *machine_to_assembly(uint32_t machine_instr) {
   Instruction *instr = malloc(sizeof(Instruction));
   uint8_t mode = machine_instr >> 30;
-
   if (mode == 0) {
     uint8_t compute_mode = machine_instr >> 25;
     uint8_t d = (machine_instr >> 22) & REGISTER_MASK;
     uint8_t s = (machine_instr >> 19) & REGISTER_MASK;
-    uint32_t i = machine_instr & IMMEDIATE_MASK;
+    // TODO: Sign extend and not überall hinzfügen
+    // TODO: Tobias fragen ob LOADI das i signed ist
+    uint32_t i = sign_extend_22_to_32(machine_instr & IMMEDIATE_MASK);
 
     instr->op = compute_mode;
 
@@ -131,7 +144,12 @@ Instruction *machine_to_assembly(uint32_t machine_instr) {
     uint8_t load_store_mode = machine_instr >> 28;
     uint8_t s = (machine_instr >> 25) & REGISTER_MASK;
     uint8_t d = (machine_instr >> 22) & REGISTER_MASK;
-    uint32_t i = machine_instr & IMMEDIATE_MASK;
+    uint32_t i;
+    // if () {
+    //   i = machine_instr & IMMEDIATE_MASK;
+    // } else {
+      i = sign_extend_22_to_32(machine_instr & IMMEDIATE_MASK);
+    // }
 
     load_store_mode = load_store_mode << 3;
 
@@ -170,7 +188,13 @@ Instruction *machine_to_assembly(uint32_t machine_instr) {
     }
   } else { // mode == 3
     uint8_t jump_mode = machine_instr >> 25;
-    uint32_t i = machine_instr & IMMEDIATE_MASK;
+    uint32_t i = 0;
+    if (jump_mode == INT) {
+      i = machine_instr & IMMEDIATE_MASK;
+    } else if (jump_mode == RTI || jump_mode == NOP) {
+    } else {
+      i = sign_extend_22_to_32(machine_instr & IMMEDIATE_MASK);
+    }
 
     instr->op = jump_mode;
 

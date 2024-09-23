@@ -6,12 +6,15 @@
 #include <stdlib.h>
 #include <string.h>
 
-String_Instruction *parse_instruction(const char *instr_str) {
+uint32_t num_instrs_prgrm = 0;
+
+// TODO: Unit tests für parse_instrs usw.
+String_Instruction *parse_instr(const char *instr_str) {
   String_Instruction *instr = malloc(sizeof(String_Instruction));
   char op[8] = {'\0'};
-  char opd1[23] = {'\0'};
-  char opd2[23] = {'\0'};
-  char opd3[23] = {'\0'};
+  char opd1[9] = {'\0'};
+  char opd2[9] = {'\0'};
+  char opd3[9] = {'\0'};
 
   // Parse operation and operands
   sscanf(instr_str, "%s %s %s %s", op, opd1, opd2, opd3);
@@ -72,11 +75,10 @@ char **tokenize(const char *input, const char *delimiters, uint32_t *count) {
 }
 
 void parse_and_load_program(const char *program) {
-  uint32_t count;
-  char **instr_strings = tokenize(program, "\n;", &count);
+  char **instr_strings = tokenize(program, "\n;", &num_instrs_prgrm);
 
-  for (uint32_t i = 0; i < count; i++) {
-    String_Instruction *string_instr = parse_instruction(instr_strings[i]);
+  for (uint32_t i = 0; i < num_instrs_prgrm; i++) {
+    String_Instruction *string_instr = parse_instr(instr_strings[i]);
     uint32_t machine_instr = assembly_to_machine(string_instr);
     write_file(sram, i, machine_instr);
 

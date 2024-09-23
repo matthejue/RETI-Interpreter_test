@@ -13,16 +13,24 @@ void test_assembly_to_machine() {
 }
 
 void test_machine_to_assembly() { 
-  __asm__("int3");
+  Instruction *instr = machine_to_assembly(0b10010111110111111111111111111111);
+  assert(instr->op == 0b1001000);
+  assert(instr->opd1 == 0b111);
+  assert(instr->opd2 == 0b011);
+  assert(instr->opd3 == 2097151);
+}
+
+void test_machine_to_assembly_negative() { 
   Instruction *instr = machine_to_assembly(0b10010111111000000000000000000000);
   assert(instr->op == 0b1001000);
   assert(instr->opd1 == 0b111);
   assert(instr->opd2 == 0b011);
-  assert(instr->opd3 == 0b1000000000000000000000);
+  assert(instr->opd3 == -2097152);
 }
 
 int main(int argc, char *argv[]) {
   test_assembly_to_machine();
   test_machine_to_assembly();
+  test_machine_to_assembly_negative();
   return 0;
 }

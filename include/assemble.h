@@ -1,6 +1,7 @@
 #ifndef ASSEMBLE_H
 #define ASSEMBLE_H
 
+#include <stdbool.h>
 #include <stdint.h>
 
 #define IMMEDIATE_MASK 0x3FFFFF // 22 bits for immediate value
@@ -61,9 +62,9 @@ typedef struct {
 
 typedef struct {
   char op[8];
-  char opd1[23];
-  char opd2[23];
-  char opd3[23];
+  char opd1[9];
+  char opd2[9];
+  char opd3[9];
 } String_Instruction;
 
 typedef struct {
