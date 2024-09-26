@@ -60,7 +60,7 @@ char *read_stdin_content() {
   return content;
 }
 
-void parse_arguments(uint8_t argc, char *argv[], char **input) {
+void parse_args(uint8_t argc, char *argv[], char **input) {
   uint32_t opt;
   *input = NULL;
 

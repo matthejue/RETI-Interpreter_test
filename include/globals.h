@@ -9,6 +9,7 @@ extern uint16_t page_size;
 extern uint32_t hdd_size;
 extern bool daemon_mode;
 extern uint8_t radius;
+
 extern char *file_dir;
 
 extern uint64_t eprom_watchpoint;

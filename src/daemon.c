@@ -20,8 +20,8 @@ Mnemonic_to_String opcode_to_mnemonic[] = {
     {STORE, "STORE"},   {STOREIN, "STOREIN"}, {MOVE, "MOVE"},
     {JUMPGT, "JUMP>"},  {JUMPEQ, "JUMP=="},   {JUMPEQ, "JUMP="},
     {JUMPGE, "JUMP>="}, {JUMPLT, "JUMP<"},    {JUMPNE, "JUMP!="},
-    {JUMPNE, "JUMP<>"}, {JUMPLE, "JUMP<"},    {JUMP, "JUMP"},
-    {INT, "INT"},       {RTI, "RTI"}};
+    {JUMPNE, "JUMP<>"}, {JUMPLE, "JUMP<="},   {JUMP, "JUMP"},
+    {INT, "INT"},       {RTI, "RTI"},         {NOP, "NOP"}};
 
 char *read_stdin() {
   size_t len = 0;

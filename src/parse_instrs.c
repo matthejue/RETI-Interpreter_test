@@ -1,7 +1,7 @@
 #include "../include/parse_instrs.h"
+#include "../include/globals.h"
 #include "../include/interpret.h"
 #include "../include/reti.h"
-#include "../include/globals.h"
 #include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -10,83 +10,80 @@
 uint32_t num_instrs_prgrm = 0;
 
 // TODO: Unit tests für parse_instrs usw.
-// TODO: Irgendwie durch untere Funktionen dafür sorgen, dass immer nur ein space zwischhen den %s ist
-String_Instruction *parse_instr(const char *instr_str) {
-  String_Instruction *instr = malloc(sizeof(String_Instruction));
-  char op[8] = {'\0'};
-  char opd1[9] = {'\0'};
-  char opd2[9] = {'\0'};
-  char opd3[9] = {'\0'};
+// TODO: Irgendwie durch untere Funktionen dafür sorgen, dass immer nur ein
+// TODO: nen check machen, ob Zahl nicht zu lang, später in ner anderen
 
-  // Parse operation and operands
-  sscanf(instr_str, "%s %s %s %s", op, opd1, opd2, opd3);
+String_Instruction *parse_instr(const char **original_prgrm_pntr) {
+  const char *prgrm_pntr = *original_prgrm_pntr;
+  String_Instruction *str_instr = malloc(sizeof(String_Instruction));
+  uint8_t token_cnt = 0;
+  uint8_t rel_idx;
 
-  // Identify operation
-  strcpy(instr->op, op);
-  strcpy(instr->opd1, opd1);
-  strcpy(instr->opd2, opd2);
-
-  // check if if operation3 is the empty string and then copy
-  // TODO: nen check machen, ob Zahl nicht zu lang, später in ner anderen Funktion dann check, ob Zahl nicht zu groß ist
-  if (strcmp(opd3, "") != 0) {
-    strcpy(instr->opd3, opd3);
+  while (*prgrm_pntr == ' ') {
+    prgrm_pntr++;
   }
 
-  return instr;
-}
-
-char *trim_whitespace(char *str) {
-  char *end;
-
-  // Trim leading space
-  while (isspace((unsigned char)*str))
-    str++;
-
-  if (*str == 0) // All spaces?
-    return str;
-
-  // Trim trailing space
-  end = str + strlen(str) - 1;
-  while (end > str && isspace((unsigned char)*end))
-    end--;
-
-  // Write new null terminator
-  *(end + 1) = '\0';
-
-  return str;
-}
-
-// TODO: Was ist mid LOADI   ACC   12 usw.?
-char **tokenize(const char *input, const char *delimiters, uint32_t *count) {
-  char *input_copy = strdup(input);
-  char *token;
-  char **tokens = NULL;
-  uint32_t tokens_count = 0;
-
-  token = strtok(input_copy, delimiters);
-  while (token != NULL) {
-    tokens = realloc(tokens, sizeof(char *) * (tokens_count + 1));
-    char *trimmed_token = strdup(trim_whitespace(token));
-    if (strlen(trimmed_token) > 0) {
-      tokens[tokens_count++] = trimmed_token;
+  while (true) {
+    rel_idx = 0;
+    while (true) {
+      if (*prgrm_pntr == ' ') {
+        switch (token_cnt) {
+        case 0:
+          (str_instr->op)[rel_idx] = '\0';
+          break;
+        case 1:
+          (str_instr->opd1)[rel_idx] = '\0';
+          break;
+        case 2:
+          (str_instr->opd2)[rel_idx] = '\0';
+          break;
+        case 3:
+          (str_instr->opd3)[rel_idx] = '\0';
+          break;
+        }
+        while (*prgrm_pntr == ' ') {
+          prgrm_pntr++;
+        }
+        break;
+      } else if (*prgrm_pntr == ';' || *prgrm_pntr == '\n') {
+        prgrm_pntr++;
+        *original_prgrm_pntr = prgrm_pntr;
+        return str_instr;
+      } else if (*prgrm_pntr == '\0') {
+        *original_prgrm_pntr = prgrm_pntr;
+        return str_instr;
+      }
+      switch (token_cnt) {
+      case 0:
+        (str_instr->op)[rel_idx] = *prgrm_pntr;
+        break;
+      case 1:
+        (str_instr->opd1)[rel_idx] = *prgrm_pntr;
+        break;
+      case 2:
+        (str_instr->opd2)[rel_idx] = *prgrm_pntr;
+        break;
+      case 3:
+        (str_instr->opd3)[rel_idx] = *prgrm_pntr;
+        break;
+      }
+      rel_idx++;
+      prgrm_pntr++;
     }
-    token = strtok(NULL, delimiters);
+    token_cnt++;
   }
-
-  free(input_copy);
-  *count = tokens_count;
-  return tokens;
 }
 
-void parse_and_load_program(const char *program) {
-  char **instr_strings = tokenize(program, "\n;", &num_instrs_prgrm);
+void parse_and_load_program(const char *prgrm) {
+  const char *prgrm_pntr = prgrm;
+  uint32_t i = 0;
 
-  for (uint32_t i = 0; i < num_instrs_prgrm; i++) {
-    String_Instruction *string_instr = parse_instr(instr_strings[i]);
-    uint32_t machine_instr = assembly_to_machine(string_instr);
-    write_file(sram, i, machine_instr);
-
-    free(instr_strings[i]);
+  while (*prgrm_pntr != '\0') {
+    String_Instruction *str_instr = parse_instr(&prgrm_pntr);
+    if (isalpha(*str_instr->op)) {
+      uint32_t machine_instr = assembly_to_machine(str_instr);
+      write_file(sram, i++, machine_instr);
+    }
   }
-  free(instr_strings);
+  num_instrs_prgrm = i;
 }

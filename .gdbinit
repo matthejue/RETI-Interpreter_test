@@ -43,6 +43,24 @@
 #display/t machine_instr
 #display *assembly_instr
 
+#display $_is_defined(str_instr) ? str_instr : 0
+
 run
+
+define S
+  step
+  info locals
+  info args
+  print *str_instr
+  #info variables
+end
+
+define N
+  next
+  info locals
+  info args
+  print *str_instr
+  #info variables
+end
 
 set pagination off

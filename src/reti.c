@@ -18,41 +18,45 @@ void init_reti() {
   memset(regs, 0, sizeof(uint32_t) * NUM_REGISTERS);
   // memset(eprom, 0, sizeof(uint32_t) * NUM_INSTRUCTIONS_START_PROGRAM);
   memset(uart, 0, sizeof(uint32_t) * NUM_UART_ADDRESSES);
-  sram = fopen(strcat(file_dir, "/sram.bin"), "w+b");
-  hdd = fopen(strcat(file_dir, "/hdd.bin"), "w+b");
+
+  char *suffix = "/sram.bin";
+  char *new_file_dir = malloc(strlen(file_dir) + strlen(suffix) + 1);
+  strcpy(new_file_dir, file_dir);
+  sram = fopen(strcat(new_file_dir, suffix), "w+b");
+
+  suffix = "/hdd.bin";
+  new_file_dir = malloc(strlen(file_dir) + strlen(suffix) + 1);
+  strcpy(new_file_dir, file_dir);
+  hdd = fopen(strcat(new_file_dir, suffix), "w+b");
   if (!sram || !hdd) {
     perror("Failed to open storage files");
     exit(EXIT_FAILURE);
   }
 }
 
-uint32_t read_storage(uint32_t *stor, uint16_t addr) {
-  return stor[addr];
-}
+uint32_t read_storage(uint32_t *stor, uint16_t addr) { return stor[addr]; }
 
 void write_storage(uint32_t *stor, uint16_t addr, uint32_t buffer) {
   stor[addr] = buffer;
 }
 
 uint32_t swap_endian_32(uint32_t value) {
-    return (value >> 24) |
-           ((value >> 8) & 0x0000FF00) |
-           ((value << 8) & 0x00FF0000) |
-           (value << 24);
+  return (value >> 24) | ((value >> 8) & 0x0000FF00) |
+         ((value << 8) & 0x00FF0000) | (value << 24);
 }
 
 uint32_t read_file(FILE *dev, uint64_t address) {
   uint32_t big_endian_buffer;
   fseek(dev, address * sizeof(uint32_t), SEEK_SET);
   fread(&big_endian_buffer, sizeof(uint32_t), 1, dev);
-  return swap_endian_32(big_endian_buffer);;
+  return swap_endian_32(big_endian_buffer);
 }
 
 void write_file(FILE *dev, uint64_t address, uint32_t buffer) {
-    uint32_t big_endian_buffer = swap_endian_32(buffer);
-    fseek(dev, address * sizeof(uint32_t), SEEK_SET);
-    fwrite(&big_endian_buffer, sizeof(uint32_t), 1, dev);
-    fflush(dev);
+  uint32_t big_endian_buffer = swap_endian_32(buffer);
+  fseek(dev, address * sizeof(uint32_t), SEEK_SET);
+  fwrite(&big_endian_buffer, sizeof(uint32_t), 1, dev);
+  fflush(dev);
 }
 
 // Example function to emulate processor operation

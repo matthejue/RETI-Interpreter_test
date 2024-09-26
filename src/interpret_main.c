@@ -9,7 +9,7 @@
 int main(int argc, char *argv[]) {
   char *input = NULL;
 
-  parse_arguments(argc, argv, &input);
+  parse_args(argc, argv, &input);
 
   printf("RAM Size: %d\n", sram_size);
   printf("Page Size: %d\n", page_size);

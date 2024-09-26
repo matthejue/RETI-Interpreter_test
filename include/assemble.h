@@ -50,7 +50,6 @@ typedef enum {
   JUMPNE = 0b1110100,
   JUMPLE = 0b1111000,
   JUMP = 0b1111100,
-  UNKNOWN,
 } Unique_Opcode;
 
 extern const char *register_name_to_code[];

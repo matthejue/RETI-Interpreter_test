@@ -17,8 +17,9 @@ String_to_Mnemonic mnemonic_to_opcode[] = {
     {"LOADI", LOADI},   {"STORE", STORE},   {"STOREIN", STOREIN},
     {"MOVE", MOVE},     {"JUMP>", JUMPGT},  {"JUMP==", JUMPEQ},
     {"JUMP=", JUMPEQ},  {"JUMP>=", JUMPGE}, {"JUMP<", JUMPLT},
-    {"JUMP!=", JUMPNE}, {"JUMP<>", JUMPNE}, {"JUMP<", JUMPLE},
-    {"JUMP", JUMP},     {"INT", INT},       {"RTI", RTI}};
+    {"JUMP!=", JUMPNE}, {"JUMP<>", JUMPNE}, {"JUMP<=", JUMPLE},
+    {"JUMP", JUMP},     {"INT", INT},       {"RTI", RTI},
+    {"NOP", NOP}};
 
 uint8_t get_register_code(char *reg) {
   for (uint8_t i = 0;
@@ -38,7 +39,8 @@ uint8_t get_mnemonic(char *mnemonic) {
       return (uint8_t)mnemonic_to_opcode[i].value;
     }
   }
-  return (uint8_t)UNKNOWN;
+  perror("Error: Invalid mnemonic");
+  exit(EXIT_FAILURE);
 }
 
 uint32_t assembly_to_machine(String_Instruction *instr) {
