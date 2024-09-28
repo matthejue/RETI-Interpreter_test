@@ -1,6 +1,7 @@
 #include "../include/daemon.h"
 #include "../include/globals.h"
 #include "../include/reti.h"
+#include "../include/utils.h"
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -171,10 +172,6 @@ char **split_string(const char *str, uint8_t *count) {
 
   return result;
 }
-
-int32_t max(int32_t a, int32_t b) { return (a > b) ? a : b; }
-
-int32_t min(int32_t a, int32_t b) { return (a < b) ? a : b; }
 
 void cont(void) {
   uint64_t center_sram = 0;

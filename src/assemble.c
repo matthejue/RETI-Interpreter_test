@@ -1,4 +1,5 @@
 #include "../include/parse_instrs.h"
+#include "../include/utils.h"
 #include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -103,18 +104,6 @@ uint32_t assembly_to_machine(String_Instruction *instr) {
   }
 
   return machine_instr;
-}
-
-uint32_t sign_extend_22_to_32(uint32_t num) {
-  // Check if the number is negative by checking the 21st bit
-  if (num & (1 << 21)) {
-    // If negative, set the upper bits to 1
-    num |= ~((1 << 22) - 1);
-  } else {
-    // If positive, ensure the upper bits are 0
-    num &= (1 << 22) - 1;
-  }
-  return num;
 }
 
 Instruction *machine_to_assembly(uint32_t machine_instr) {

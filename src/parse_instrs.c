@@ -9,7 +9,6 @@
 
 uint32_t num_instrs_prgrm = 0;
 
-// TODO: Unit tests für parse_instrs usw.
 // TODO: Irgendwie durch untere Funktionen dafür sorgen, dass immer nur ein
 // TODO: nen check machen, ob Zahl nicht zu lang, später in ner anderen
 
