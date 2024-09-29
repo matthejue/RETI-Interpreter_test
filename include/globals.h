@@ -22,5 +22,4 @@ extern uint64_t hdd_watchpoint;
 
 extern uint32_t num_instrs_prgrm;
 
-
 #endif // GLOBALS_H
