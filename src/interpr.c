@@ -1,6 +1,6 @@
-#include "../include/interpret.h"
 #include "../include/daemon.h"
 #include "../include/globals.h"
+#include "../include/interpret.h"
 #include "../include/reti.h"
 #include "../include/utils.h"
 #include <stdbool.h>
@@ -21,7 +21,7 @@ void interpr_instruction(Instruction *assembly_instr) {
     break;
   case SUBI:
     write_array(regs, assembly_instr->opd1,
-                read_array(regs, assembly_instr->opd1) -
+                (int32_t)read_array(regs, assembly_instr->opd1) -
                     (int32_t)assembly_instr->opd2);
     break;
   case MULTI:
@@ -141,13 +141,16 @@ void interpr_instruction(Instruction *assembly_instr) {
   case LOADIN:
     write_array(regs, assembly_instr->opd2,
                 read_storage(read_array(regs, assembly_instr->opd1) +
-                                    (int32_t)assembly_instr->opd3));
+                             (int32_t)assembly_instr->opd3));
     break;
   case LOADI:
-    write_array(regs, assembly_instr->opd1, assembly_instr->opd2);
+    // TODO: Das mit der Maske entfernen, falls i auch signed sein darf
+    write_array(regs, assembly_instr->opd1,
+                assembly_instr->opd2 & IMMEDIATE_MASK);
     break;
   case STORE:
-    write_storage_ds_fill(assembly_instr->opd2, read_array(regs, assembly_instr->opd1));
+    write_storage_ds_fill(assembly_instr->opd2,
+                          read_array(regs, assembly_instr->opd1));
     break;
   case STOREIN:
     write_storage(read_array(regs, assembly_instr->opd1) +
@@ -163,7 +166,7 @@ void interpr_instruction(Instruction *assembly_instr) {
   case INT:
     write_array(regs, SP, read_array(regs, SP) - 1);
     write_storage(read_array(regs, SP) + 1, read_array(regs, PC));
-    write_array(regs, PC, read_storage(assembly_instr->opd1));
+    write_array(regs, PC, read_storage_ds_fill(assembly_instr->opd1));
     break;
   case RTI:
     write_array(regs, PC, read_storage(read_array(regs, SP) + 1));
@@ -172,48 +175,54 @@ void interpr_instruction(Instruction *assembly_instr) {
   case JUMPGT:
     if (read_array(regs, ACC) > 0) {
       write_array(regs, PC,
-                  read_array(regs, PC) + (int32_t)assembly_instr->opd1 - 1);
+                  read_array(regs, PC) + (int32_t)assembly_instr->opd1);
+      goto no_pc_increase;
     }
     break;
   case JUMPEQ:
     if (read_array(regs, ACC) == 0) {
       write_array(regs, PC,
-                  read_array(regs, PC) + (int32_t)assembly_instr->opd1 - 1);
+                  read_array(regs, PC) + (int32_t)assembly_instr->opd1);
+      goto no_pc_increase;
     }
     break;
   case JUMPGE:
     if (read_array(regs, ACC) >= 0) {
       write_array(regs, PC,
-                  read_array(regs, PC) + (int32_t)assembly_instr->opd1 - 1);
+                  read_array(regs, PC) + (int32_t)assembly_instr->opd1);
+      goto no_pc_increase;
     }
     break;
   case JUMPLT:
     if (read_array(regs, ACC) < 0) {
       write_array(regs, PC,
-                  read_array(regs, PC) + (int32_t)assembly_instr->opd1 - 1);
+                  read_array(regs, PC) + (int32_t)assembly_instr->opd1);
+      goto no_pc_increase;
     }
     break;
   case JUMPNE:
     if (read_array(regs, ACC) != 0) {
       write_array(regs, PC,
-                  read_array(regs, PC) + (int32_t)assembly_instr->opd1 - 1);
+                  read_array(regs, PC) + (int32_t)assembly_instr->opd1);
+      goto no_pc_increase;
     }
     break;
   case JUMPLE:
     if (read_array(regs, ACC) <= 0) {
       write_array(regs, PC,
-                  read_array(regs, PC) + (int32_t)assembly_instr->opd1 - 1);
+                  read_array(regs, PC) + (int32_t)assembly_instr->opd1);
+      goto no_pc_increase;
     }
     break;
   case JUMP:
-    write_array(regs, PC,
-                read_array(regs, PC) + (int32_t)assembly_instr->opd1 - 1);
-    break;
+    write_array(regs, PC, read_array(regs, PC) + (int32_t)assembly_instr->opd1);
+    goto no_pc_increase;
   default:
     perror("Error a instruction with this opcode doesn't exist yet");
     exit(EXIT_FAILURE);
   }
   write_array(regs, PC, read_array(regs, PC) + 1);
+no_pc_increase:;
 }
 
 void interpr_program() {
