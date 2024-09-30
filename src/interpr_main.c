@@ -3,7 +3,7 @@
 #include "../include/parse_args.h"
 #include "../include/parse_instrs.h"
 #include "../include/reti.h"
-#include "../include/interpret.h"
+#include "../include/interpr.h"
 #include <stdlib.h>
 
 int main(int argc, char *argv[]) {
@@ -20,7 +20,7 @@ int main(int argc, char *argv[]) {
 
   parse_and_load_program(input);
 
-  interpr_program();
+  interpr_prgrm();
 
   fin_reti();
 

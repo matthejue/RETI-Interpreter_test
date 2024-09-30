@@ -28,7 +28,7 @@ void test_machine_to_assembly_negative() {
   assert(instr->opd3 == -2097152);
 }
 
-int main(int argc, char *argv[]) {
+int main() {
   test_assembly_to_machine();
   test_machine_to_assembly();
   test_machine_to_assembly_negative();

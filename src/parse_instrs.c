@@ -1,6 +1,6 @@
 #include "../include/parse_instrs.h"
 #include "../include/globals.h"
-#include "../include/interpret.h"
+#include "../include/interpr.h"
 #include "../include/reti.h"
 #include <ctype.h>
 #include <stdio.h>

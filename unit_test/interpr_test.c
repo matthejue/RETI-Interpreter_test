@@ -1,0 +1,57 @@
+#include "../include/assert.h"
+#include "../include/daemon.h"
+#include "../include/interpr.h"
+#include "../include/parse_args.h"
+#include "../include/parse_instrs.h"
+#include "../include/reti.h"
+#include <stdlib.h>
+#include <string.h>
+
+void test_interpr_prgrm() {
+  char *input = NULL;
+  const char *test_input = "LOADI ACC 1;"
+                           "STORE ACC 5;"
+                           "ADD ACC 5;"
+                           "SUBI ACC 3;"
+                           "JUMP 0";
+
+  size_t input_size = strlen(test_input);
+
+  FILE *input_stream = fmemopen((void *)test_input, input_size, "r");
+  if (input_stream == NULL) {
+    perror("fmemopen failed");
+    exit(EXIT_FAILURE);
+  }
+
+  FILE *original_stdin = stdin;
+  stdin = input_stream;
+
+  parse_args(4, (char *[]){"", "-f", "/tmp", "-"}, &input);
+  init_reti();
+  write_array(regs, PC, 1 << 31);
+  write_array(regs, DS, 1 << 31);
+  parse_and_load_program(input);
+  interpr_prgrm();
+
+  fclose(input_stream);
+  stdin = original_stdin;
+
+  assert(strcmp(assembly_to_str(machine_to_assembly(read_file(sram, 0))),
+                "LOADI ACC 1") == 0);
+  assert(strcmp(assembly_to_str(machine_to_assembly(read_file(sram, 1))),
+                "STORE ACC 5") == 0);
+  assert(strcmp(assembly_to_str(machine_to_assembly(read_file(sram, 2))),
+                "ADD ACC 5") == 0);
+  assert(strcmp(assembly_to_str(machine_to_assembly(read_file(sram, 3))),
+                "SUBI ACC 3") == 0);
+  assert(strcmp(assembly_to_str(machine_to_assembly(read_file(sram, 4))),
+                "JUMP 0") == 0);
+  assert(strcmp(mem_content_to_str(read_file(sram, 5)),
+                "1") == 0);
+}
+
+int main() {
+  test_interpr_prgrm();
+
+  return 0;
+}

@@ -1,7 +1,7 @@
 #include "../include/reti.h"
+#include "../include/assemble.h"
 #include "../include/globals.h"
 #include "../include/utils.h"
-#include "../include/assemble.h"
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -49,7 +49,6 @@ uint32_t read_file(FILE *dev, uint64_t address) {
   return swap_endian_32(big_endian_buffer);
 }
 
-
 void write_file(FILE *dev, uint64_t addr, uint32_t buffer) {
   uint32_t big_endian_buffer = swap_endian_32(buffer);
   fseek(dev, addr * sizeof(uint32_t), SEEK_SET);
@@ -57,37 +56,43 @@ void write_file(FILE *dev, uint64_t addr, uint32_t buffer) {
   fflush(dev);
 }
 
-
 uint32_t read_storage_ds_fill(uint32_t addr) {
-  addr = addr | (read_array(regs, DS) << 22);
+  addr = addr | (read_array(regs, DS) & 0xffc00000);
   return read_storage(addr);
 }
 
 uint32_t read_storage(uint32_t addr) {
-  uint8_t stor_mode = addr;
+  uint8_t stor_mode = addr >> 30;
   switch (stor_mode) {
   case 0b00:
+    addr = addr & 0x3FFFFFF;
     return read_array(eprom, addr);
   case 0b01:
+    addr = addr & 0x3FFFFFF;
     return read_array(uart, addr);
   default:
+    addr = addr & 0x7FFFFFF;
     return read_file(sram, addr);
   }
 }
 
 void write_storage_ds_fill(uint64_t addr, uint32_t buffer) {
-  addr = addr | (read_array(regs, DS) << 22);
+  addr = addr | (read_array(regs, DS) & 0xffc00000);
   write_storage(addr, buffer);
 }
 
 void write_storage(uint32_t addr, uint32_t buffer) {
-  uint8_t stor_mode = addr;
+  uint8_t stor_mode = addr >> 30;
+  addr = addr & 0x3FFFFFF;
   switch (stor_mode) {
   case 0b00:
+    addr = addr & 0x3FFFFFF;
     write_array(eprom, addr, buffer);
   case 0b01:
+    addr = addr & 0x3FFFFFF;
     write_array(uart, addr, buffer);
   default:
+    addr = addr & 0x7FFFFFF;
     write_file(sram, addr, buffer);
   }
 }

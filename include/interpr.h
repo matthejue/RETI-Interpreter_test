@@ -3,7 +3,7 @@
 
 #include "../include/assemble.h"
 
-void interpr_instruction(Instruction *assembly_instr);
-void interpr_program();
+void interpr_instr(Instruction *assembly_instr);
+void interpr_prgrm();
 
 #endif // INTERPRET_H

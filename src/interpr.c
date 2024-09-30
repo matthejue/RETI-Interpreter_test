@@ -1,6 +1,6 @@
 #include "../include/daemon.h"
 #include "../include/globals.h"
-#include "../include/interpret.h"
+#include "../include/interpr.h"
 #include "../include/reti.h"
 #include "../include/utils.h"
 #include <stdbool.h>
@@ -12,7 +12,7 @@
 // typedef struct {
 //     uint32_t value : 22;
 // } uint22_t;
-void interpr_instruction(Instruction *assembly_instr) {
+void interpr_instr(Instruction *assembly_instr) {
   switch (assembly_instr->op) {
   case ADDI:
     write_array(regs, assembly_instr->opd1,
@@ -225,7 +225,7 @@ void interpr_instruction(Instruction *assembly_instr) {
 no_pc_increase:;
 }
 
-void interpr_program() {
+void interpr_prgrm() {
   while (true) {
     uint32_t machine_instr = read_storage(read_array(regs, PC));
     Instruction *assembly_instr = machine_to_assembly(machine_instr);
@@ -238,7 +238,7 @@ void interpr_program() {
       free(assembly_instr);
       break;
     } else {
-      interpr_instruction(assembly_instr);
+      interpr_instr(assembly_instr);
       free(assembly_instr);
     }
   }

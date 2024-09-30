@@ -1,6 +1,6 @@
 // #include <stdio.h>
 #include "../include/globals.h"
-#include "../include/interpret.h"
+#include "../include/interpr.h"
 #include "../include/parse_args.h"
 #include "../include/reti.h"
 #include <errno.h>

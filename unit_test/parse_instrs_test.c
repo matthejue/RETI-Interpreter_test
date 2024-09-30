@@ -55,7 +55,7 @@ void test_parse_and_load_program2() {
   fin_reti();
 }
 
-int main(int argc, char *argv[]) {
+int main() {
   test_parse_instr();
   test_parse_instr2();
   test_parse_instr3();
