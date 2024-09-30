@@ -1,4 +1,7 @@
 #include <stdint.h>
+#include <stdlib.h>
+#include <string.h>
+#include <stdio.h>
 
 // r = a % m <-> r + m * q = a + m * p <-> r = a - m * q (q is biggest q such that q*m <= a) = a − m * (a / m)
 // 0 <= r < m, a,q € Z, m € N/0 (normal C / hardware implementation ignores 0 <= r < m)
@@ -37,3 +40,84 @@ uint32_t swap_endian_32(uint32_t value) {
   return (value >> 24) | ((value >> 8) & 0x0000FF00) |
          ((value << 8) & 0x00FF0000) | (value << 24);
 }
+
+char *proper_str_cat(char *prefix, char *suffix) {
+  char *new_file_dir = malloc(strlen(prefix) + strlen(suffix) + 1);
+  strcpy(new_file_dir, prefix);
+  return strcat(new_file_dir, suffix);
+}
+
+char *read_stdin_content() {
+  size_t len = 0;
+  size_t read;
+  char *line = NULL;
+  char *content = malloc(4);
+
+  while ((read = getline(&line, &len, stdin)) != -1) {
+    if (content == NULL) {
+      content = strdup(line);
+    } else {
+      content = realloc(content, strlen(content) + read + 1);
+      strcat(content, line);
+    }
+  }
+
+  free(line);
+  return content;
+}
+
+char *read_file_content(const char *file_path) {
+  FILE *file = fopen(file_path, "r");
+  if (!file) {
+    perror("Error opening file");
+    exit(EXIT_FAILURE);
+  }
+
+  fseek(file, 0, SEEK_END);
+  long file_size = ftell(file);
+  fseek(file, 0, SEEK_SET);
+
+  char *content = malloc(file_size + 1);
+  if (!content) {
+    perror("Error allocating memory");
+    exit(EXIT_FAILURE);
+  }
+
+  fread(content, 1, file_size, file);
+  content[file_size] = '\0';
+
+  fclose(file);
+  return content;
+}
+
+char *get_prgrm_content(const char *prgrm_path) {
+  if (strcmp(prgrm_path, "-") == 0) {
+    return read_stdin_content();
+  } else {
+    FILE *file = fopen(prgrm_path, "r");
+    if (file) {
+      fclose(file);
+      return read_file_content(prgrm_path);
+    } else {
+      fprintf(stderr, "Error: Unable to open file %s\n", prgrm_path);
+      exit(EXIT_FAILURE);
+    }
+  }
+}
+
+// char *read_stdin() {
+//   size_t len = 0;
+//   size_t read;
+//   char *line = NULL;
+//   char *content = NULL;
+//   while ((read = getline(&line, &len, stdin)) != -1) {
+//     if (content == NULL) {
+//       content = strdup(line);
+//     } else {
+//       content = realloc(content, strlen(content) + read + 1);
+//       strcat(content, line);
+//     }
+//   }
+//   free(line);
+//   return content;
+// }

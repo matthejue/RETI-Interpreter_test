@@ -24,22 +24,6 @@ Mnemonic_to_String opcode_to_mnemonic[] = {
     {JUMPNE, "JUMP<>"}, {JUMPLE, "JUMP<="},   {JUMP, "JUMP"},
     {INT, "INT"},       {RTI, "RTI"},         {NOP, "NOP"}};
 
-char *read_stdin() {
-  size_t len = 0;
-  size_t read;
-  char *line = NULL;
-  char *content = NULL;
-  while ((read = getline(&line, &len, stdin)) != -1) {
-    if (content == NULL) {
-      content = strdup(line);
-    } else {
-      content = realloc(content, strlen(content) + read + 1);
-      strcat(content, line);
-    }
-  }
-  free(line);
-  return content;
-}
 
 char *copy_mnemonic_into_str(char *dest, const uint8_t opcode) {
   strcat(dest, opcode_to_mnemonic[opcode].name);
@@ -177,15 +161,16 @@ void cont(void) {
   uint64_t center_sram = 0;
   uint64_t center_hdd = 0;
   print_array_with_idcs(regs, NUM_REGISTERS);
-  print_array_with_idcs(eprom, NUM_INSTRUCTIONS_START_PROGRAM);
+  print_array_with_idcs(eprom, num_instrs_start_prgrm);
   print_array_with_idcs(uart, NUM_UART_ADDRESSES);
+  // num_instrs_prgrm
   print_file_idcs(sram, max(0, center_sram - radius),
                   min(center_sram + radius, sram_size));
   print_file_idcs(hdd, max(0, center_hdd - radius),
                   min(center_hdd + radius, hdd_size));
   while (true) {
     uint8_t count;
-    char **stdin = split_string(read_stdin(), &count);
+    char **stdin = split_string(read_stdin_content(), &count);
     // TODO: count not used
 
     if (strcmp(stdin[0], "next") == 0) {

@@ -9,27 +9,23 @@
 
 uint32_t *regs, *eprom, *uart;
 
-// File pointers for peripheral devices
 FILE *sram, *hdd;
 
-// Initialize file-backed storage
 void init_reti() {
   regs = malloc(sizeof(uint32_t) * NUM_REGISTERS);
-  // eprom = malloc(sizeof(uint32_t) * NUM_INSTRUCTIONS_START_PROGRAM);
+  eprom = malloc(sizeof(uint32_t) * num_instrs_start_prgrm);
   uart = malloc(sizeof(uint32_t) * NUM_UART_ADDRESSES);
+
   memset(regs, 0, sizeof(uint32_t) * NUM_REGISTERS);
-  // memset(eprom, 0, sizeof(uint32_t) * NUM_INSTRUCTIONS_START_PROGRAM);
+  memset(eprom, 0, sizeof(uint32_t) * num_instrs_start_prgrm);
   memset(uart, 0, sizeof(uint32_t) * NUM_UART_ADDRESSES);
 
-  char *suffix = "/sram.bin";
-  char *new_file_dir = malloc(strlen(file_dir) + strlen(suffix) + 1);
-  strcpy(new_file_dir, file_dir);
-  sram = fopen(strcat(new_file_dir, suffix), "w+b");
+  char *file_path = proper_str_cat(peripherals_dir, "/sram.bin");
+  sram = fopen(file_path, "w+b");
 
-  suffix = "/hdd.bin";
-  new_file_dir = malloc(strlen(file_dir) + strlen(suffix) + 1);
-  strcpy(new_file_dir, file_dir);
-  hdd = fopen(strcat(new_file_dir, suffix), "w+b");
+  file_path = proper_str_cat(peripherals_dir, "/hdd.bin");
+  hdd = fopen(file_path, "w+b");
+
   if (!sram || !hdd) {
     perror("Failed to open storage files");
     exit(EXIT_FAILURE);

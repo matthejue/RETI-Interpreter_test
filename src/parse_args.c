@@ -1,8 +1,9 @@
 // #include <stdio.h>
+#include "../include/parse_args.h"
 #include "../include/globals.h"
 #include "../include/interpr.h"
-#include "../include/parse_args.h"
 #include "../include/reti.h"
+#include "../include/utils.h"
 #include <errno.h>
 #include <limits.h>
 #include <stdio.h>
@@ -15,56 +16,13 @@ uint16_t page_size = 4096;
 uint32_t hdd_size = 4294967295;
 bool daemon_mode = false;
 uint8_t radius = 32;
-char *file_dir = ".";
+char *peripherals_dir = ".";
+char *eprom_prgrm_path = "";
 
-char *read_file_content(const char *file_path) {
-  FILE *file = fopen(file_path, "r");
-  if (!file) {
-    perror("Error opening file");
-    exit(EXIT_FAILURE);
-  }
-
-  fseek(file, 0, SEEK_END);
-  long file_size = ftell(file);
-  fseek(file, 0, SEEK_SET);
-
-  char *content = malloc(file_size + 1);
-  if (!content) {
-    perror("Error allocating memory");
-    exit(EXIT_FAILURE);
-  }
-
-  fread(content, 1, file_size, file);
-  content[file_size] = '\0';
-
-  fclose(file);
-  return content;
-}
-
-char *read_stdin_content() {
-  size_t len = 0;
-  size_t read;
-  char *line = NULL;
-  char *content = NULL;
-
-  while ((read = getline(&line, &len, stdin)) != -1) {
-    if (content == NULL) {
-      content = strdup(line);
-    } else {
-      content = realloc(content, strlen(content) + read + 1);
-      strcat(content, line);
-    }
-  }
-
-  free(line);
-  return content;
-}
-
-void parse_args(uint8_t argc, char *argv[], char **input) {
+void parse_args(uint8_t argc, char *argv[]) {
   uint32_t opt;
-  *input = NULL;
 
-  while ((opt = getopt(argc, argv, "s:p:h:d:r:f:")) != -1) {
+  while ((opt = getopt(argc, argv, "s:p:h:d:r:f:e:")) != -1) {
     char *endptr;
     errno = 0;
     long tmp_val;
@@ -122,13 +80,16 @@ void parse_args(uint8_t argc, char *argv[], char **input) {
       radius = tmp_val;
       break;
     case 'f':
-      file_dir = optarg;
+      peripherals_dir = optarg;
+      break;
+    case 'e':
+      eprom_prgrm_path = optarg;
       break;
     default:
       fprintf(
           stderr,
           "Usage: %s -r ram_size -p page_size -h hdd_size -d (run as daemon)"
-          "-r radius -f file_dir input\n",
+          "-r radius -f file_dir -e eprom_prgrm_path input\n",
           argv[0]);
       exit(EXIT_FAILURE);
     }
@@ -139,19 +100,15 @@ void parse_args(uint8_t argc, char *argv[], char **input) {
     exit(EXIT_FAILURE);
   }
 
-  const char *input_arg = argv[optind];
+  const char *sram_prgrm_path = argv[optind];
+}
 
-  // Check if the input is a file path or a string piped over stdout
-  if (strcmp(input_arg, "-") == 0) {
-    *input = read_stdin_content();
-  } else {
-    FILE *file = fopen(input_arg, "r");
-    if (file) {
-      fclose(file);
-      *input = read_file_content(input_arg);
-    } else {
-      fprintf(stderr, "Error: Unable to open file %s\n", input_arg);
-      exit(EXIT_FAILURE);
-    }
-  }
+void print_args() {
+  printf("SRAM Size: %d\n", sram_size);
+  printf("Page Size: %d\n", page_size);
+  printf("HDD Size: %d\n", hdd_size);
+  printf("Daemon Mode: %s\n", daemon_mode ? "true" : "false");
+  printf("Radius: %d\n", radius);
+  printf("Peripheral File Directory: %s\n", peripherals_dir);
+  printf("Eprom Program Path: %s\n", eprom_prgrm_path);
 }
