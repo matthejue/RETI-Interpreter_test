@@ -30,7 +30,8 @@ uint8_t get_register_code(char *reg) {
       return i;
     }
   }
-  return -1; // Invalid register
+  perror("Error: Invalid register");
+  exit(EXIT_FAILURE);
 }
 
 uint8_t get_mnemonic(char *mnemonic) {
@@ -98,7 +99,7 @@ uint32_t assembly_to_machine(String_Instruction *instr) {
   } else if (op == STOREIN) {
     machine_instr = op << 25 | opd1 << 22 | opd2 << 25 | opd3;
   } else if (op == MOVE) {
-    machine_instr = op << 28 | opd1 << 25 | opd2 << 22;
+    machine_instr = op << 25 | opd1 << 25 | opd2 << 22;
   } else if (NOP <= op && op <= JUMP) {
     machine_instr = op << 25 | opd1;
   }
