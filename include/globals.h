@@ -12,7 +12,7 @@ extern uint8_t radius;
 
 extern char *peripherals_dir;
 extern char *eprom_prgrm_path;
-extern const char *sram_prgrm_path;
+extern char *sram_prgrm_path;
 
 extern uint64_t eprom_watchpoint;
 extern uint64_t sram_watchpoint;

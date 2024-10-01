@@ -1,5 +1,6 @@
 #include "../include/assemble.h"
 #include "../include/daemon.h"
+#include "../include/utils.h"
 #include <assert.h>
 #include <stdint.h>
 #include <stdlib.h>
@@ -16,7 +17,7 @@ void test_read_stdin() {
 
   freopen("input.txt", "r", stdin);
 
-  char *input = read_stdin();
+  char *input = read_stdin_content();
   assert(strcmp(input, "Simulated user input\n") == 0);
 
   freopen("/dev/tty", "r", stdin);

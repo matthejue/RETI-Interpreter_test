@@ -218,7 +218,7 @@ void interpr_instr(Instruction *assembly_instr) {
     write_array(regs, PC, read_array(regs, PC) + (int32_t)assembly_instr->opd1);
     goto no_pc_increase;
   default:
-    perror("Error a instruction with this opcode doesn't exist yet");
+    perror("Error: A instruction with this opcode doesn't exist yet");
     exit(EXIT_FAILURE);
   }
   write_array(regs, PC, read_array(regs, PC) + 1);

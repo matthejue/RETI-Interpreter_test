@@ -4,11 +4,12 @@
 #include "../include/parse_args.h"
 #include "../include/parse_instrs.h"
 #include "../include/reti.h"
+#include "../include/utils.h"
+#include "../include/globals.h"
 #include <stdlib.h>
 #include <string.h>
 
 void test_interpr_prgrm() {
-  char *input = NULL;
   const char *test_input = "LOADI ACC 1;"
                            "STORE ACC 5;"
                            "ADD ACC 5;"
@@ -26,11 +27,11 @@ void test_interpr_prgrm() {
   FILE *original_stdin = stdin;
   stdin = input_stream;
 
-  parse_args(4, (char *[]){"", "-f", "/tmp", "-"}, &input);
+  parse_args(4, (char *[]){"", "-f", "/tmp", "-"});
   init_reti();
   write_array(regs, PC, 1 << 31);
   write_array(regs, DS, 1 << 31);
-  parse_and_load_program(input);
+  parse_and_load_program(get_prgrm_content(sram_prgrm_path), SRAM);
   interpr_prgrm();
 
   fclose(input_stream);

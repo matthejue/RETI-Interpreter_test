@@ -18,6 +18,7 @@ bool daemon_mode = false;
 uint8_t radius = 32;
 char *peripherals_dir = ".";
 char *eprom_prgrm_path = "";
+char *sram_prgrm_path = "";
 
 void parse_args(uint8_t argc, char *argv[]) {
   uint32_t opt;
@@ -100,7 +101,7 @@ void parse_args(uint8_t argc, char *argv[]) {
     exit(EXIT_FAILURE);
   }
 
-  const char *sram_prgrm_path = argv[optind];
+  sram_prgrm_path = argv[optind];
 }
 
 void print_args() {

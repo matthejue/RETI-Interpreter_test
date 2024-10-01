@@ -8,6 +8,7 @@
 #include <string.h>
 
 uint32_t num_instrs_prgrm = 0;
+uint32_t num_instrs_start_prgrm = 0;
 
 // TODO: Irgendwie durch untere Funktionen dafür sorgen, dass immer nur ein
 // TODO: nen check machen, ob Zahl nicht zu lang, später in ner anderen
@@ -73,7 +74,7 @@ String_Instruction *parse_instr(const char **original_prgrm_pntr) {
   }
 }
 
-void parse_and_load_program(char *prgrm, Memory_Type memory_type) {
+void parse_and_load_program(char *prgrm, Memory_Type mem_type) {
   const char *prgrm_pntr = prgrm;
   uint32_t i = 0;
 
@@ -81,19 +82,29 @@ void parse_and_load_program(char *prgrm, Memory_Type memory_type) {
     String_Instruction *str_instr = parse_instr(&prgrm_pntr);
     if (isalpha(*str_instr->op)) {
       uint32_t machine_instr = assembly_to_machine(str_instr);
-      switch (memory_type) {
-        case EPROM:
-          write_array(eprom, i++, machine_instr);
-          break;
-        case SRAM:
-          write_file(sram, i++, machine_instr);
-          break;
-        default:
-          perror("Error: Invalid memory type");
-          break;
+      switch (mem_type) {
+      case EPROM:
+        write_array(eprom, i++, machine_instr);
+        break;
+      case SRAM:
+        write_file(sram, i++, machine_instr);
+        break;
+      default:
+        perror("Error: Invalid memory type");
+        break;
       }
     }
   }
-  num_instrs_prgrm = i;
+  switch (mem_type) {
+  case EPROM:
+    num_instrs_start_prgrm = i;
+    break;
+  case SRAM:
+    num_instrs_prgrm = i;
+    break;
+  default:
+    perror("Error: Invalid memory type");
+    break;
+  }
   free(prgrm);
 }

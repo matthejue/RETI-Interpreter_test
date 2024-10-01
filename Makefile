@@ -54,6 +54,6 @@ clean:
 DEB_BIN := interpret_main
 debug: $(BIN_SRC) $(BIN_TEST)
 	# p/x $pc with # break *0x555555556543 or break src/interpret.c:234 or break exit
-	gdb --tui -n -x ./.gdbinit --args ./bin/$(DEB_BIN) -f /tmp ./tests/all_operations.reti
+	gdb --tui -n -x ./.gdbinit --args ./bin/$(DEB_BIN) -f /tmp -e ./sys_test/eprom_start_program.reti ./sys_test/basic_arith_ops.reti
 
 -include $(OBJ:.o=.d)
