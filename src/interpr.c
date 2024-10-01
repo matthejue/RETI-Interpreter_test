@@ -226,6 +226,7 @@ no_pc_increase:;
 }
 
 void interpr_prgrm() {
+  int i = 1;
   while (true) {
     uint32_t machine_instr = read_storage(read_array(regs, PC));
     Instruction *assembly_instr = machine_to_assembly(machine_instr);
@@ -241,5 +242,6 @@ void interpr_prgrm() {
       interpr_instr(assembly_instr);
       free(assembly_instr);
     }
+    i++;
   }
 }

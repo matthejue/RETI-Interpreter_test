@@ -8,6 +8,7 @@
 #include <string.h>
 
 int main(int argc, char *argv[]) {
+  __asm__("int3"); // ../.gdbinit
   parse_args(argc, argv);
   print_args();
 

@@ -43,7 +43,6 @@ void test_parse_and_load_program() {
   fin_reti();
 }
 
-
 void test_parse_and_load_program2() {
   peripherals_dir = "/tmp";
   init_reti();

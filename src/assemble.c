@@ -59,7 +59,7 @@ uint32_t assembly_to_machine(String_Instruction *instr) {
     if (isalpha(instr->opd1[0])) {
       opd1 = get_register_code(instr->opd1);
     } else {
-      opd1 = atoi(instr->opd1);
+      opd1 = atoi(instr->opd1) & IMMEDIATE_MASK;
     }
   } else {
     opd1 = 0;
@@ -69,7 +69,7 @@ uint32_t assembly_to_machine(String_Instruction *instr) {
     if (isalpha(instr->opd2[0])) {
       opd2 = get_register_code(instr->opd2);
     } else {
-      opd2 = atoi(instr->opd2);
+      opd2 = atoi(instr->opd2) & IMMEDIATE_MASK;
     }
   } else {
     opd2 = 0;

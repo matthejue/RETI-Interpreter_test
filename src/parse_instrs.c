@@ -16,6 +16,7 @@ uint32_t num_instrs_start_prgrm = 0;
 String_Instruction *parse_instr(const char **original_prgrm_pntr) {
   const char *prgrm_pntr = *original_prgrm_pntr;
   String_Instruction *str_instr = malloc(sizeof(String_Instruction));
+  memset(str_instr, 0, sizeof(String_Instruction));
   uint8_t token_cnt = 0;
   uint8_t rel_idx;
 
