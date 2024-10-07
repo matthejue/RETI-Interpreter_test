@@ -43,13 +43,13 @@ void test_assembly_to_str_negative() {
 
 void test_mem_content_to_str() {
   uint32_t mem_content = 42;
-  char *instr_str = mem_content_to_str(mem_content);
+  char *instr_str = mem_value_to_str(mem_content, false);
   assert(strcmp(instr_str, "42") == 0);
 }
 
 void test_mem_content_to_str_negative() {
   uint32_t mem_content = -42;
-  char *instr_str = mem_content_to_str(mem_content);
+  char *instr_str = mem_value_to_str(mem_content, false);
   assert(strcmp(instr_str, "-42") == 0);
 }
 

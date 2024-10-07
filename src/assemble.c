@@ -109,6 +109,7 @@ uint32_t assembly_to_machine(String_Instruction *instr) {
 
 Instruction *machine_to_assembly(uint32_t machine_instr) {
   Instruction *instr = malloc(sizeof(Instruction));
+  memset(instr, 0, sizeof(Instruction));
   uint8_t mode = machine_instr >> 30;
   if (mode == 0) {
     uint8_t compute_mode = machine_instr >> 25;
@@ -142,14 +143,13 @@ Instruction *machine_to_assembly(uint32_t machine_instr) {
     uint8_t d = (machine_instr >> 22) & REGISTER_MASK;
     uint32_t i;
 
-    if (load_store_mode == LOAD || load_store_mode == STORE ||
-        load_store_mode == LOADI) {
+    if (load_store_mode == LOAD || load_store_mode == STORE) {
       i = machine_instr & IMMEDIATE_MASK;
-    } else if (load_store_mode == LOADIN || load_store_mode == STOREIN) {
+    } else if (load_store_mode == LOADIN || load_store_mode == STOREIN ||
+               load_store_mode == LOADI) {
       i = sign_extend_22_to_32(machine_instr & IMMEDIATE_MASK);
     }
-    // TODO: Tobias fragen, ob es nicht mehr Sinn ergibt, wenn LOADI das i
-    // signed ist
+    // TODO: LOADI in folien ändern, dass das i signed ist
 
     instr->op = load_store_mode;
 
@@ -178,7 +178,7 @@ Instruction *machine_to_assembly(uint32_t machine_instr) {
       break;
     case MOVE:
       instr->opd1 = s;
-      instr->opd1 = d;
+      instr->opd2 = d;
       break;
     default:
       perror("Error a instruction with this opcode doesn't exist yet");

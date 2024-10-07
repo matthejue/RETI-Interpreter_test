@@ -1,4 +1,5 @@
 #include "../include/daemon.h"
+#include "../include/assemble.h"
 #include "../include/globals.h"
 #include "../include/reti.h"
 #include "../include/utils.h"
@@ -7,6 +8,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
+uint64_t sram_view_pos = 0;
+uint64_t hdd_view_pos = 0;
 
 Mnemonic_to_String opcode_to_mnemonic[] = {
     {ADDI, "ADDI"},     {SUBI, "SUBI"},       {MULTI, "MULTI"},
@@ -23,7 +27,6 @@ Mnemonic_to_String opcode_to_mnemonic[] = {
     {JUMPGE, "JUMP>="}, {JUMPLT, "JUMP<"},    {JUMPNE, "JUMP!="},
     {JUMPNE, "JUMP<>"}, {JUMPLE, "JUMP<="},   {JUMP, "JUMP"},
     {INT, "INT"},       {RTI, "RTI"},         {NOP, "NOP"}};
-
 
 char *copy_mnemonic_into_str(char *dest, const uint8_t opcode) {
   strcat(dest, opcode_to_mnemonic[opcode].name);
@@ -79,32 +82,53 @@ char *assembly_to_str(Instruction *instr) {
   }
   return instr_str;
 }
-char *mem_content_to_str(uint32_t mem_content) {
+char *mem_value_to_str(uint32_t mem_content, bool is_unsigned) {
   char *instr_str = malloc(12); // -2147483649
-  sprintf(instr_str, "%d", mem_content);
+  if(is_unsigned){
+    sprintf(instr_str, "%u", mem_content);
+  } else {
+    sprintf(instr_str, "%d", mem_content);
+  }
   return instr_str;
 }
 
 // TODO:: split zwischen mem content und assembly instrs
 // TODO:: Unit test dafür und die ganzen idx Funktionen
-void print_mem_content_with_idx(uint64_t idx, uint32_t mem_content) {
+void print_mem_content_with_idx(uint64_t idx, uint32_t mem_content,
+                                bool are_instrs) {
   char idx_str[6];
   snprintf(idx_str, sizeof(idx_str), "%05zu", idx);
-
-  const char *assembly_str = mem_content_to_str(mem_content);
-
-  printf("%s: %s\n", idx_str, assembly_str);
+  const char *mem_content_str;
+  if (are_instrs) {
+    mem_content_str = assembly_to_str(machine_to_assembly(mem_content));
+  } else {
+    mem_content_str = mem_value_to_str(mem_content, false);
+  }
+  printf("%s: %s\n", idx_str, mem_content_str);
 }
 
-void print_array_with_idcs(uint32_t *ar, uint8_t length) {
+void print_reg_content_with_reg(uint8_t idx, uint32_t mem_content) {
+  char reg_str[4];
+  snprintf(reg_str, sizeof(reg_str), "%3s", register_name_to_code[idx]);
+  const char *mem_content_str = mem_value_to_str(mem_content, true);
+  printf("%s: %s\n", reg_str, mem_content_str);
+}
+
+void print_array_with_idcs(uint32_t *ar, uint8_t length, bool is_regs,
+                           bool are_instrs) {
   for (size_t i = 0; i < length; i++) {
-    print_mem_content_with_idx(i, ar[i]);
+    if (is_regs) {
+      print_reg_content_with_reg(i, ar[i]);
+    } else {
+      print_mem_content_with_idx(i, ar[i], are_instrs);
+    }
   }
 }
 
-void print_file_idcs(FILE *file, uint64_t start, uint64_t end) {
+void print_file_idcs(FILE *file, uint64_t start, uint64_t end,
+                     bool are_instrs) {
   for (size_t i = start; i <= end; i++) {
-    print_mem_content_with_idx(i, read_file(file, i));
+    print_mem_content_with_idx(i, read_file(file, i), are_instrs);
   }
 }
 
@@ -158,25 +182,32 @@ char **split_string(const char *str, uint8_t *count) {
 }
 
 void cont(void) {
-  uint64_t center_sram = 0;
-  uint64_t center_hdd = 0;
-  print_array_with_idcs(regs, NUM_REGISTERS);
-  print_array_with_idcs(eprom, num_instrs_start_prgrm);
-  print_array_with_idcs(uart, NUM_UART_ADDRESSES);
-  // num_instrs_prgrm
-  print_file_idcs(sram, max(0, center_sram - radius),
-                  min(center_sram + radius, sram_size));
-  print_file_idcs(hdd, max(0, center_hdd - radius),
-                  min(center_hdd + radius, hdd_size));
+  print_array_with_idcs(regs, NUM_REGISTERS, true, false);
+  printf("SRAM View Position %lu\n", sram_view_pos);
+  print_array_with_idcs(eprom, num_instrs_start_prgrm, false, true);
+  print_array_with_idcs(uart, NUM_UART_ADDRESSES, false, false);
+  print_file_idcs(sram, max(0, sram_view_pos - radius),
+                  min(sram_view_pos + radius, num_instrs_prgrm - 1), true);
+  print_file_idcs(sram, max(num_instrs_prgrm, sram_view_pos - radius),
+                  min(sram_view_pos + radius, sram_max_size), false);
+  // print_file_idcs(hdd, max(0, hdd_view_pos - radius),
+  //                 min(hdd_view_pos + radius, hdd_size-1), false);
   while (true) {
     uint8_t count;
-    char **stdin = split_string(read_stdin_content(), &count);
-    // TODO: count not used
+    char buffer[26];
 
-    if (strcmp(stdin[0], "next") == 0) {
+    if (fgets(buffer, sizeof(buffer), stdin) == NULL) {
+      perror("Error: Reading input not successful\n");
+    }
+
+    char **stdin = split_string(buffer, &count);
+
+    if (strcmp(stdin[0], "n") == 0) {
       break;
-    } else if (strcmp(stdin[0], "set") == 0) {
+    } else if (strcmp(stdin[0], "s") == 0) {
       break;
+    } else if (strcmp(stdin[0], "q") == 0) {
+      exit(EXIT_SUCCESS);
     }
   }
 }

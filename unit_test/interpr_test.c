@@ -31,7 +31,7 @@ void test_interpr_prgrm() {
   init_reti();
   write_array(regs, PC, 1 << 31);
   write_array(regs, DS, 1 << 31);
-  parse_and_load_program(get_prgrm_content(sram_prgrm_path), SRAM);
+  parse_and_load_program(get_prgrm_content(sram_prgrm_path), false);
   interpr_prgrm();
 
   fclose(input_stream);
@@ -47,7 +47,7 @@ void test_interpr_prgrm() {
                 "SUBI ACC 3") == 0);
   assert(strcmp(assembly_to_str(machine_to_assembly(read_file(sram, 4))),
                 "JUMP 0") == 0);
-  assert(strcmp(mem_content_to_str(read_file(sram, 5)),
+  assert(strcmp(mem_value_to_str(read_file(sram, 5)),
                 "1") == 0);
 }
 

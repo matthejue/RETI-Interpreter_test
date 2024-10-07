@@ -11,6 +11,9 @@ extern uint32_t *uart;
 extern FILE *sram;
 extern FILE *hdd;
 
+extern uint64_t sram_view_pos;
+extern uint64_t hdd_view_pos;
+
 uint32_t read_file(FILE *dev, uint64_t address);
 void write_file(FILE *dev, uint64_t address, uint32_t buffer);
 

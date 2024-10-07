@@ -4,9 +4,9 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-extern uint32_t sram_size;
+extern uint32_t sram_max_size;
 extern uint16_t page_size;
-extern uint32_t hdd_size;
+extern uint32_t hdd_max_size;
 extern bool daemon_mode;
 extern uint8_t radius;
 

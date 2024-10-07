@@ -11,9 +11,9 @@
 #include <string.h>
 #include <unistd.h>
 
-uint32_t sram_size = 4294967295;
+uint32_t sram_max_size = 4294967295;
 uint16_t page_size = 4096;
-uint32_t hdd_size = 4294967295;
+uint32_t hdd_max_size = 4294967295;
 bool daemon_mode = false;
 uint8_t radius = 32;
 char *peripherals_dir = ".";
@@ -23,7 +23,7 @@ char *sram_prgrm_path = "";
 void parse_args(uint8_t argc, char *argv[]) {
   uint32_t opt;
 
-  while ((opt = getopt(argc, argv, "s:p:h:d:r:f:e:")) != -1) {
+  while ((opt = getopt(argc, argv, "s:p:h:dr:f:e:")) != -1) {
     char *endptr;
     errno = 0;
     long tmp_val;
@@ -39,7 +39,7 @@ void parse_args(uint8_t argc, char *argv[]) {
         perror("Error: SRAM size must be between 0 and 4294967295");
         exit(EXIT_FAILURE);
       }
-      sram_size = tmp_val;
+      sram_max_size = tmp_val;
       break;
     case 'p':
       tmp_val = strtol(optarg, &endptr, 10);
@@ -63,7 +63,7 @@ void parse_args(uint8_t argc, char *argv[]) {
         perror("Error: HDD size must be between 0 and 4294967295");
         exit(EXIT_FAILURE);
       }
-      hdd_size = tmp_val;
+      hdd_max_size = tmp_val;
       break;
     case 'd':
       daemon_mode = true;
@@ -105,11 +105,12 @@ void parse_args(uint8_t argc, char *argv[]) {
 }
 
 void print_args() {
-  printf("SRAM Size: %d\n", sram_size);
-  printf("Page Size: %d\n", page_size);
-  printf("HDD Size: %d\n", hdd_size);
+  printf("SRAM Size: %u\n", sram_max_size);
+  printf("Page Size: %u\n", page_size);
+  printf("HDD Size: %u\n", hdd_max_size);
   printf("Daemon Mode: %s\n", daemon_mode ? "true" : "false");
-  printf("Radius: %d\n", radius);
+  printf("Radius: %u\n", radius);
   printf("Peripheral File Directory: %s\n", peripherals_dir);
   printf("Eprom Program Path: %s\n", eprom_prgrm_path);
+  printf("SRAM Program Path: %s\n", sram_prgrm_path);
 }

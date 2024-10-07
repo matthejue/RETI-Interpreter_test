@@ -1,3 +1,4 @@
+#include "../include/utils.h"
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -26,9 +27,9 @@ uint32_t mod(int32_t a, int32_t b) {
   return result;
 }
 
-int32_t max(int32_t a, int32_t b) { return (a > b) ? a : b; }
+int64_t max(int64_t a, int64_t b) { return (a > b) ? a : b; }
 
-int32_t min(int32_t a, int32_t b) { return (a < b) ? a : b; }
+int64_t min(int64_t a, int64_t b) { return (a < b) ? a : b; }
 
 uint32_t sign_extend_22_to_32(uint32_t num) {
   // Check if the number is negative by checking the 21st bit
@@ -54,21 +55,31 @@ char *proper_str_cat(char *prefix, char *suffix) {
 }
 
 char *read_stdin_content() {
-  size_t len = 0;
-  size_t read;
-  char *line = NULL;
-  char *content = NULL;
+  size_t buffer_size = INITIAL_BUFFER_SIZE;
+  size_t content_size = 0;
+  char *content = malloc(buffer_size);
+  if (content == NULL) {
+    fprintf(stderr, "Failed to allocate memory\n");
+    exit(1);
+  }
 
-  while ((read = getline(&line, &len, stdin)) != -1) {
-    if (content == NULL) {
-      content = strdup(line);
-    } else {
-      content = realloc(content, strlen(content) + read + 1);
-      strcat(content, line);
+  size_t bytes_read;
+  while ((bytes_read = fread(content + content_size, 1,
+                             buffer_size - content_size, stdin)) > 0) {
+    content_size += bytes_read;
+    if (content_size == buffer_size) {
+      buffer_size *= 2;
+      content = realloc(content, buffer_size);
+      if (content == NULL) {
+        fprintf(stderr, "Failed to reallocate memory\n");
+        exit(1);
+      }
     }
   }
 
-  free(line);
+  // Null-terminate the content
+  content[content_size] = '\0';
+
   return content;
 }
 

@@ -75,7 +75,7 @@ String_Instruction *parse_instr(const char **original_prgrm_pntr) {
   }
 }
 
-void parse_and_load_program(char *prgrm, Memory_Type mem_type) {
+void parse_and_load_program(char *prgrm, bool is_eprom) {
   const char *prgrm_pntr = prgrm;
   uint32_t i = 0;
 
@@ -83,29 +83,17 @@ void parse_and_load_program(char *prgrm, Memory_Type mem_type) {
     String_Instruction *str_instr = parse_instr(&prgrm_pntr);
     if (isalpha(*str_instr->op)) {
       uint32_t machine_instr = assembly_to_machine(str_instr);
-      switch (mem_type) {
-      case EPROM:
+      if (is_eprom) {
         write_array(eprom, i++, machine_instr);
-        break;
-      case SRAM:
+      } else { // is SRAM
         write_file(sram, i++, machine_instr);
-        break;
-      default:
-        perror("Error: Invalid memory type");
-        break;
       }
     }
   }
-  switch (mem_type) {
-  case EPROM:
+  if (is_eprom) {
     num_instrs_start_prgrm = i;
-    break;
-  case SRAM:
+  } else { // is SRAM
     num_instrs_prgrm = i;
-    break;
-  default:
-    perror("Error: Invalid memory type");
-    break;
   }
   free(prgrm);
 }
