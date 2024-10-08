@@ -187,9 +187,9 @@ void cont(void) {
   print_array_with_idcs(eprom, num_instrs_start_prgrm, false, true);
   print_array_with_idcs(uart, NUM_UART_ADDRESSES, false, false);
   print_file_idcs(sram, max(0, sram_view_pos - radius),
-                  min(sram_view_pos + radius, num_instrs_prgrm - 1), true);
-  print_file_idcs(sram, max(num_instrs_prgrm, sram_view_pos - radius),
-                  min(sram_view_pos + radius, sram_max_size), false);
+                  min(sram_view_pos + radius, num_instrs_isrs + num_instrs_prgrm - 1), true);
+  print_file_idcs(sram, max(num_instrs_isrs + num_instrs_prgrm, sram_view_pos - radius),
+                  min(sram_view_pos + radius, sram_max_idx), false);
   // print_file_idcs(hdd, max(0, hdd_view_pos - radius),
   //                 min(hdd_view_pos + radius, hdd_size-1), false);
   while (true) {

@@ -4,8 +4,9 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-#define IMMEDIATE_MASK 0x3FFFFF // 22 bits for immediate value
-#define REGISTER_MASK 0x7       // 22 bits for immediate value
+#define IMMEDIATE_MASK 0x3FFFFF   // 22 bits for immediate value
+/*#define ALL_BUT_IMMEDIATE_MASK 0xffc00000*/
+#define REGISTER_MASK 0x7
 
 typedef enum { PC, ACC, IN1, IN2, SP, BAF, CS, DS } Register;
 
@@ -76,6 +77,6 @@ typedef struct {
 uint8_t get_register_code(char *reg);
 uint8_t get_mnemonic(char *mnemonic);
 Instruction *machine_to_assembly(uint32_t machine_instr);
-uint32_t assembly_to_machine(String_Instruction *instr);
+uint32_t assembly_to_machine(String_Instruction *str_instr);
 
 #endif // ASSEMBLE_H

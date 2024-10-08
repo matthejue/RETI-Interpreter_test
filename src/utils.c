@@ -31,13 +31,19 @@ int64_t max(int64_t a, int64_t b) { return (a > b) ? a : b; }
 
 int64_t min(int64_t a, int64_t b) { return (a < b) ? a : b; }
 
+int32_t sign_extend_10_to_32(uint32_t num) {
+  if (num & (1 << 9)) {
+    num |= ~((1 << 10) - 1);
+  } else {
+    num &= (1 << 10) - 1;
+  }
+  return (int32_t)num;
+}
+
 uint32_t sign_extend_22_to_32(uint32_t num) {
-  // Check if the number is negative by checking the 21st bit
   if (num & (1 << 21)) {
-    // If negative, set the upper bits to 1
     num |= ~((1 << 22) - 1);
   } else {
-    // If positive, ensure the upper bits are 0
     num &= (1 << 22) - 1;
   }
   return num;

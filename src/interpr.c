@@ -14,6 +14,7 @@
 // } uint22_t;
 void interpr_instr(Instruction *assembly_instr) {
   switch (assembly_instr->op) {
+  // TODO: Tobias ADD PC 0 ist das gleiche wie JUMP 0, was ist damit?
   case ADDI:
     write_array(regs, assembly_instr->opd1,
                 (int32_t)read_array(regs, assembly_instr->opd1) +

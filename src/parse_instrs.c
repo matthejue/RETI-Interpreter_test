@@ -7,9 +7,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-uint32_t num_instrs_prgrm = 0;
-uint32_t num_instrs_start_prgrm = 0;
-
 // TODO: Irgendwie durch untere Funktionen dafür sorgen, dass immer nur ein
 // TODO: nen check machen, ob Zahl nicht zu lang, später in ner anderen
 
@@ -75,25 +72,46 @@ String_Instruction *parse_instr(const char **original_prgrm_pntr) {
   }
 }
 
-void parse_and_load_program(char *prgrm, bool is_eprom) {
+void parse_and_load_program(char *prgrm, Program_Type prgrm_type) {
   const char *prgrm_pntr = prgrm;
-  uint32_t i = 0;
+  uint32_t i;
+  if (prgrm_type == SRAM_PRGRM) {
+    i = num_instrs_isrs;
+  } else {
+    i = 0;
+  }
 
   while (*prgrm_pntr != '\0') {
     String_Instruction *str_instr = parse_instr(&prgrm_pntr);
     if (isalpha(*str_instr->op)) {
       uint32_t machine_instr = assembly_to_machine(str_instr);
-      if (is_eprom) {
-        write_array(eprom, i++, machine_instr);
-      } else { // is SRAM
+      switch (prgrm_type) {
+      case SRAM_PRGRM:
         write_file(sram, i++, machine_instr);
+        break;
+      case ISR_PRGRMS:
+        write_file(sram, i++, machine_instr);
+        break;
+      case EPROM_START_PRGRM:
+        write_array(eprom, i++, machine_instr);
+        break;
+      default:
+        perror("Error: Invalid memory type");
       }
     }
   }
-  if (is_eprom) {
+  switch (prgrm_type) {
+  case SRAM_PRGRM:
+    num_instrs_prgrm = i - num_instrs_isrs;
+    break;
+  case ISR_PRGRMS:
+    num_instrs_isrs = i;
+    break;
+  case EPROM_START_PRGRM:
     num_instrs_start_prgrm = i;
-  } else { // is SRAM
-    num_instrs_prgrm = i;
+    break;
+  default:
+    perror("Error: Invalid memory type");
   }
   free(prgrm);
 }

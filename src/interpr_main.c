@@ -14,11 +14,16 @@ int main(int argc, char *argv[]) {
   init_reti();
 
   if (strcmp(eprom_prgrm_path, "") != 0) {
-    parse_and_load_program(get_prgrm_content(eprom_prgrm_path), true);
+    parse_and_load_program(get_prgrm_content(eprom_prgrm_path), EPROM_START_PRGRM);
   } else {
-    // TODO: else load preassembled eprom program for more efficiency
+    load_adjusted_eprom_prgrm();
   }
-  parse_and_load_program(get_prgrm_content(sram_prgrm_path), false);
+  if (strcmp(isrs_prgrm_path, "") != 0) {
+    parse_and_load_program(get_prgrm_content(isrs_prgrm_path), ISR_PRGRMS);
+  } else {
+    load_isrs();
+  }
+  parse_and_load_program(get_prgrm_content(sram_prgrm_path), SRAM_PRGRM);
 
   interpr_prgrm();
 

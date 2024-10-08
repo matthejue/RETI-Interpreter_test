@@ -45,42 +45,42 @@ uint8_t get_mnemonic(char *mnemonic) {
   exit(EXIT_FAILURE);
 }
 
-uint32_t assembly_to_machine(String_Instruction *instr) {
+uint32_t assembly_to_machine(String_Instruction *str_instr) {
   uint32_t machine_instr = 0;
-  uint8_t op = get_mnemonic(instr->op);
+  uint8_t op = get_mnemonic(str_instr->op);
 
   if (ADDR <= op && op <= ANDR) {
-    if (isdigit(instr->opd2[0])) {
+    if (isdigit(str_instr->opd2[0])) {
       op += 8;
     }
   }
 
   uint32_t opd1, opd2, opd3;
-  if (strcmp(instr->opd1, "") != 0) {
-    if (isalpha(instr->opd1[0])) {
-      opd1 = get_register_code(instr->opd1);
+  if (strcmp(str_instr->opd1, "") != 0) {
+    if (isalpha(str_instr->opd1[0])) {
+      opd1 = get_register_code(str_instr->opd1);
     } else {
-      opd1 = atoi(instr->opd1) & IMMEDIATE_MASK;
+      opd1 = atoi(str_instr->opd1) & IMMEDIATE_MASK;
     }
   } else {
     opd1 = 0;
   }
 
-  if (strcmp(instr->opd2, "") != 0) {
-    if (isalpha(instr->opd2[0])) {
-      opd2 = get_register_code(instr->opd2);
+  if (strcmp(str_instr->opd2, "") != 0) {
+    if (isalpha(str_instr->opd2[0])) {
+      opd2 = get_register_code(str_instr->opd2);
     } else {
-      opd2 = atoi(instr->opd2) & IMMEDIATE_MASK;
+      opd2 = atoi(str_instr->opd2) & IMMEDIATE_MASK;
     }
   } else {
     opd2 = 0;
   }
 
-  if (strcmp(instr->opd3, "") != 0) {
-    if (isalpha(instr->opd3[0])) {
-      opd3 = get_register_code(instr->opd3);
+  if (strcmp(str_instr->opd3, "") != 0) {
+    if (isalpha(str_instr->opd3[0])) {
+      opd3 = get_register_code(str_instr->opd3);
     } else {
-      opd3 = atoi(instr->opd3) & IMMEDIATE_MASK;
+      opd3 = atoi(str_instr->opd3) & IMMEDIATE_MASK;
     }
   } else {
     opd3 = 0;
