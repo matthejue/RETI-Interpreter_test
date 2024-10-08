@@ -14,6 +14,8 @@ extern FILE *hdd;
 extern uint64_t sram_view_pos;
 extern uint64_t hdd_view_pos;
 
+#define adjusteed_eprom_prgrm_size 13
+
 void load_adjusted_eprom_prgrm();
 void load_isrs();
 

@@ -53,12 +53,21 @@ typedef enum {
   JUMP = 0b1111100,
 } Unique_Opcode;
 
+typedef enum {
+  IM = 0b10000000
+} Directive;
+
 extern const char *register_name_to_code[];
 
 typedef struct {
   const char *name;
   Unique_Opcode value;
 } String_to_Mnemonic;
+
+typedef struct {
+  const char *name;
+  Directive value;
+} String_to_Directive;
 
 typedef struct {
   char op[8];

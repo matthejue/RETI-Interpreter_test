@@ -258,7 +258,6 @@ void interpr_instr(Instruction *assembly_instr) {
   case RTI:
     write_array(regs, PC, read_storage(read_array(regs, SP) + 1));
     write_array(regs, SP, read_array(regs, SP) + 1);
-    goto no_pc_increase;
     break;
   case JUMPGT:
     if (read_array(regs, ACC) > 0) {

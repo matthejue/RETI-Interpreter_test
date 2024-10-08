@@ -10,6 +10,8 @@
 // TODO: Irgendwie durch untere Funktionen dafür sorgen, dass immer nur ein
 // TODO: nen check machen, ob Zahl nicht zu lang, später in ner anderen
 
+uint32_t ivt_max_idx = 0;
+
 String_Instruction *parse_instr(const char **original_prgrm_pntr) {
   const char *prgrm_pntr = *original_prgrm_pntr;
   String_Instruction *str_instr = malloc(sizeof(String_Instruction));
@@ -90,9 +92,20 @@ void parse_and_load_program(char *prgrm, Program_Type prgrm_type) {
         write_file(sram, i++, machine_instr);
         break;
       case ISR_PRGRMS:
+        if (strcmp(str_instr->op, "IM") == 0) {
+          ivt_max_idx = i;
+        }
         write_file(sram, i++, machine_instr);
         break;
       case EPROM_START_PRGRM:
+        uint32_t *temp =
+            realloc(eprom, sizeof(uint32_t) * i + sizeof(uint32_t));
+        if (temp == NULL) {
+          fprintf(stderr, "Realloc failed\n");
+          free(eprom);
+          exit(EXIT_FAILURE);
+        }
+        eprom = temp;
         write_array(eprom, i++, machine_instr);
         break;
       default:

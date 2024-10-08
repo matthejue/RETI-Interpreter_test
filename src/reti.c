@@ -2,6 +2,7 @@
 #include "../include/assemble.h"
 #include "../include/globals.h"
 #include "../include/utils.h"
+#include "../include/daemon.h"
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -18,7 +19,12 @@ uint32_t num_instrs_isrs = 0;
 void init_reti() {
   regs = malloc(sizeof(uint32_t) * NUM_REGISTERS);
   // TODO: herausfinden, wie man num_instrs_start_prgrm vorher bestimmt
-  eprom = malloc(sizeof(uint32_t) * num_instrs_start_prgrm);
+  if (strcmp(eprom_prgrm_path, "") == 0) {
+    num_instrs_start_prgrm = adjusteed_eprom_prgrm_size;
+    eprom = malloc(sizeof(uint32_t) * num_instrs_start_prgrm);
+  } else {
+    eprom = NULL;
+  }
   uart = malloc(sizeof(uint32_t) * NUM_UART_ADDRESSES);
 
   memset(regs, 0, sizeof(uint32_t) * NUM_REGISTERS);
@@ -54,34 +60,39 @@ void load_adjusted_eprom_prgrm() {
   write_array(eprom, i++, assembly_to_machine(&str_instr));
 
   // Codesegment register
-  uint16_t im = 0b10 << 30 | num_instrs_isrs;
+  uint32_t im = 0b10 << 30 | num_instrs_isrs;
   // or because of assumption that num_instrs_isrs is less than 2^30
-  uint16_t im_upper_str = sign_extend_10_to_32(im >> 10);
+  uint32_t im_upper_str = sign_extend_22_to_32(im >> 10);
   uint32_t im_lower_str = im & IMMEDIATE_MASK;
   str_instr =
-      (String_Instruction){.op = "LOADI", .opd1 = "CS", .opd2 = im_upper_str, .opd3 = ""};
+      (String_Instruction){.op = "LOADI", .opd1 = "CS", .opd2 = "", .opd3 = ""};
+  strcpy(str_instr.opd2, mem_value_to_str(im_upper_str, false));
   write_array(eprom, i++, assembly_to_machine(&str_instr));
   str_instr =
-      (String_Instruction){.op = "MULTI", .opd1 = "CS", .opd2 = "2048", .opd3 = ""};
+      (String_Instruction){.op = "MULTI", .opd1 = "CS", .opd2 = "1024", .opd3 = ""};
   write_array(eprom, i++, assembly_to_machine(&str_instr));
   str_instr =
-      (String_Instruction){.op = "ORI", .opd1 = "CS", .opd2 = im_lower_str, .opd3 = ""};
+      (String_Instruction){.op = "ORI", .opd1 = "CS", .opd2 = "", .opd3 = ""};
+  strcpy(str_instr.opd2, mem_value_to_str(im_lower_str, false));
   write_array(eprom, i++, assembly_to_machine(&str_instr));
+
   str_instr = (String_Instruction){
       .op = "MOVE", .opd1 = "CS", .opd2 = "DS", .opd3 = ""};
   write_array(eprom, i++, assembly_to_machine(&str_instr));
 
   // Datensegment register
-  im_upper_str = sign_extend_10_to_32(num_instrs_prgrm >> 10);
+  im_upper_str = sign_extend_22_to_32(num_instrs_prgrm >> 10);
   im_lower_str = num_instrs_prgrm & IMMEDIATE_MASK;
   str_instr =
-      (String_Instruction){.op = "LOADI", .opd1 = "ACC", .opd2 = im_upper_str, .opd3 = ""};
+      (String_Instruction){.op = "LOADI", .opd1 = "ACC", .opd2 = "", .opd3 = ""};
+  strcpy(str_instr.opd2, mem_value_to_str(im_upper_str, false));
   write_array(eprom, i++, assembly_to_machine(&str_instr));
   str_instr =
-      (String_Instruction){.op = "MULTI", .opd1 = "ACC", .opd2 = "2048", .opd3 = ""};
+      (String_Instruction){.op = "MULTI", .opd1 = "ACC", .opd2 = "1024", .opd3 = ""};
   write_array(eprom, i++, assembly_to_machine(&str_instr));
   str_instr =
-      (String_Instruction){.op = "ORI", .opd1 = "ACC", .opd2 = im_lower_str, .opd3 = ""};
+      (String_Instruction){.op = "ORI", .opd1 = "ACC", .opd2 = "", .opd3 = ""};
+  strcpy(str_instr.opd2, mem_value_to_str(im_lower_str, false));
   write_array(eprom, i++, assembly_to_machine(&str_instr));
   str_instr =
       (String_Instruction){.op = "ADD", .opd1 = "DS", .opd2 = "ACC", .opd3 = ""};
@@ -92,7 +103,6 @@ void load_adjusted_eprom_prgrm() {
   write_array(eprom, i++, assembly_to_machine(&str_instr));
 
   // TODO: Tobias, soll eprom schreiben ab hier gelockt sein?
-  num_instrs_isrs = i;
 }
 
 void load_isrs() {}
@@ -126,13 +136,13 @@ uint32_t read_storage(uint32_t addr) {
   uint8_t stor_mode = addr >> 30;
   switch (stor_mode) {
   case 0b00:
-    addr = addr & 0x3FFFFFF;
+    addr = addr & 0x3FFFFFFF;
     return read_array(eprom, addr);
   case 0b01:
-    addr = addr & 0x3FFFFFF;
+    addr = addr & 0x3FFFFFFF;
     return read_array(uart, addr);
   default:
-    addr = addr & 0x7FFFFFF;
+    addr = addr & 0x7FFFFFFF;
     return read_file(sram, addr);
   }
 }
@@ -144,16 +154,15 @@ void write_storage_ds_fill(uint64_t addr, uint32_t buffer) {
 
 void write_storage(uint32_t addr, uint32_t buffer) {
   uint8_t stor_mode = addr >> 30;
-  addr = addr & 0x3FFFFFF;
   switch (stor_mode) {
   case 0b00:
-    addr = addr & 0x3FFFFFF;
+    addr = addr & 0x3FFFFFFF;
     write_array(eprom, addr, buffer);
   case 0b01:
-    addr = addr & 0x3FFFFFF;
+    addr = addr & 0x3FFFFFFF;
     write_array(uart, addr, buffer);
   default:
-    addr = addr & 0x7FFFFFF;
+    addr = addr & 0x7FFFFFFF;
     write_file(sram, addr, buffer);
   }
 }

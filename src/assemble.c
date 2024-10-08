@@ -22,6 +22,10 @@ String_to_Mnemonic mnemonic_to_opcode[] = {
     {"JUMP", JUMP},     {"INT", INT},       {"RTI", RTI},
     {"NOP", NOP}};
 
+String_to_Directive mnemonic_to_directive[] = {
+    {"IM", IM},    
+};
+
 uint8_t get_register_code(char *reg) {
   for (uint8_t i = 0;
        i < sizeof(register_name_to_code) / sizeof(register_name_to_code[0]);
@@ -41,6 +45,12 @@ uint8_t get_mnemonic(char *mnemonic) {
       return (uint8_t)mnemonic_to_opcode[i].value;
     }
   }
+  for (uint8_t i = 0;
+       i < sizeof(mnemonic_to_directive) / sizeof(mnemonic_to_directive[0]); ++i) {
+    if (strcmp(mnemonic, mnemonic_to_directive[i].name) == 0) {
+      return (uint8_t)mnemonic_to_directive[i].value;
+    }
+  }
   perror("Error: Invalid mnemonic");
   exit(EXIT_FAILURE);
 }
@@ -56,6 +66,7 @@ uint32_t assembly_to_machine(String_Instruction *str_instr) {
   }
 
   uint32_t opd1, opd2, opd3;
+
   if (strcmp(str_instr->opd1, "") != 0) {
     if (isalpha(str_instr->opd1[0])) {
       opd1 = get_register_code(str_instr->opd1);
@@ -102,6 +113,10 @@ uint32_t assembly_to_machine(String_Instruction *str_instr) {
     machine_instr = op << 25 | opd1 << 25 | opd2 << 22;
   } else if (NOP <= op && op <= JUMP) {
     machine_instr = op << 25 | opd1;
+  } else if (op == IM) {
+    machine_instr = 0b10 << 30 | opd1;
+  } else {
+    perror("Error: Invalid opcode");
   }
 
   return machine_instr;

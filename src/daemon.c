@@ -84,7 +84,7 @@ char *assembly_to_str(Instruction *instr) {
 }
 char *mem_value_to_str(uint32_t mem_content, bool is_unsigned) {
   char *instr_str = malloc(12); // -2147483649
-  if(is_unsigned){
+  if (is_unsigned) {
     sprintf(instr_str, "%u", mem_content);
   } else {
     sprintf(instr_str, "%d", mem_content);
@@ -94,15 +94,14 @@ char *mem_value_to_str(uint32_t mem_content, bool is_unsigned) {
 
 // TODO:: split zwischen mem content und assembly instrs
 // TODO:: Unit test dafür und die ganzen idx Funktionen
-void print_mem_content_with_idx(uint64_t idx, uint32_t mem_content,
-                                bool are_instrs) {
+void print_mem_content_with_idx(uint64_t idx, uint32_t mem_content, bool are_unsigned, bool are_instrs) {
   char idx_str[6];
   snprintf(idx_str, sizeof(idx_str), "%05zu", idx);
   const char *mem_content_str;
   if (are_instrs) {
     mem_content_str = assembly_to_str(machine_to_assembly(mem_content));
   } else {
-    mem_content_str = mem_value_to_str(mem_content, false);
+    mem_content_str = mem_value_to_str(mem_content, are_unsigned);
   }
   printf("%s: %s\n", idx_str, mem_content_str);
 }
@@ -114,21 +113,20 @@ void print_reg_content_with_reg(uint8_t idx, uint32_t mem_content) {
   printf("%s: %s\n", reg_str, mem_content_str);
 }
 
-void print_array_with_idcs(uint32_t *ar, uint8_t length, bool is_regs,
+void print_array_with_idcs(uint32_t *ar, uint8_t length, bool are_regs,
                            bool are_instrs) {
   for (size_t i = 0; i < length; i++) {
-    if (is_regs) {
+    if (are_regs) {
       print_reg_content_with_reg(i, ar[i]);
     } else {
-      print_mem_content_with_idx(i, ar[i], are_instrs);
+      print_mem_content_with_idx(i, ar[i], false, are_instrs);
     }
   }
 }
 
-void print_file_idcs(FILE *file, uint64_t start, uint64_t end,
-                     bool are_instrs) {
+void print_file_idcs(FILE *file, uint64_t start, uint64_t end, bool are_unsigned, bool are_instrs) {
   for (size_t i = start; i <= end; i++) {
-    print_mem_content_with_idx(i, read_file(file, i), are_instrs);
+    print_mem_content_with_idx(i, read_file(file, i), are_unsigned, are_instrs);
   }
 }
 
@@ -187,9 +185,14 @@ void cont(void) {
   print_array_with_idcs(eprom, num_instrs_start_prgrm, false, true);
   print_array_with_idcs(uart, NUM_UART_ADDRESSES, false, false);
   print_file_idcs(sram, max(0, sram_view_pos - radius),
-                  min(sram_view_pos + radius, num_instrs_isrs + num_instrs_prgrm - 1), true);
-  print_file_idcs(sram, max(num_instrs_isrs + num_instrs_prgrm, sram_view_pos - radius),
-                  min(sram_view_pos + radius, sram_max_idx), false);
+                  min(sram_view_pos + radius, ivt_max_idx), true, false);
+  print_file_idcs(
+      sram, max(ivt_max_idx + 1, sram_view_pos - radius),
+      min(sram_view_pos + radius, num_instrs_isrs + num_instrs_prgrm - 1), false,
+      true);
+  print_file_idcs(
+      sram, max(num_instrs_isrs + num_instrs_prgrm, sram_view_pos - radius),
+      min(sram_view_pos + radius, SRAM_MAX_IDX), false, false);
   // print_file_idcs(hdd, max(0, hdd_view_pos - radius),
   //                 min(hdd_view_pos + radius, hdd_size-1), false);
   while (true) {

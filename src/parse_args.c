@@ -11,9 +11,9 @@
 #include <string.h>
 #include <unistd.h>
 
-uint32_t sram_max_idx = 4294967295;
+uint32_t sram_size = 4294967295;
 uint16_t page_size = 4096;
-uint32_t hdd_max_idx = 4294967295;
+uint32_t hdd_size = 4294967295;
 bool daemon_mode = false;
 uint8_t radius = 32;
 char *peripherals_dir = ".";
@@ -40,7 +40,7 @@ void parse_args(uint8_t argc, char *argv[]) {
         perror("Error: SRAM max index must be between 0 and 4294967295");
         exit(EXIT_FAILURE);
       }
-      sram_max_idx = tmp_val;
+      sram_size = tmp_val;
       break;
     case 'p':
       tmp_val = strtol(optarg, &endptr, 10);
@@ -64,7 +64,7 @@ void parse_args(uint8_t argc, char *argv[]) {
         perror("Error: HDD max index must be between 0 and 4294967295");
         exit(EXIT_FAILURE);
       }
-      hdd_max_idx = tmp_val;
+      hdd_size = tmp_val;
       break;
     case 'd':
       daemon_mode = true;
@@ -109,12 +109,13 @@ void parse_args(uint8_t argc, char *argv[]) {
 }
 
 void print_args() {
-  printf("SRAM Size: %u\n", sram_max_idx);
+  printf("SRAM Size: %u\n", sram_size);
   printf("Page Size: %u\n", page_size);
-  printf("HDD Size: %u\n", hdd_max_idx);
+  printf("HDD Size: %u\n", hdd_size);
   printf("Daemon Mode: %s\n", daemon_mode ? "true" : "false");
   printf("Radius: %u\n", radius);
   printf("Peripheral File Directory: %s\n", peripherals_dir);
   printf("Eprom Program Path: %s\n", eprom_prgrm_path);
+  printf("Interrupt Service Routines Program Path: %s\n", isrs_prgrm_path);
   printf("SRAM Program Path: %s\n", sram_prgrm_path);
 }
