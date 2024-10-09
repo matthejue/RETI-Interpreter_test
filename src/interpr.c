@@ -1,6 +1,7 @@
 #include "../include/interpr.h"
 #include "../include/daemon.h"
 #include "../include/globals.h"
+#include "../include/parse_args.h"
 #include "../include/reti.h"
 #include "../include/utils.h"
 #include <stdbool.h>
@@ -17,207 +18,207 @@ void interpr_instr(Instruction *assembly_instr) {
   // TODO: Tobias ADD PC 0 ist das gleiche wie JUMP 0, was ist damit?
   case ADDI:
     write_array(regs, assembly_instr->opd1,
-                (int32_t)read_array(regs, assembly_instr->opd1) +
-                    (int32_t)assembly_instr->opd2);
+                (int32_t)read_array(regs, assembly_instr->opd1, false) +
+                    (int32_t)assembly_instr->opd2, false);
     if (assembly_instr->opd1 == PC) {
       goto no_pc_increase;
     }
     break;
   case SUBI:
     write_array(regs, assembly_instr->opd1,
-                (int32_t)read_array(regs, assembly_instr->opd1) -
-                    (int32_t)assembly_instr->opd2);
+                (int32_t)read_array(regs, assembly_instr->opd1, false) -
+                    (int32_t)assembly_instr->opd2, false);
     if (assembly_instr->opd1 == PC) {
       goto no_pc_increase;
     }
     break;
   case MULTI:
     write_array(regs, assembly_instr->opd1,
-                (int32_t)read_array(regs, assembly_instr->opd1) *
-                    (int32_t)assembly_instr->opd2);
+                (int32_t)read_array(regs, assembly_instr->opd1, false) *
+                    (int32_t)assembly_instr->opd2, false);
     if (assembly_instr->opd1 == PC) {
       goto no_pc_increase;
     }
     break;
   case DIVI:
     write_array(regs, assembly_instr->opd1,
-                (int32_t)read_array(regs, assembly_instr->opd1) /
-                    (int32_t)assembly_instr->opd2);
+                (int32_t)read_array(regs, assembly_instr->opd1, false) /
+                    (int32_t)assembly_instr->opd2, false);
     if (assembly_instr->opd1 == PC) {
       goto no_pc_increase;
     }
     break;
   case MODI:
     write_array(regs, assembly_instr->opd1,
-                mod((int32_t)read_array(regs, assembly_instr->opd1),
-                    (int32_t)assembly_instr->opd2));
+                mod((int32_t)read_array(regs, assembly_instr->opd1, false),
+                    (int32_t)assembly_instr->opd2), false);
     if (assembly_instr->opd1 == PC) {
       goto no_pc_increase;
     }
     break;
   case OPLUSI:
     write_array(regs, assembly_instr->opd1,
-                read_array(regs, assembly_instr->opd1) ^
-                    (assembly_instr->opd2 & IMMEDIATE_MASK));
+                read_array(regs, assembly_instr->opd1, false) ^
+                    (assembly_instr->opd2 & IMMEDIATE_MASK), false);
     if (assembly_instr->opd1 == PC) {
       goto no_pc_increase;
     }
     break;
   case ORI:
     write_array(regs, assembly_instr->opd1,
-                read_array(regs, assembly_instr->opd1) |
-                    (assembly_instr->opd2 & IMMEDIATE_MASK));
+                read_array(regs, assembly_instr->opd1, false) |
+                    (assembly_instr->opd2 & IMMEDIATE_MASK), false);
     if (assembly_instr->opd1 == PC) {
       goto no_pc_increase;
     }
     break;
   case ANDI:
     write_array(regs, assembly_instr->opd1,
-                read_array(regs, assembly_instr->opd1) &
-                    (assembly_instr->opd2 & IMMEDIATE_MASK));
+                read_array(regs, assembly_instr->opd1, false) &
+                    (assembly_instr->opd2 & IMMEDIATE_MASK), false);
     if (assembly_instr->opd1 == PC) {
       goto no_pc_increase;
     }
     break;
   case ADDR:
     write_array(regs, assembly_instr->opd1,
-                (int32_t)read_array(regs, assembly_instr->opd1) +
-                    (int32_t)read_array(regs, assembly_instr->opd2));
+                (int32_t)read_array(regs, assembly_instr->opd1, false) +
+                    (int32_t)read_array(regs, assembly_instr->opd2, false), false);
     if (assembly_instr->opd1 == PC) {
       goto no_pc_increase;
     }
     break;
   case SUBR:
     write_array(regs, assembly_instr->opd1,
-                (int32_t)read_array(regs, assembly_instr->opd1) -
-                    (int32_t)read_array(regs, assembly_instr->opd2));
+                (int32_t)read_array(regs, assembly_instr->opd1, false) -
+                    (int32_t)read_array(regs, assembly_instr->opd2, false), false);
     if (assembly_instr->opd1 == PC) {
       goto no_pc_increase;
     }
     break;
   case MULTR:
     write_array(regs, assembly_instr->opd1,
-                (int32_t)read_array(regs, assembly_instr->opd1) *
-                    (int32_t)read_array(regs, assembly_instr->opd2));
+                (int32_t)read_array(regs, assembly_instr->opd1, false) *
+                    (int32_t)read_array(regs, assembly_instr->opd2, false), false);
     if (assembly_instr->opd1 == PC) {
       goto no_pc_increase;
     }
     break;
   case DIVR:
     write_array(regs, assembly_instr->opd1,
-                (int32_t)read_array(regs, assembly_instr->opd1) /
-                    (int32_t)read_array(regs, assembly_instr->opd2));
+                (int32_t)read_array(regs, assembly_instr->opd1, false) /
+                    (int32_t)read_array(regs, assembly_instr->opd2, false), false);
     if (assembly_instr->opd1 == PC) {
       goto no_pc_increase;
     }
     break;
   case MODR:
     write_array(regs, assembly_instr->opd1,
-                mod((int32_t)read_array(regs, assembly_instr->opd1),
-                    (int32_t)read_array(regs, assembly_instr->opd2)));
+                mod((int32_t)read_array(regs, assembly_instr->opd1, false),
+                    (int32_t)read_array(regs, assembly_instr->opd2, false)), false);
     if (assembly_instr->opd1 == PC) {
       goto no_pc_increase;
     }
     break;
   case OPLUSR:
     write_array(regs, assembly_instr->opd1,
-                read_array(regs, assembly_instr->opd1) ^
-                    read_array(regs, assembly_instr->opd2));
+                read_array(regs, assembly_instr->opd1, false) ^
+                    read_array(regs, assembly_instr->opd2, false), false);
     if (assembly_instr->opd1 == PC) {
       goto no_pc_increase;
     }
     break;
   case ORR:
     write_array(regs, assembly_instr->opd1,
-                read_array(regs, assembly_instr->opd1) |
-                    read_array(regs, assembly_instr->opd2));
+                read_array(regs, assembly_instr->opd1, false) |
+                    read_array(regs, assembly_instr->opd2, false), false);
     if (assembly_instr->opd1 == PC) {
       goto no_pc_increase;
     }
     break;
   case ANDR:
     write_array(regs, assembly_instr->opd1,
-                read_array(regs, assembly_instr->opd1) &
-                    read_array(regs, assembly_instr->opd2));
+                read_array(regs, assembly_instr->opd1, false) &
+                    read_array(regs, assembly_instr->opd2, false), false);
     if (assembly_instr->opd1 == PC) {
       goto no_pc_increase;
     }
     break;
   case ADDM:
     write_array(regs, assembly_instr->opd1,
-                (int32_t)read_array(regs, assembly_instr->opd1) +
-                    (int32_t)read_storage_ds_fill(assembly_instr->opd2));
+                (int32_t)read_array(regs, assembly_instr->opd1, false) +
+                    (int32_t)read_storage_ds_fill(assembly_instr->opd2), false);
     if (assembly_instr->opd1 == PC) {
       goto no_pc_increase;
     }
     break;
   case SUBM:
     write_array(regs, assembly_instr->opd1,
-                (int32_t)read_array(regs, assembly_instr->opd1) -
-                    (int32_t)read_storage_ds_fill(assembly_instr->opd2));
+                (int32_t)read_array(regs, assembly_instr->opd1, false) -
+                    (int32_t)read_storage_ds_fill(assembly_instr->opd2), false);
     if (assembly_instr->opd1 == PC) {
       goto no_pc_increase;
     }
     break;
   case MULTM:
     write_array(regs, assembly_instr->opd1,
-                (int32_t)read_array(regs, assembly_instr->opd1) *
-                    (int32_t)read_storage_ds_fill(assembly_instr->opd2));
+                (int32_t)read_array(regs, assembly_instr->opd1, false) *
+                    (int32_t)read_storage_ds_fill(assembly_instr->opd2), false);
     if (assembly_instr->opd1 == PC) {
       goto no_pc_increase;
     }
     break;
   case DIVM:
     write_array(regs, assembly_instr->opd1,
-                (int32_t)read_array(regs, assembly_instr->opd1) /
-                    (int32_t)read_storage_ds_fill(assembly_instr->opd2));
+                (int32_t)read_array(regs, assembly_instr->opd1, false) /
+                    (int32_t)read_storage_ds_fill(assembly_instr->opd2), false);
     if (assembly_instr->opd1 == PC) {
       goto no_pc_increase;
     }
     break;
   case MODM:
     write_array(regs, assembly_instr->opd1,
-                mod((int32_t)read_array(regs, assembly_instr->opd1),
-                    (int32_t)read_storage_ds_fill(assembly_instr->opd2)));
+                mod((int32_t)read_array(regs, assembly_instr->opd1, false),
+                    (int32_t)read_storage_ds_fill(assembly_instr->opd2)), false);
     if (assembly_instr->opd1 == PC) {
       goto no_pc_increase;
     }
     break;
   case OPLUSM:
     write_array(regs, assembly_instr->opd1,
-                read_array(regs, assembly_instr->opd1) ^
-                    read_storage_ds_fill(assembly_instr->opd2));
+                read_array(regs, assembly_instr->opd1, false) ^
+                    read_storage_ds_fill(assembly_instr->opd2), false);
     if (assembly_instr->opd1 == PC) {
       goto no_pc_increase;
     }
     break;
   case ORM:
     write_array(regs, assembly_instr->opd1,
-                read_array(regs, assembly_instr->opd1) |
-                    read_storage_ds_fill(assembly_instr->opd2));
+                read_array(regs, assembly_instr->opd1, false) |
+                    read_storage_ds_fill(assembly_instr->opd2), false);
     if (assembly_instr->opd1 == PC) {
       goto no_pc_increase;
     }
     break;
   case ANDM:
     write_array(regs, assembly_instr->opd1,
-                read_array(regs, assembly_instr->opd1) &
-                    read_storage_ds_fill(assembly_instr->opd2));
+                read_array(regs, assembly_instr->opd1, false) &
+                    read_storage_ds_fill(assembly_instr->opd2), false);
     if (assembly_instr->opd1 == PC) {
       goto no_pc_increase;
     }
     break;
   case LOAD:
     write_array(regs, assembly_instr->opd1,
-                read_storage_ds_fill(assembly_instr->opd2));
+                read_storage_ds_fill(assembly_instr->opd2), false);
     if (assembly_instr->opd1 == PC) {
       goto no_pc_increase;
     }
     break;
   case LOADIN:
     write_array(regs, assembly_instr->opd2,
-                read_storage(read_array(regs, assembly_instr->opd1) +
-                             (int32_t)assembly_instr->opd3));
+                read_storage(read_array(regs, assembly_instr->opd1, false) +
+                             (int32_t)assembly_instr->opd3), false);
     if (assembly_instr->opd2 == PC) {
       // TODO: Testcases für genau das
       goto no_pc_increase;
@@ -226,23 +227,23 @@ void interpr_instr(Instruction *assembly_instr) {
   case LOADI:
     // TODO: Das mit der Maske entfernen, falls i auch signed sein darf
     write_array(regs, assembly_instr->opd1,
-                assembly_instr->opd2 & IMMEDIATE_MASK);
+                assembly_instr->opd2 & IMMEDIATE_MASK, false);
     if (assembly_instr->opd1 == PC) {
       goto no_pc_increase;
     }
     break;
   case STORE:
     write_storage_ds_fill(assembly_instr->opd2,
-                          read_array(regs, assembly_instr->opd1));
+                          read_array(regs, assembly_instr->opd1, false));
     break;
   case STOREIN:
-    write_storage(read_array(regs, assembly_instr->opd1) +
+    write_storage(read_array(regs, assembly_instr->opd1, false) +
                       (int32_t)assembly_instr->opd3,
-                  read_array(regs, assembly_instr->opd2));
+                  read_array(regs, assembly_instr->opd2, false));
     break;
   case MOVE:
     write_array(regs, assembly_instr->opd2,
-                read_array(regs, assembly_instr->opd1));
+                read_array(regs, assembly_instr->opd1, false), false);
     if (assembly_instr->opd2 == PC) {
       goto no_pc_increase;
     }
@@ -250,71 +251,71 @@ void interpr_instr(Instruction *assembly_instr) {
   case NOP:
     break;
   case INT:
-    write_array(regs, SP, read_array(regs, SP) - 1);
-    write_storage(read_array(regs, SP) + 1, read_array(regs, PC));
-    write_array(regs, PC, read_storage_ds_fill(assembly_instr->opd1));
+    write_array(regs, SP, read_array(regs, SP, false) - 1, false);
+    write_storage(read_array(regs, SP, false) + 1, read_array(regs, PC, false));
+    write_array(regs, PC, read_storage_ds_fill(assembly_instr->opd1), false);
     goto no_pc_increase;
     break;
   case RTI:
-    write_array(regs, PC, read_storage(read_array(regs, SP) + 1));
-    write_array(regs, SP, read_array(regs, SP) + 1);
+    write_array(regs, PC, read_storage(read_array(regs, SP, false) + 1), false);
+    write_array(regs, SP, read_array(regs, SP, false) + 1, false);
     break;
   case JUMPGT:
-    if (read_array(regs, ACC) > 0) {
+    if (read_array(regs, ACC, false) > 0) {
       write_array(regs, PC,
-                  read_array(regs, PC) + (int32_t)assembly_instr->opd1);
+                  read_array(regs, PC, false) + (int32_t)assembly_instr->opd1, false);
       goto no_pc_increase;
     }
     break;
   case JUMPEQ:
-    if (read_array(regs, ACC) == 0) {
+    if (read_array(regs, ACC, false) == 0) {
       write_array(regs, PC,
-                  read_array(regs, PC) + (int32_t)assembly_instr->opd1);
+                  read_array(regs, PC, false) + (int32_t)assembly_instr->opd1, false);
       goto no_pc_increase;
     }
     break;
   case JUMPGE:
-    if (read_array(regs, ACC) >= 0) {
+    if (read_array(regs, ACC, false) >= 0) {
       write_array(regs, PC,
-                  read_array(regs, PC) + (int32_t)assembly_instr->opd1);
+                  read_array(regs, PC, false) + (int32_t)assembly_instr->opd1, false);
       goto no_pc_increase;
     }
     break;
   case JUMPLT:
-    if (read_array(regs, ACC) < 0) {
+    if (read_array(regs, ACC, false) < 0) {
       write_array(regs, PC,
-                  read_array(regs, PC) + (int32_t)assembly_instr->opd1);
+                  read_array(regs, PC, false) + (int32_t)assembly_instr->opd1, false);
       goto no_pc_increase;
     }
     break;
   case JUMPNE:
-    if (read_array(regs, ACC) != 0) {
+    if (read_array(regs, ACC, false) != 0) {
       write_array(regs, PC,
-                  read_array(regs, PC) + (int32_t)assembly_instr->opd1);
+                  read_array(regs, PC, false) + (int32_t)assembly_instr->opd1, false);
       goto no_pc_increase;
     }
     break;
   case JUMPLE:
-    if (read_array(regs, ACC) <= 0) {
+    if (read_array(regs, ACC, false) <= 0) {
       write_array(regs, PC,
-                  read_array(regs, PC) + (int32_t)assembly_instr->opd1);
+                  read_array(regs, PC, false) + (int32_t)assembly_instr->opd1, false);
       goto no_pc_increase;
     }
     break;
   case JUMP:
-    write_array(regs, PC, read_array(regs, PC) + (int32_t)assembly_instr->opd1);
+    write_array(regs, PC, read_array(regs, PC, false) + (int32_t)assembly_instr->opd1, false);
     goto no_pc_increase;
   default:
     perror("Error: A instruction with this opcode doesn't exist yet");
     exit(EXIT_FAILURE);
   }
-  write_array(regs, PC, read_array(regs, PC) + 1);
+  write_array(regs, PC, read_array(regs, PC, false) + 1, false);
 no_pc_increase:;
 }
 
 void interpr_prgrm() {
   while (true) {
-    uint32_t machine_instr = read_storage(read_array(regs, PC));
+    uint32_t machine_instr = read_storage(read_array(regs, PC, false));
     Instruction *assembly_instr = machine_to_assembly(machine_instr);
 
     if (daemon_mode) {

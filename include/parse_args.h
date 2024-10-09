@@ -1,7 +1,19 @@
 #ifndef PARSE_ARGS_H
 #define PARSE_ARGS_H
 
+#include <stdbool.h>
 #include <stdint.h>
+
+extern uint32_t sram_size;
+extern uint16_t page_size;
+extern uint32_t hdd_size;
+extern bool daemon_mode;
+extern uint8_t radius;
+
+extern char *peripherals_dir;
+extern char *eprom_prgrm_path;
+extern char *sram_prgrm_path;
+extern char *isrs_prgrm_path;
 
 void parse_args(uint8_t argc, char *argv[]);
 void print_args() ;

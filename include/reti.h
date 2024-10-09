@@ -1,20 +1,25 @@
 #ifndef RETI_H
 #define RETI_H
 
+#include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
 #include <stdio.h>
 
 extern uint32_t *regs;
 extern uint32_t *eprom;
-extern uint32_t *uart;
+extern uint8_t *uart;
 extern FILE *sram;
 extern FILE *hdd;
 
-extern uint64_t sram_view_pos;
-extern uint64_t hdd_view_pos;
+extern uint64_t sram_watchpoint;
+extern uint64_t hdd_watchpoint;
+extern uint64_t eprom_watchpoint;
 
-#define adjusteed_eprom_prgrm_size 13
+#define ADJUSTEED_EPROM_PRGRM_SIZE 14
+#define NUM_REGISTERS 8
+#define NUM_UART_ADDRESSES 3
+#define SRAM_MAX_IDX 2147483647
 
 void load_adjusted_eprom_prgrm();
 void load_isrs();
@@ -22,8 +27,8 @@ void load_isrs();
 uint32_t read_file(FILE *dev, uint64_t address);
 void write_file(FILE *dev, uint64_t address, uint32_t buffer);
 
-uint32_t read_array(uint32_t *stor, uint16_t addr);
-void write_array(uint32_t *stor, uint16_t addr, uint32_t buffer);
+uint32_t read_array(void *stor, uint16_t addr, bool is_uart);
+void write_array(void *stor, uint16_t addr, uint32_t buffer, bool is_uart);
 
 uint32_t read_storage_ds_fill(uint32_t addr);
 uint32_t read_storage(uint32_t addr);

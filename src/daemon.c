@@ -1,6 +1,7 @@
 #include "../include/daemon.h"
 #include "../include/assemble.h"
 #include "../include/globals.h"
+#include "../include/parse_args.h"
 #include "../include/reti.h"
 #include "../include/utils.h"
 #include <stdbool.h>
@@ -8,9 +9,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
-uint64_t sram_view_pos = 0;
-uint64_t hdd_view_pos = 0;
 
 Mnemonic_to_String opcode_to_mnemonic[] = {
     {ADDI, "ADDI"},     {SUBI, "SUBI"},       {MULTI, "MULTI"},
@@ -94,7 +92,8 @@ char *mem_value_to_str(uint32_t mem_content, bool is_unsigned) {
 
 // TODO:: split zwischen mem content und assembly instrs
 // TODO:: Unit test dafür und die ganzen idx Funktionen
-void print_mem_content_with_idx(uint64_t idx, uint32_t mem_content, bool are_unsigned, bool are_instrs) {
+void print_mem_content_with_idx(uint64_t idx, uint32_t mem_content,
+                                bool are_unsigned, bool are_instrs) {
   char idx_str[6];
   snprintf(idx_str, sizeof(idx_str), "%05zu", idx);
   const char *mem_content_str;
@@ -113,18 +112,23 @@ void print_reg_content_with_reg(uint8_t idx, uint32_t mem_content) {
   printf("%s: %s\n", reg_str, mem_content_str);
 }
 
-void print_array_with_idcs(uint32_t *ar, uint8_t length, bool are_regs,
-                           bool are_instrs) {
+void print_array_with_idcs(void *ar, uint8_t length, bool are_regs,
+                           bool are_instrs, bool is_uart) {
   for (size_t i = 0; i < length; i++) {
     if (are_regs) {
-      print_reg_content_with_reg(i, ar[i]);
+      print_reg_content_with_reg(i, ((uint32_t *)ar)[i]);
     } else {
-      print_mem_content_with_idx(i, ar[i], false, are_instrs);
+      if (is_uart) {
+        print_mem_content_with_idx(i, ((uint8_t *)ar)[i], false, are_instrs);
+      } else {
+        print_mem_content_with_idx(i, ((uint32_t *)ar)[i], false, are_instrs);
+      }
     }
   }
 }
 
-void print_file_idcs(FILE *file, uint64_t start, uint64_t end, bool are_unsigned, bool are_instrs) {
+void print_file_idcs(FILE *file, uint64_t start, uint64_t end,
+                     bool are_unsigned, bool are_instrs) {
   for (size_t i = start; i <= end; i++) {
     print_mem_content_with_idx(i, read_file(file, i), are_unsigned, are_instrs);
   }
@@ -180,19 +184,19 @@ char **split_string(const char *str, uint8_t *count) {
 }
 
 void cont(void) {
-  print_array_with_idcs(regs, NUM_REGISTERS, true, false);
-  printf("SRAM View Position %lu\n", sram_view_pos);
-  print_array_with_idcs(eprom, num_instrs_start_prgrm, false, true);
-  print_array_with_idcs(uart, NUM_UART_ADDRESSES, false, false);
-  print_file_idcs(sram, max(0, sram_view_pos - radius),
-                  min(sram_view_pos + radius, ivt_max_idx), true, false);
+  print_array_with_idcs(regs, NUM_REGISTERS, true, false, false);
+  printf("SRAM View Position %lu\n", sram_watchpoint);
+  print_array_with_idcs(eprom, num_instrs_start_prgrm, false, true, false);
+  print_array_with_idcs(uart, NUM_UART_ADDRESSES, false, false, true);
+  print_file_idcs(sram, max(0, sram_watchpoint - radius),
+                  min(sram_watchpoint + radius, ivt_max_idx), true, false);
   print_file_idcs(
-      sram, max(ivt_max_idx + 1, sram_view_pos - radius),
-      min(sram_view_pos + radius, num_instrs_isrs + num_instrs_prgrm - 1), false,
-      true);
+      sram, max(ivt_max_idx + 1, sram_watchpoint - radius),
+      min(sram_watchpoint + radius, num_instrs_isrs + num_instrs_prgrm - 1),
+      false, true);
   print_file_idcs(
-      sram, max(num_instrs_isrs + num_instrs_prgrm, sram_view_pos - radius),
-      min(sram_view_pos + radius, SRAM_MAX_IDX), false, false);
+      sram, max(num_instrs_isrs + num_instrs_prgrm, sram_watchpoint - radius),
+      min(sram_watchpoint + radius, SRAM_MAX_IDX), false, false);
   // print_file_idcs(hdd, max(0, hdd_view_pos - radius),
   //                 min(hdd_view_pos + radius, hdd_size-1), false);
   while (true) {
