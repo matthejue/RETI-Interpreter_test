@@ -46,6 +46,8 @@ void init_reti() {
     perror("Failed to open storage files");
     exit(EXIT_FAILURE);
   }
+
+  uart[2] = 0b00000001;
 }
 
 void load_adjusted_eprom_prgrm() {
@@ -126,6 +128,14 @@ uint32_t read_array(void *stor, uint16_t addr, bool is_uart) {
 
 void write_array(void *stor, uint16_t addr, uint32_t buffer, bool is_uart) {
   if (is_uart) {
+    if (!(uart[2] & 0b00000001) && addr == 0) {
+      // TODO: Tobias fragen, ob er damit agreed
+      perror("Error: UART does not accept any further data");
+      exit(EXIT_FAILURE);
+    } else if (!(uart[2] & 0b00000001) && addr == 2 && (buffer & 0b00000001)) {
+      perror("Error: Only the UART itself can allow sending again");
+      exit(EXIT_FAILURE);
+    }
     ((uint8_t *)stor)[addr] = buffer & 0xFF;
   } else {
     ((uint32_t *)stor)[addr] = buffer;
@@ -151,18 +161,26 @@ uint32_t read_storage_ds_fill(uint32_t addr) {
   return read_storage(addr);
 }
 
+uint32_t read_storage_sram_constant_fill(uint32_t addr) {
+  addr = addr | 0x80000000;
+  return read_storage(addr);
+}
+
 uint32_t read_storage(uint32_t addr) {
   uint8_t stor_mode = addr >> 30;
   switch (stor_mode) {
   case 0b00:
     addr = addr & 0x3FFFFFFF;
     return read_array(eprom, addr, false);
+    break;
   case 0b01:
     addr = addr & 0x3FFFFFFF;
     return read_array(uart, addr, true);
+    break;
   default:
     addr = addr & 0x7FFFFFFF;
     return read_file(sram, addr);
+    break;
   }
 }
 
@@ -177,12 +195,15 @@ void write_storage(uint32_t addr, uint32_t buffer) {
   case 0b00:
     addr = addr & 0x3FFFFFFF;
     write_array(eprom, addr, buffer, false);
+    break;
   case 0b01:
     addr = addr & 0x3FFFFFFF;
     write_array(uart, addr, buffer, true);
+    break;
   default:
     addr = addr & 0x7FFFFFFF;
     write_file(sram, addr, buffer);
+    break;
   }
 }
 

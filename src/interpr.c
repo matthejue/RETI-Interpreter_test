@@ -4,6 +4,7 @@
 #include "../include/parse_args.h"
 #include "../include/reti.h"
 #include "../include/utils.h"
+#include "../include/uart.h"
 #include <stdbool.h>
 #include <stdlib.h>
 
@@ -253,7 +254,9 @@ void interpr_instr(Instruction *assembly_instr) {
   case INT:
     write_array(regs, SP, read_array(regs, SP, false) - 1, false);
     write_storage(read_array(regs, SP, false) + 1, read_array(regs, PC, false));
-    write_array(regs, PC, read_storage_ds_fill(assembly_instr->opd1), false);
+    // TODO: Tobias, wird mit DS ausgefüllt?
+    // write_array(regs, PC, read_storage_ds_fill(assembly_instr->opd1), false);
+    write_array(regs, PC, read_storage_sram_constant_fill(assembly_instr->opd1), false);
     goto no_pc_increase;
     break;
   case RTI:
@@ -329,5 +332,7 @@ void interpr_prgrm() {
       interpr_instr(assembly_instr);
       free(assembly_instr);
     }
+
+    uart_check();
   }
 }

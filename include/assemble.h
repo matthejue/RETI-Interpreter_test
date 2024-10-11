@@ -8,7 +8,7 @@
 /*#define ALL_BUT_IMMEDIATE_MASK 0xffc00000*/
 #define REGISTER_MASK 0x7
 
-typedef enum { PC, ACC, IN1, IN2, SP, BAF, CS, DS } Register;
+typedef enum { PC, IN1, IN2, ACC, SP, BAF, CS, DS } Register;
 
 typedef enum {
   ADDI,   // 0b0000000

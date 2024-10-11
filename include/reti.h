@@ -31,6 +31,7 @@ uint32_t read_array(void *stor, uint16_t addr, bool is_uart);
 void write_array(void *stor, uint16_t addr, uint32_t buffer, bool is_uart);
 
 uint32_t read_storage_ds_fill(uint32_t addr);
+uint32_t read_storage_sram_constant_fill(uint32_t addr) ;
 uint32_t read_storage(uint32_t addr);
 void write_storage_ds_fill(uint64_t addr, uint32_t buffer);
 void write_storage(uint32_t addr, uint32_t buffer);

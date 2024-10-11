@@ -185,7 +185,7 @@ char **split_string(const char *str, uint8_t *count) {
 
 void cont(void) {
   print_array_with_idcs(regs, NUM_REGISTERS, true, false, false);
-  printf("SRAM View Position %lu\n", sram_watchpoint);
+  printf("SRAM Watchpoint: %lu\n", sram_watchpoint);
   print_array_with_idcs(eprom, num_instrs_start_prgrm, false, true, false);
   print_array_with_idcs(uart, NUM_UART_ADDRESSES, false, false, true);
   print_file_idcs(sram, max(0, sram_watchpoint - radius),

@@ -16,7 +16,7 @@ OBJ_SRC := $(SRC:$(SRC_DIR)/%.c=$(OBJ_DIR)/%.o)
 CPPFLAGS := -I$(INCLUDE_DIR) -MMD -MP
 CFLAGS   := -Wall -g # -O2
 LDFLAGS  := -L$(LIB_DIR)
-LDLIBS   := # -lm
+LDLIBS   := -lm
 
 .PRECIOUS: $(OBJ_DIR)/%.o $(OBJ_TEST_DIR)/%.o
 .PHONY: all test test-full clean debug
