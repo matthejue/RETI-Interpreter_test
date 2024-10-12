@@ -16,9 +16,10 @@ char *mem_value_to_str(uint32_t mem_content, bool is_unsigned);
 void print_mem_content_with_idx(uint64_t idx, uint32_t mem_content,
                                 bool are_unsigned, bool are_instrs);
 void print_reg_content_with_reg(uint8_t idx, uint32_t mem_content);
-void print_array_with_idcs(void *ar, uint8_t length, bool are_regs, bool are_instrs, bool is_uart) ;
-void print_file_idcs(FILE *file, uint64_t start, uint64_t end,
-                     bool are_unsigned, bool are_instrs);
+void print_array_with_idcs(void *ar, uint8_t length, bool are_regs,
+                           bool are_instrs, bool is_uart);
+void print_file_with_idcs(FILE *file, uint64_t start, uint64_t end,
+                          bool are_unsigned, bool are_instrs);
 char **split_string(const char *str, uint8_t *count);
 void cont(void);
 

@@ -45,7 +45,7 @@ uint32_t swap_endian_32(uint32_t value) {
          ((value << 8) & 0x00FF0000) | (value << 24);
 }
 
-char *proper_str_cat(char *prefix, char *suffix) {
+char *proper_str_cat(const char *prefix, const char *suffix) {
   char *new_file_dir = malloc(strlen(prefix) + strlen(suffix) + 1);
   strcpy(new_file_dir, prefix);
   return strcat(new_file_dir, suffix);

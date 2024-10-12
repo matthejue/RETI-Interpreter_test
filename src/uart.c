@@ -1,56 +1,110 @@
+#include "../include/uart.h"
 #include "../include/globals.h"
 #include "../include/reti.h"
+#include "../include/utils.h"
+#include <ctype.h>
+#include <limits.h>
 #include <math.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
-uint8_t specification = 0;
+uint8_t spec = 0;
 uint8_t remaining_bytes = 0;
 uint8_t num_bytes = 0;
-uint8_t *received_data;
-uint8_t waiting_time = 0;
 
-bool reading_finished = false;
+uint8_t *send_data;
+char received_num = '\0';
+
+uint8_t sending_waiting_time = 0;
+uint8_t receiving_waiting_time = 0;
+
+bool sending_finished = false;
+bool receiving_finished = false;
 
 typedef enum { INTEGER, STRING } Datatype;
 
 Datatype datatype;
 
-void uart_check() {
-  if (!(read_array(uart, 2, true) & 0b00000001) && !reading_finished) {
-    if (specification == 0) {
-      specification = read_array(uart, 0, true);
-      remaining_bytes = specification & 0b01111111;
+void uart_send() {
+  if (!(read_array(uart, 2, true) & 0b00000001) && !sending_finished) {
+    if (spec == 0) {
+      spec = read_array(uart, 0, true);
+      remaining_bytes = spec & 0b01111111;
       num_bytes = remaining_bytes;
-      datatype = (specification & 0b10000000) >> 7;
-      received_data = malloc(remaining_bytes);
+      datatype = (spec & 0b10000000) >> 7;
+      send_data = malloc(remaining_bytes);
     } else if (remaining_bytes > 0) {
-      received_data[num_bytes - remaining_bytes] = read_array(uart, 0, true);
+      send_data[num_bytes - remaining_bytes] = read_array(uart, 0, true);
       remaining_bytes--;
       if (remaining_bytes == 0) {
         if (datatype == INTEGER) {
           for (int i = 0; i < ceil((double)num_bytes / 4); i++) {
-            printf("%d ", (uint32_t)received_data[i * 4]);
+            printf("%d ", (uint32_t)send_data[i * 4]);
           }
           printf("\n");
         } else { // dataype == STRING
           for (int i = 0; i < num_bytes; i++) {
-            printf("%c", received_data[i]);
+            printf("%c", send_data[i]);
           }
           printf("\n");
         }
-        specification = 0;
+        spec = 0;
       }
     }
-    // randomly pick number btween 1 and 5
-    waiting_time = rand() % MAX_WAITING_TIME + 1;
-    reading_finished = true;
-  } else if (waiting_time > 0 && reading_finished) {
-    waiting_time--;
-  } else if (waiting_time == 0 && reading_finished) {
-    // to make it more realistic the bit is not set to 1 again immediately
-    uart[2] = 0b00000001;
-    reading_finished = false;
+    sending_waiting_time = rand() % MAX_WAITING_TIME + 1;
+    sending_finished = true;
+  } else if (sending_waiting_time > 0 && sending_finished) {
+    sending_waiting_time--;
+  } else if (sending_waiting_time == 0 && sending_finished) {
+    uart[2] = uart[2] | 0b00000001;
+    sending_finished = false;
+  }
+}
+
+void uart_receive() {
+  if (!(read_array(uart, 2, true) & 0b00000010) && !receiving_finished) {
+    char input[4]; // Buffer to store the input
+
+    while (true) {
+      printf("Please enter a number or a character: ");
+      if (fgets(input, sizeof(input), stdin) == NULL) {
+        perror("Error: Couldn't read input.\n");
+      }
+      input[strcspn(input, "\n")] = '\0';
+
+      if (isalpha(input[0]) && !receiving_finished) {
+        if (strlen(input) > 1) {
+          perror("Error: Only one character allowed.\n");
+        } else {
+          received_num = input[0];
+          break;
+        }
+      } else if (isdigit(input[0])) {
+        char *endptr;
+        received_num = strtol(input, &endptr, 10);
+        if (*endptr != '\0') {
+          const char *str = "Error: Further characters after number: ";
+          const char *str2 = proper_str_cat(str, endptr);
+          const char *str3 = proper_str_cat(str2, ".\n");
+          perror(str3);
+        } else if (received_num < INT8_MIN && received_num > INT8_MAX) {
+          perror("Error: Number out of range, must be between -128 and 127.\n");
+        } else {
+          break;
+        }
+      } else {
+        perror("Error: Invalid input.\n");
+      }
+    }
+    receiving_waiting_time = rand() % MAX_WAITING_TIME + 1;
+    receiving_finished = true;
+  } else if (receiving_waiting_time > 0 && receiving_finished) {
+    receiving_waiting_time--;
+  } else if (receiving_waiting_time == 0 && receiving_finished) {
+    write_array(uart, 1, received_num, true);
+    uart[2] = uart[2] | 0b00000010;
+    receiving_finished = false;
   }
 }

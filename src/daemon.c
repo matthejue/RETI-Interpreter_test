@@ -90,10 +90,16 @@ char *mem_value_to_str(uint32_t mem_content, bool is_unsigned) {
   return instr_str;
 }
 
+char *pointing_regs(uint8_t idx) {
+  if (read_array(regs, PC, false) - (1 << 31) == idx) {
+    return "<- PC";
+  }
+  return "";
+}
+
 // TODO:: split zwischen mem content und assembly instrs
 // TODO:: Unit test dafür und die ganzen idx Funktionen
-void print_mem_content_with_idx(uint64_t idx, uint32_t mem_content,
-                                bool are_unsigned, bool are_instrs) {
+void print_mem_content_with_idx(uint64_t idx, uint32_t mem_content, bool are_unsigned, bool are_instrs) {
   char idx_str[6];
   snprintf(idx_str, sizeof(idx_str), "%05zu", idx);
   const char *mem_content_str;
@@ -102,7 +108,7 @@ void print_mem_content_with_idx(uint64_t idx, uint32_t mem_content,
   } else {
     mem_content_str = mem_value_to_str(mem_content, are_unsigned);
   }
-  printf("%s: %s\n", idx_str, mem_content_str);
+  printf("%s: %s%s\n", idx_str, mem_content_str, pointing_regs(idx));
 }
 
 void print_reg_content_with_reg(uint8_t idx, uint32_t mem_content) {
@@ -112,8 +118,7 @@ void print_reg_content_with_reg(uint8_t idx, uint32_t mem_content) {
   printf("%s: %s\n", reg_str, mem_content_str);
 }
 
-void print_array_with_idcs(void *ar, uint8_t length, bool are_regs,
-                           bool are_instrs, bool is_uart) {
+void print_array_with_idcs(void *ar, uint8_t length, bool are_regs, bool are_instrs, bool is_uart) {
   for (size_t i = 0; i < length; i++) {
     if (are_regs) {
       print_reg_content_with_reg(i, ((uint32_t *)ar)[i]);
@@ -127,8 +132,7 @@ void print_array_with_idcs(void *ar, uint8_t length, bool are_regs,
   }
 }
 
-void print_file_idcs(FILE *file, uint64_t start, uint64_t end,
-                     bool are_unsigned, bool are_instrs) {
+void print_file_with_idcs(FILE *file, uint64_t start, uint64_t end, bool are_unsigned, bool are_instrs) {
   for (size_t i = start; i <= end; i++) {
     print_mem_content_with_idx(i, read_file(file, i), are_unsigned, are_instrs);
   }
@@ -188,13 +192,13 @@ void cont(void) {
   printf("SRAM Watchpoint: %lu\n", sram_watchpoint);
   print_array_with_idcs(eprom, num_instrs_start_prgrm, false, true, false);
   print_array_with_idcs(uart, NUM_UART_ADDRESSES, false, false, true);
-  print_file_idcs(sram, max(0, sram_watchpoint - radius),
+  print_file_with_idcs(sram, max(0, sram_watchpoint - radius),
                   min(sram_watchpoint + radius, ivt_max_idx), true, false);
-  print_file_idcs(
+  print_file_with_idcs(
       sram, max(ivt_max_idx + 1, sram_watchpoint - radius),
       min(sram_watchpoint + radius, num_instrs_isrs + num_instrs_prgrm - 1),
       false, true);
-  print_file_idcs(
+  print_file_with_idcs(
       sram, max(num_instrs_isrs + num_instrs_prgrm, sram_watchpoint - radius),
       min(sram_watchpoint + radius, SRAM_MAX_IDX), false, false);
   // print_file_idcs(hdd, max(0, hdd_view_pos - radius),

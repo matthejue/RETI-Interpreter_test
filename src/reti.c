@@ -47,7 +47,7 @@ void init_reti() {
     exit(EXIT_FAILURE);
   }
 
-  uart[2] = 0b00000001;
+  uart[2] = 0b00000011;
 }
 
 void load_adjusted_eprom_prgrm() {
@@ -120,6 +120,12 @@ void load_isrs() {}
 
 uint32_t read_array(void *stor, uint16_t addr, bool is_uart) {
   if (is_uart) {
+    if (!(uart[2] & 0b00000010) && addr == 1) {
+      perror("Warning: No new data in the receive register");
+    } else if (addr == 0) {
+      perror("Warning: Reading from the send register of the UART makes no sense");
+    }
+    // uart[2] = uart[2] & 0b11111101; has to be done by the programmer
     return ((uint8_t *)stor)[addr];
   } else {
     return ((uint32_t *)stor)[addr];
@@ -130,11 +136,13 @@ void write_array(void *stor, uint16_t addr, uint32_t buffer, bool is_uart) {
   if (is_uart) {
     if (!(uart[2] & 0b00000001) && addr == 0) {
       // TODO: Tobias fragen, ob er damit agreed
-      perror("Error: UART does not accept any further data");
-      exit(EXIT_FAILURE);
+      perror("Warning: UART does not accept any further data");
     } else if (!(uart[2] & 0b00000001) && addr == 2 && (buffer & 0b00000001)) {
-      perror("Error: Only the UART itself can allow sending again");
-      exit(EXIT_FAILURE);
+      perror("Warning: Only the UART should allow sending again");
+    } else if (!(uart[2] & 0b00000010) && addr == 2 && (buffer & 0b00000010)) {
+      perror("Warning: Only the UART itself should tell that it received something");
+    } else if (addr == 1) {
+      perror("Warnng: Writing to the receive register of the UART makes no sense");
     }
     ((uint8_t *)stor)[addr] = buffer & 0xFF;
   } else {

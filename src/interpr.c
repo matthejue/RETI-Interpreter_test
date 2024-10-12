@@ -333,6 +333,7 @@ void interpr_prgrm() {
       free(assembly_instr);
     }
 
-    uart_check();
+    uart_receive();
+    uart_send();
   }
 }
