@@ -10,6 +10,10 @@
 #include <stdlib.h>
 #include <string.h>
 
+#define IS_TYPE(var, type) (_Generic((var), type: 1, default: 0))
+#define STRINGIFY(x) #x
+#define TOSTRING(x) STRINGIFY(x)
+
 Mnemonic_to_String opcode_to_mnemonic[] = {
     {ADDI, "ADDI"},     {SUBI, "SUBI"},       {MULTI, "MULTI"},
     {DIVI, "DIVI"},     {MODI, "MODI"},       {OPLUSI, "OPLUSI"},
@@ -90,16 +94,25 @@ char *mem_value_to_str(uint32_t mem_content, bool is_unsigned) {
   return instr_str;
 }
 
-char *pointing_regs(uint8_t idx) {
-  if (read_array(regs, PC, false) - (1 << 31) == idx) {
-    return "<- PC";
+char *reg_to_mem_pntr(uint64_t idx) {
+  char *active_regs = "";
+  uint32_t addr = read_array(regs, PC, false);
+  uint8_t mem_type = idx & 0xC0000000;
+  uint8_t rel_idx = idx & 0x3FFFFFFF;
+  for (size_t i = 0; i < NUM_REGISTERS; i++) {
+    uint64_t reg_addr = read_array(regs, i, false);
+    if (mem_type == (reg_addr & 0xC0000000) && rel_idx == (reg_addr & 0x3FFFFFFF)) {
+      active_regs = register_name_to_code[i];
+      break;
+    }
   }
-  return "";
+  return active_regs;
 }
 
 // TODO:: split zwischen mem content und assembly instrs
 // TODO:: Unit test dafür und die ganzen idx Funktionen
-void print_mem_content_with_idx(uint64_t idx, uint32_t mem_content, bool are_unsigned, bool are_instrs) {
+void print_mem_content_with_idx(uint64_t idx, uint32_t mem_content,
+                                bool are_unsigned, bool are_instrs) {
   char idx_str[6];
   snprintf(idx_str, sizeof(idx_str), "%05zu", idx);
   const char *mem_content_str;
@@ -108,7 +121,7 @@ void print_mem_content_with_idx(uint64_t idx, uint32_t mem_content, bool are_uns
   } else {
     mem_content_str = mem_value_to_str(mem_content, are_unsigned);
   }
-  printf("%s: %s%s\n", idx_str, mem_content_str, pointing_regs(idx));
+  printf("%s: %s%s\n", idx_str, mem_content_str, reg_to_mem_pntr(idx));
 }
 
 void print_reg_content_with_reg(uint8_t idx, uint32_t mem_content) {
@@ -118,7 +131,8 @@ void print_reg_content_with_reg(uint8_t idx, uint32_t mem_content) {
   printf("%s: %s\n", reg_str, mem_content_str);
 }
 
-void print_array_with_idcs(void *ar, uint8_t length, bool are_regs, bool are_instrs, bool is_uart) {
+void print_array_with_idcs(void *ar, uint8_t length, bool are_regs,
+                           bool are_instrs, bool is_uart) {
   for (size_t i = 0; i < length; i++) {
     if (are_regs) {
       print_reg_content_with_reg(i, ((uint32_t *)ar)[i]);
@@ -132,7 +146,8 @@ void print_array_with_idcs(void *ar, uint8_t length, bool are_regs, bool are_ins
   }
 }
 
-void print_file_with_idcs(FILE *file, uint64_t start, uint64_t end, bool are_unsigned, bool are_instrs) {
+void print_file_with_idcs(FILE *file, uint64_t start, uint64_t end,
+                          bool are_unsigned, bool are_instrs) {
   for (size_t i = start; i <= end; i++) {
     print_mem_content_with_idx(i, read_file(file, i), are_unsigned, are_instrs);
   }
@@ -193,7 +208,7 @@ void cont(void) {
   print_array_with_idcs(eprom, num_instrs_start_prgrm, false, true, false);
   print_array_with_idcs(uart, NUM_UART_ADDRESSES, false, false, true);
   print_file_with_idcs(sram, max(0, sram_watchpoint - radius),
-                  min(sram_watchpoint + radius, ivt_max_idx), true, false);
+                       min(sram_watchpoint + radius, ivt_max_idx), true, false);
   print_file_with_idcs(
       sram, max(ivt_max_idx + 1, sram_watchpoint - radius),
       min(sram_watchpoint + radius, num_instrs_isrs + num_instrs_prgrm - 1),

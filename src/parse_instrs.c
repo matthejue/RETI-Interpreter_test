@@ -92,7 +92,7 @@ void parse_and_load_program(char *prgrm, Program_Type prgrm_type) {
         write_file(sram, i++, machine_instr);
         break;
       case ISR_PRGRMS:
-        if (strcmp(str_instr->op, "IM") == 0) {
+        if (strcmp(str_instr->op, "IVTE") == 0) {
           ivt_max_idx = i;
         }
         write_file(sram, i++, machine_instr);
@@ -106,7 +106,7 @@ void parse_and_load_program(char *prgrm, Program_Type prgrm_type) {
           exit(EXIT_FAILURE);
         }
         eprom = temp;
-        write_array(eprom, i++, machine_instr);
+        write_array(eprom, i++, machine_instr, false);
         break;
       default:
         perror("Error: Invalid memory type");

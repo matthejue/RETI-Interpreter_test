@@ -23,7 +23,7 @@ String_to_Mnemonic mnemonic_to_opcode[] = {
     {"NOP", NOP}};
 
 String_to_Directive mnemonic_to_directive[] = {
-    {"IM", IM},    
+    {"IVTE", IM},    
 };
 
 uint8_t get_register_code(char *reg) {
