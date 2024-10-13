@@ -1,8 +1,8 @@
-#ifndef PARSE_ARGS_H
-#define PARSE_ARGS_H
-
 #include <stdbool.h>
 #include <stdint.h>
+
+#ifndef PARSE_ARGS_H
+#define PARSE_ARGS_H
 
 extern uint32_t sram_size;
 extern uint16_t page_size;

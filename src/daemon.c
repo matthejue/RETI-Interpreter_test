@@ -10,10 +10,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define IS_TYPE(var, type) (_Generic((var), type: 1, default: 0))
-#define STRINGIFY(x) #x
-#define TOSTRING(x) STRINGIFY(x)
-
 Mnemonic_to_String opcode_to_mnemonic[] = {
     {ADDI, "ADDI"},     {SUBI, "SUBI"},       {MULTI, "MULTI"},
     {DIVI, "DIVI"},     {MODI, "MODI"},       {OPLUSI, "OPLUSI"},
@@ -29,6 +25,8 @@ Mnemonic_to_String opcode_to_mnemonic[] = {
     {JUMPGE, "JUMP>="}, {JUMPLT, "JUMP<"},    {JUMPNE, "JUMP!="},
     {JUMPNE, "JUMP<>"}, {JUMPLE, "JUMP<="},   {JUMP, "JUMP"},
     {INT, "INT"},       {RTI, "RTI"},         {NOP, "NOP"}};
+
+const uint8_t mem_type_to_constant[] = {0b11, 0b00, 0b01, 0b10, 0b11};
 
 char *copy_mnemonic_into_str(char *dest, const uint8_t opcode) {
   strcat(dest, opcode_to_mnemonic[opcode].name);
@@ -94,25 +92,30 @@ char *mem_value_to_str(uint32_t mem_content, bool is_unsigned) {
   return instr_str;
 }
 
-char *reg_to_mem_pntr(uint64_t idx) {
+char *reg_to_mem_pntr(uint64_t idx, MemType mem_type) {
   char *active_regs = "";
-  uint32_t addr = read_array(regs, PC, false);
-  uint8_t mem_type = idx & 0xC0000000;
-  uint8_t rel_idx = idx & 0x3FFFFFFF;
-  for (size_t i = 0; i < NUM_REGISTERS; i++) {
-    uint64_t reg_addr = read_array(regs, i, false);
-    if (mem_type == (reg_addr & 0xC0000000) && rel_idx == (reg_addr & 0x3FFFFFFF)) {
-      active_regs = register_name_to_code[i];
-      break;
+  bool at_least_one_reg = false;
+  for (int i = 0; i < NUM_REGISTERS; i++) {
+    uint32_t addr = read_array(regs, i, false);
+    uint8_t addr_mem_type = addr >> 30;
+    uint8_t addr_idx = addr & 0x3FFFFFFF;
+    if (addr_mem_type == mem_type_to_constant[mem_type] && addr_idx == idx) {
+      active_regs = proper_str_cat(active_regs, register_name_to_code[i]);
+      active_regs = proper_str_cat(active_regs, " ");
+      at_least_one_reg = true;
     }
   }
-  return active_regs;
+  if (at_least_one_reg) {
+    return proper_str_cat("<- ", active_regs);
+  }
+  return "";
 }
 
 // TODO:: split zwischen mem content und assembly instrs
 // TODO:: Unit test dafür und die ganzen idx Funktionen
 void print_mem_content_with_idx(uint64_t idx, uint32_t mem_content,
-                                bool are_unsigned, bool are_instrs) {
+                                bool are_unsigned, bool are_instrs,
+                                MemType mem_type) {
   char idx_str[6];
   snprintf(idx_str, sizeof(idx_str), "%05zu", idx);
   const char *mem_content_str;
@@ -121,7 +124,8 @@ void print_mem_content_with_idx(uint64_t idx, uint32_t mem_content,
   } else {
     mem_content_str = mem_value_to_str(mem_content, are_unsigned);
   }
-  printf("%s: %s%s\n", idx_str, mem_content_str, reg_to_mem_pntr(idx));
+  printf("%s: %s%s\n", idx_str, mem_content_str,
+         reg_to_mem_pntr(idx, mem_type));
 }
 
 void print_reg_content_with_reg(uint8_t idx, uint32_t mem_content) {
@@ -131,25 +135,49 @@ void print_reg_content_with_reg(uint8_t idx, uint32_t mem_content) {
   printf("%s: %s\n", reg_str, mem_content_str);
 }
 
-void print_array_with_idcs(void *ar, uint8_t length, bool are_regs,
-                           bool are_instrs, bool is_uart) {
-  for (size_t i = 0; i < length; i++) {
-    if (are_regs) {
-      print_reg_content_with_reg(i, ((uint32_t *)ar)[i]);
-    } else {
-      if (is_uart) {
-        print_mem_content_with_idx(i, ((uint8_t *)ar)[i], false, are_instrs);
-      } else {
-        print_mem_content_with_idx(i, ((uint32_t *)ar)[i], false, are_instrs);
-      }
+void print_array_with_idcs(MemType mem_type, uint8_t length, bool are_instrs) {
+  switch (mem_type) {
+  case REGS:
+    for (size_t i = 0; i < length; i++) {
+      print_reg_content_with_reg(i, ((uint32_t *)regs)[i]);
     }
+    break;
+  case EPROM:
+    for (size_t i = 0; i < length; i++) {
+      print_mem_content_with_idx(i, ((uint8_t *)eprom)[i], false, are_instrs,
+                                 EPROM);
+    }
+    break;
+  case UART:
+    for (size_t i = 0; i < length; i++) {
+      print_mem_content_with_idx(i, ((uint32_t *)uart)[i], false, are_instrs,
+                                 UART);
+    }
+    break;
+  default:
+    perror("Error: Invalid memory type");
+    exit(EXIT_FAILURE);
   }
 }
 
-void print_file_with_idcs(FILE *file, uint64_t start, uint64_t end,
+void print_file_with_idcs(MemType mem_type, uint64_t start, uint64_t end,
                           bool are_unsigned, bool are_instrs) {
-  for (size_t i = start; i <= end; i++) {
-    print_mem_content_with_idx(i, read_file(file, i), are_unsigned, are_instrs);
+  switch (mem_type) {
+  case SRAM:
+    for (size_t i = start; i <= end; i++) {
+      print_mem_content_with_idx(i, read_file(sram, i), are_unsigned,
+                                 are_instrs, SRAM);
+    }
+    break;
+  case HDD:
+    for (size_t i = start; i <= end; i++) {
+      print_mem_content_with_idx(i, read_file(hdd, i), are_unsigned, are_instrs,
+                                 HDD);
+    }
+    break;
+  default:
+    perror("Error: Invalid memory type");
+    exit(EXIT_FAILURE);
   }
 }
 
@@ -203,18 +231,18 @@ char **split_string(const char *str, uint8_t *count) {
 }
 
 void cont(void) {
-  print_array_with_idcs(regs, NUM_REGISTERS, true, false, false);
+  print_array_with_idcs(REGS, NUM_REGISTERS, false);
   printf("SRAM Watchpoint: %lu\n", sram_watchpoint);
-  print_array_with_idcs(eprom, num_instrs_start_prgrm, false, true, false);
-  print_array_with_idcs(uart, NUM_UART_ADDRESSES, false, false, true);
-  print_file_with_idcs(sram, max(0, sram_watchpoint - radius),
+  print_array_with_idcs(EPROM, num_instrs_start_prgrm, true);
+  print_array_with_idcs(UART, NUM_UART_ADDRESSES, false);
+  print_file_with_idcs(SRAM, max(0, sram_watchpoint - radius),
                        min(sram_watchpoint + radius, ivt_max_idx), true, false);
   print_file_with_idcs(
-      sram, max(ivt_max_idx + 1, sram_watchpoint - radius),
+      SRAM, max(ivt_max_idx + 1, sram_watchpoint - radius),
       min(sram_watchpoint + radius, num_instrs_isrs + num_instrs_prgrm - 1),
       false, true);
   print_file_with_idcs(
-      sram, max(num_instrs_isrs + num_instrs_prgrm, sram_watchpoint - radius),
+      SRAM, max(num_instrs_isrs + num_instrs_prgrm, sram_watchpoint - radius),
       min(sram_watchpoint + radius, SRAM_MAX_IDX), false, false);
   // print_file_idcs(hdd, max(0, hdd_view_pos - radius),
   //                 min(hdd_view_pos + radius, hdd_size-1), false);

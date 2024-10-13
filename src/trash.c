@@ -23,4 +23,8 @@ char *read_stdin_content() {
   return content;
 }
 
+#define IS_TYPE(var, type) (_Generic((var), type: 1, default: 0))
+#define STRINGIFY(x) #x
+#define TOSTRING(x) STRINGIFY(x)
+
 #endif

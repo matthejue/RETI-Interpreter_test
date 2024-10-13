@@ -1,7 +1,7 @@
+#include "../include/assemble.h"
+
 #ifndef PARSE_H
 #define PARSE_H
-#include "../include/assemble.h"
-#include <stdio.h>
 
 typedef enum { EPROM_START_PRGRM, SRAM_PRGRM, ISR_PRGRMS } Program_Type;
 

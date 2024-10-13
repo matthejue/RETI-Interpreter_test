@@ -1,5 +1,6 @@
 #include "../include/daemon.h"
 #include "../include/parse_instrs.h"
+#include "../include/parse_args.h"
 #include "../include/reti.h"
 #include "../include/globals.h"
 #include "../include/utils.h"
@@ -33,7 +34,7 @@ void test_parse_and_load_program() {
   peripherals_dir = "/tmp";
   init_reti();
   parse_and_load_program(
-      allocate_and_copy_string("   LOADI   ACC 42  ;   \n    STOREIN IN2   ACC -2097152   ;\n  ADD ACC 32\n"), false);
+      allocate_and_copy_string("   LOADI   ACC 42  ;   \n    STOREIN IN2   ACC -2097152   ;\n  ADD ACC 32\n"), SRAM_PRGRM);
   char *str = assembly_to_str(machine_to_assembly(read_file(sram, 0)));
   assert(strcmp(str, "LOADI ACC 42") == 0);
   str = assembly_to_str(machine_to_assembly(read_file(sram, 1)));
@@ -47,7 +48,7 @@ void test_parse_and_load_program2() {
   peripherals_dir = "/tmp";
   init_reti();
   parse_and_load_program(
-      allocate_and_copy_string("   JUMP<=  0;NOP   "), false);
+      allocate_and_copy_string("   JUMP<=  0;NOP   "), SRAM_PRGRM);
   char *str = assembly_to_str(machine_to_assembly(read_file(sram, 0)));
   assert(strcmp(str, "JUMP<= 0") == 0);
   str = assembly_to_str(machine_to_assembly(read_file(sram, 1)));

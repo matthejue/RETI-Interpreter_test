@@ -1,8 +1,8 @@
-#ifndef ASSEMBLE_H
-#define ASSEMBLE_H
-
 #include <stdbool.h>
 #include <stdint.h>
+
+#ifndef ASSEMBLE_H
+#define ASSEMBLE_H
 
 #define IMMEDIATE_MASK 0x3FFFFF   // 22 bits for immediate value
 /*#define ALL_BUT_IMMEDIATE_MASK 0xffc00000*/

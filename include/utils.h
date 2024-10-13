@@ -1,7 +1,7 @@
+#include <stdint.h>
+
 #ifndef UTILS_H
 #define UTILS_H
-
-#include <stdint.h>
 
 #define INITIAL_BUFFER_SIZE 1024
 
