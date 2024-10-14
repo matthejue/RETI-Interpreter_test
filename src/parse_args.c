@@ -4,7 +4,6 @@
 #include "../include/interpr.h"
 #include "../include/reti.h"
 #include "../include/utils.h"
-#include <errno.h>
 #include <limits.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -26,13 +25,12 @@ void parse_args(uint8_t argc, char *argv[]) {
 
   while ((opt = getopt(argc, argv, "s:p:h:dr:f:e:i:")) != -1) {
     char *endptr;
-    errno = 0;
     long tmp_val;
 
     switch (opt) {
     case 's':
       tmp_val = strtol(optarg, &endptr, 10);
-      if (endptr == optarg || *endptr != '\0' || errno == ERANGE) {
+      if (endptr == optarg || *endptr != '\0') {
         perror("Error: Invalid sram size");
         exit(EXIT_FAILURE);
       }
@@ -44,7 +42,7 @@ void parse_args(uint8_t argc, char *argv[]) {
       break;
     case 'p':
       tmp_val = strtol(optarg, &endptr, 10);
-      if (endptr == optarg || *endptr != '\0' || errno == ERANGE) {
+      if (endptr == optarg || *endptr != '\0') {
         perror("Error: Invalid page size");
         exit(EXIT_FAILURE);
       }
@@ -56,7 +54,7 @@ void parse_args(uint8_t argc, char *argv[]) {
       break;
     case 'h':
       tmp_val = strtol(optarg, &endptr, 10);
-      if (endptr == optarg || *endptr != '\0' || errno == ERANGE) {
+      if (endptr == optarg || *endptr != '\0') {
         perror("Error: Invalid hdd size");
         exit(EXIT_FAILURE);
       }
@@ -71,12 +69,12 @@ void parse_args(uint8_t argc, char *argv[]) {
       break;
     case 'r':
       tmp_val = strtol(optarg, &endptr, 10);
-      if (endptr == optarg || *endptr != '\0' || errno == ERANGE) {
+      if (endptr == optarg || *endptr != '\0') {
         perror("Error: Invalid radius size");
         exit(EXIT_FAILURE);
       }
-      if (tmp_val < 8 || tmp_val > UINT8_MAX) {
-        perror("Error: Radius must be between 8 and 255");
+      if (tmp_val < 0 || tmp_val > UINT8_MAX) {
+        perror("Error: Radius must be between 0 and 255");
         exit(EXIT_FAILURE);
       }
       radius = tmp_val;

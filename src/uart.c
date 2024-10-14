@@ -10,6 +10,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#define MAX_WAITING_TIME 5
+
 uint8_t spec = 0;
 uint8_t remaining_bytes = 0;
 uint8_t num_bytes = 0;

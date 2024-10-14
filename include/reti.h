@@ -12,9 +12,11 @@ extern uint8_t *uart;
 extern FILE *sram;
 extern FILE *hdd;
 
-extern uint64_t sram_watchpoint;
-extern uint64_t hdd_watchpoint;
-extern uint64_t eprom_watchpoint;
+extern char *sram_watchpoint_cs;
+extern char *sram_watchpoint_ds;
+extern char *sram_watchpoint_stack;
+/*extern uint64_t hdd_watchpoint;*/
+/*extern uint64_t eprom_watchpoint;*/
 
 #define ADJUSTEED_EPROM_PRGRM_SIZE 14
 #define NUM_REGISTERS 8

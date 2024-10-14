@@ -27,4 +27,54 @@ char *read_stdin_content() {
 #define STRINGIFY(x) #x
 #define TOSTRING(x) STRINGIFY(x)
 
+// TODO: potentiel neu schreiben, Copilot hat keinen so guten Code generiert
+// char **split_string(const char *str, uint8_t *count) {
+//   // Copy the input string to avoid modifying the original
+//   char *str_copy = strdup(str);
+//   if (str_copy == NULL) {
+//     perror("strdup was not successful");
+//     exit(EXIT_FAILURE);
+//   }
+//
+//   // Count the number of words
+//   int words = 0;
+//   char *token = strtok(str_copy, " \t\n");
+//   while (token != NULL) {
+//     words++;
+//     token = strtok(NULL, " \t\n");
+//   }
+//
+//   // Allocate memory for the array of words
+//   char **result = malloc((words + 1) * sizeof(void *));
+//   if (result == NULL) {
+//     perror("malloc was not successful");
+//     exit(EXIT_FAILURE);
+//   }
+//
+//   // Reset the copy of the string
+//   strcpy(str_copy, str);
+//
+//   // Split the string and store the words in the array
+//   int idx = 0;
+//   token = strtok(str_copy, " \t\n");
+//   while (token != NULL) {
+//     result[idx] = strdup(token);
+//     if (result[idx] == NULL) {
+//       perror("strdup was not successful");
+//       exit(EXIT_FAILURE);
+//     }
+//     idx++;
+//     token = strtok(NULL, " \t\n");
+//   }
+//   result[idx] = NULL;
+//
+//   // Set the count of words
+//   *count = words;
+//
+//   // Free the copy of the string
+//   free(str_copy);
+//
+//   return result;
+// }
+
 #endif

@@ -18,7 +18,10 @@ uint32_t num_instrs_prgrm = 0;
 uint32_t num_instrs_start_prgrm = 0;
 uint32_t num_instrs_isrs = 0;
 
-uint64_t sram_watchpoint = 0;
+char *sram_watchpoint_cs = "PC";
+char *sram_watchpoint_ds = "DS";
+char *sram_watchpoint_stack = "SP";
+
 uint64_t hdd_watchpoint = 0;
 
 void init_reti() {
@@ -214,18 +217,6 @@ void write_storage(uint32_t addr, uint32_t buffer) {
     break;
   }
 }
-
-// Example function to emulate processor operation
-// void emulate_processor() {
-//     // Example: Read a value from EPROM and store it in ACC
-//     uint32_t value;
-//     read_device(eprom, 0x00, &value, sizeof(value));
-//     regs.ACC = value;
-//
-//     // Example: Write a value from ACC to SRAM
-//     value = regs.ACC;
-//     write_device(sram, 0x00, &value, sizeof(value));
-// }
 
 void fin_reti() {
   fclose(sram);

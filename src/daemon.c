@@ -4,6 +4,7 @@
 #include "../include/parse_args.h"
 #include "../include/reti.h"
 #include "../include/utils.h"
+#include <math.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -111,13 +112,35 @@ char *reg_to_mem_pntr(uint64_t idx, MemType mem_type) {
   return "";
 }
 
+char *num_digits_for_idx_str(uint64_t max_idx) {
+  char *buffer = malloc(20);
+  sprintf(buffer, "%d", (uint8_t)ceil(log10(max_idx)));
+  return buffer;
+}
+
 // TODO:: split zwischen mem content und assembly instrs
 // TODO:: Unit test dafür und die ganzen idx Funktionen
 void print_mem_content_with_idx(uint64_t idx, uint32_t mem_content,
                                 bool are_unsigned, bool are_instrs,
                                 MemType mem_type) {
-  char idx_str[6];
-  snprintf(idx_str, sizeof(idx_str), "%05zu", idx);
+  char idx_str[20];
+  switch (mem_type) {
+    case SRAM:
+      snprintf(idx_str, sizeof(idx_str), proper_str_cat(proper_str_cat("%0", num_digits_for_idx_str(sram_size)), "zu"), idx);
+      break;
+    case HDD:
+      snprintf(idx_str, sizeof(idx_str), proper_str_cat(proper_str_cat("%0", num_digits_for_idx_str(hdd_size)), "zu"), idx);
+      break;
+    case EPROM:
+      snprintf(idx_str, sizeof(idx_str), proper_str_cat(proper_str_cat("%0", num_digits_for_idx_str(num_instrs_start_prgrm)), "zu"), idx);
+      break;
+    case UART:
+      snprintf(idx_str, sizeof(idx_str), proper_str_cat(proper_str_cat("%0", num_digits_for_idx_str(NUM_UART_ADDRESSES)), "zu"), idx);
+      break;
+    default:
+      perror("Error: Invalid memory type");
+      exit(EXIT_FAILURE);
+  }
   const char *mem_content_str;
   if (are_instrs) {
     mem_content_str = assembly_to_str(machine_to_assembly(mem_content));
@@ -138,19 +161,19 @@ void print_reg_content_with_reg(uint8_t idx, uint32_t mem_content) {
 void print_array_with_idcs(MemType mem_type, uint8_t length, bool are_instrs) {
   switch (mem_type) {
   case REGS:
-    for (size_t i = 0; i < length; i++) {
+    for (uint8_t i = 0; i < length; i++) {
       print_reg_content_with_reg(i, ((uint32_t *)regs)[i]);
     }
     break;
   case EPROM:
-    for (size_t i = 0; i < length; i++) {
-      print_mem_content_with_idx(i, ((uint8_t *)eprom)[i], false, are_instrs,
+    for (uint16_t i = 0; i < length; i++) {
+      print_mem_content_with_idx(i, ((uint32_t *)eprom)[i], false, are_instrs,
                                  EPROM);
     }
     break;
   case UART:
-    for (size_t i = 0; i < length; i++) {
-      print_mem_content_with_idx(i, ((uint32_t *)uart)[i], false, are_instrs,
+    for (uint8_t i = 0; i < length; i++) {
+      print_mem_content_with_idx(i, ((uint8_t *)uart)[i], false, are_instrs,
                                  UART);
     }
     break;
@@ -164,13 +187,13 @@ void print_file_with_idcs(MemType mem_type, uint64_t start, uint64_t end,
                           bool are_unsigned, bool are_instrs) {
   switch (mem_type) {
   case SRAM:
-    for (size_t i = start; i <= end; i++) {
+    for (uint64_t i = start; i <= end; i++) {
       print_mem_content_with_idx(i, read_file(sram, i), are_unsigned,
                                  are_instrs, SRAM);
     }
     break;
   case HDD:
-    for (size_t i = start; i <= end; i++) {
+    for (uint64_t i = start; i <= end; i++) {
       print_mem_content_with_idx(i, read_file(hdd, i), are_unsigned, are_instrs,
                                  HDD);
     }
@@ -189,37 +212,39 @@ char **split_string(const char *str, uint8_t *count) {
     exit(EXIT_FAILURE);
   }
 
-  // Count the number of words
+  // Initialize the array of words
+  char **result = NULL;
   int words = 0;
+
+  // Split the string and store the words in the array
   char *token = strtok(str_copy, " \t\n");
   while (token != NULL) {
+    // Resize the array to hold the new word
+    char **temp = realloc(result, (words + 1) * sizeof(char *));
+    if (temp == NULL) {
+      perror("realloc was not successful");
+      exit(EXIT_FAILURE);
+    }
+    result = temp;
+
+    // Store the word in the array
+    result[words] = strdup(token);
+    if (result[words] == NULL) {
+      perror("strdup was not successful");
+      exit(EXIT_FAILURE);
+    }
     words++;
     token = strtok(NULL, " \t\n");
   }
 
-  // Allocate memory for the array of words
-  char **result = malloc((words + 1) * sizeof(void *));
-  if (result == NULL) {
-    perror("malloc was not successful");
+  // Resize the array to add a NULL terminator
+  char **temp = realloc(result, (words + 1) * sizeof(char *));
+  if (temp == NULL) {
+    perror("realloc was not successful");
     exit(EXIT_FAILURE);
   }
-
-  // Reset the copy of the string
-  strcpy(str_copy, str);
-
-  // Split the string and store the words in the array
-  int idx = 0;
-  token = strtok(str_copy, " \t\n");
-  while (token != NULL) {
-    result[idx] = strdup(token);
-    if (result[idx] == NULL) {
-      perror("strdup was not successful");
-      exit(EXIT_FAILURE);
-    }
-    idx++;
-    token = strtok(NULL, " \t\n");
-  }
-  result[idx] = NULL;
+  result = temp;
+  result[words] = NULL;
 
   // Set the count of words
   *count = words;
@@ -230,20 +255,63 @@ char **split_string(const char *str, uint8_t *count) {
   return result;
 }
 
-void cont(void) {
-  print_array_with_idcs(REGS, NUM_REGISTERS, false);
-  printf("SRAM Watchpoint: %lu\n", sram_watchpoint);
-  print_array_with_idcs(EPROM, num_instrs_start_prgrm, true);
-  print_array_with_idcs(UART, NUM_UART_ADDRESSES, false);
-  print_file_with_idcs(SRAM, max(0, sram_watchpoint - radius),
-                       min(sram_watchpoint + radius, ivt_max_idx), true, false);
+uint64_t determine_watchpoint_value(char *watchpoint_str) {
+  for (int i = 0; i < NUM_REGISTERS; i++) {
+    if (strcmp(watchpoint_str, register_name_to_code[i]) == 0) {
+      return read_array(regs, i, false);
+    }
+  }
+
+  char *endptr;
+  uint64_t watchpoint_val = strtol(watchpoint_str, &endptr, 10);
+  if (*endptr != '\0') {
+    const char *str = "Error: Further characters after number: ";
+    const char *str2 = proper_str_cat(str, endptr);
+    const char *str3 = proper_str_cat(str2, ".\n");
+    perror(str3);
+  } else if (watchpoint_val < 0 && watchpoint_val > UINT64_MAX) {
+    perror("Error: Number out of range, must be between 0 and "
+           "18446744073709551615.\n");
+  }
+
+  // TODO: later also add in paging physical addresses
+
+  return watchpoint_val;
+}
+
+void print_sram_watchpoint(uint64_t sram_watchpoint_x) {
+  sram_watchpoint_x = max(0, sram_watchpoint_x - (uint32_t)(1 << 31));
+  print_file_with_idcs(SRAM, max(0, sram_watchpoint_x - radius),
+                       min(sram_watchpoint_x + radius, ivt_max_idx), true,
+                       false);
   print_file_with_idcs(
-      SRAM, max(ivt_max_idx + 1, sram_watchpoint - radius),
-      min(sram_watchpoint + radius, num_instrs_isrs + num_instrs_prgrm - 1),
+      SRAM, max(ivt_max_idx + 1, sram_watchpoint_x - radius),
+      min(sram_watchpoint_x + radius, num_instrs_isrs + num_instrs_prgrm - 1),
       false, true);
   print_file_with_idcs(
-      SRAM, max(num_instrs_isrs + num_instrs_prgrm, sram_watchpoint - radius),
-      min(sram_watchpoint + radius, SRAM_MAX_IDX), false, false);
+      SRAM, max(num_instrs_isrs + num_instrs_prgrm, sram_watchpoint_x - radius),
+      min(sram_watchpoint_x + radius, SRAM_MAX_IDX), false, false);
+}
+
+void cont(void) {
+  print_array_with_idcs(REGS, NUM_REGISTERS, false);
+  print_array_with_idcs(EPROM, num_instrs_start_prgrm, true);
+  print_array_with_idcs(UART, NUM_UART_ADDRESSES, false);
+
+  uint64_t sram_watchpoint_cs_int =
+      determine_watchpoint_value(sram_watchpoint_cs);
+  uint64_t sram_watchpoint_ds_int =
+      determine_watchpoint_value(sram_watchpoint_ds);
+  uint64_t sram_watchpoint_stack_int =
+      determine_watchpoint_value(sram_watchpoint_stack);
+
+  printf("SRAM Watchpoint Codesegment: %s\n", sram_watchpoint_cs);
+  print_sram_watchpoint(sram_watchpoint_cs_int);
+  printf("SRAM Watchpoint Datasegment: %s\n", sram_watchpoint_ds);
+  print_sram_watchpoint(sram_watchpoint_ds_int);
+  printf("SRAM Watchpoint Stack: %s\n", sram_watchpoint_stack);
+  print_sram_watchpoint(sram_watchpoint_stack_int);
+
   // print_file_idcs(hdd, max(0, hdd_view_pos - radius),
   //                 min(hdd_view_pos + radius, hdd_size-1), false);
   while (true) {
