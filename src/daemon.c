@@ -99,8 +99,13 @@ char *reg_to_mem_pntr(uint64_t idx, MemType mem_type) {
   for (int i = 0; i < NUM_REGISTERS; i++) {
     uint32_t addr = read_array(regs, i, false);
     uint8_t addr_mem_type = addr >> 30;
-    uint8_t addr_idx = addr & 0x3FFFFFFF;
-    if (addr_mem_type == mem_type_to_constant[mem_type] && addr_idx == idx) {
+    uint32_t addr_idx;
+    if(mem_type == SRAM) {
+      addr_idx = addr & 0x7FFFFFFF;
+    } else {
+      addr_idx = addr & 0x3FFFFFFF;
+    }
+    if ((addr_mem_type == 0b11 ? mem_type_to_constant[mem_type] == 0b10 : addr_mem_type == mem_type_to_constant[mem_type]) && addr_idx == idx) {
       active_regs = proper_str_cat(active_regs, register_name_to_code[i]);
       active_regs = proper_str_cat(active_regs, " ");
       at_least_one_reg = true;
@@ -205,51 +210,21 @@ void print_file_with_idcs(MemType mem_type, uint64_t start, uint64_t end,
 }
 
 char **split_string(const char *str, uint8_t *count) {
-  // Copy the input string to avoid modifying the original
   char *str_copy = strdup(str);
-  if (str_copy == NULL) {
-    perror("strdup was not successful");
-    exit(EXIT_FAILURE);
-  }
 
-  // Initialize the array of words
   char **result = NULL;
   int words = 0;
 
-  // Split the string and store the words in the array
   char *token = strtok(str_copy, " \t\n");
   while (token != NULL) {
-    // Resize the array to hold the new word
-    char **temp = realloc(result, (words + 1) * sizeof(char *));
-    if (temp == NULL) {
-      perror("realloc was not successful");
-      exit(EXIT_FAILURE);
-    }
-    result = temp;
+    result = realloc(result, (words + 1) * sizeof(char *));
 
-    // Store the word in the array
     result[words] = strdup(token);
-    if (result[words] == NULL) {
-      perror("strdup was not successful");
-      exit(EXIT_FAILURE);
-    }
     words++;
     token = strtok(NULL, " \t\n");
   }
-
-  // Resize the array to add a NULL terminator
-  char **temp = realloc(result, (words + 1) * sizeof(char *));
-  if (temp == NULL) {
-    perror("realloc was not successful");
-    exit(EXIT_FAILURE);
-  }
-  result = temp;
-  result[words] = NULL;
-
-  // Set the count of words
   *count = words;
 
-  // Free the copy of the string
   free(str_copy);
 
   return result;
@@ -280,7 +255,7 @@ uint64_t determine_watchpoint_value(char *watchpoint_str) {
 }
 
 void print_sram_watchpoint(uint64_t sram_watchpoint_x) {
-  sram_watchpoint_x = max(0, sram_watchpoint_x - (uint32_t)(1 << 31));
+  sram_watchpoint_x = max(0, sram_watchpoint_x & 0x7FFFFFFF);
   print_file_with_idcs(SRAM, max(0, sram_watchpoint_x - radius),
                        min(sram_watchpoint_x + radius, ivt_max_idx), true,
                        false);
@@ -314,17 +289,19 @@ void cont(void) {
 
   // print_file_idcs(hdd, max(0, hdd_view_pos - radius),
   //                 min(hdd_view_pos + radius, hdd_size-1), false);
-  while (true) {
-    uint8_t count;
-    char buffer[26];
 
+  uint8_t count;
+  char buffer[26];
+  while (true) {
     if (fgets(buffer, sizeof(buffer), stdin) == NULL) {
       perror("Error: Reading input not successful\n");
     }
+    printf("\033[A\033[K");
 
     char **stdin = split_string(buffer, &count);
-
-    if (strcmp(stdin[0], "n") == 0) {
+    if (stdin == NULL) {
+      ;
+    } else if (strcmp(stdin[0], "n") == 0) {
       break;
     } else if (strcmp(stdin[0], "s") == 0) {
       break;
