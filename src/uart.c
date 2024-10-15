@@ -32,13 +32,13 @@ Datatype datatype;
 void uart_send() {
   if (!(read_array(uart, 2, true) & 0b00000001) && !sending_finished) {
     if (spec == 0) {
-      spec = read_array(uart, 0, true);
+      spec = uart[0];
       remaining_bytes = spec & 0b01111111;
       num_bytes = remaining_bytes;
       datatype = (spec & 0b10000000) >> 7;
       send_data = malloc(remaining_bytes);
     } else if (remaining_bytes > 0) {
-      send_data[num_bytes - remaining_bytes] = read_array(uart, 0, true);
+      send_data[num_bytes - remaining_bytes] = uart[0];
       remaining_bytes--;
       if (remaining_bytes == 0) {
         if (datatype == INTEGER) {
@@ -71,6 +71,7 @@ void uart_receive() {
 
     while (true) {
       printf("Please enter a number or a character: ");
+      // TODO: What happens if more than 4 characters are entered? Error needed for that
       if (fgets(input, sizeof(input), stdin) == NULL) {
         perror("Error: Couldn't read input.\n");
       }
@@ -105,7 +106,7 @@ void uart_receive() {
   } else if (receiving_waiting_time > 0 && receiving_finished) {
     receiving_waiting_time--;
   } else if (receiving_waiting_time == 0 && receiving_finished) {
-    write_array(uart, 1, received_num, true);
+    uart[1] = received_num; // & 0xFF; not necessary
     uart[2] = uart[2] | 0b00000010;
     receiving_finished = false;
   }

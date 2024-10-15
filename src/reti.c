@@ -145,7 +145,7 @@ void write_array(void *stor, uint16_t addr, uint32_t buffer, bool is_uart) {
     } else if (!(uart[2] & 0b00000010) && addr == 2 && (buffer & 0b00000010)) {
       perror("Warning: Only the UART itself should tell that it received something");
     } else if (addr == 1) {
-      perror("Warnng: Writing to the receive register of the UART makes no sense");
+      perror("Warning: Writing to the receive register of the UART makes no sense");
     }
     ((uint8_t *)stor)[addr] = buffer & 0xFF;
   } else {
