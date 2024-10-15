@@ -49,6 +49,11 @@ String_Instruction *parse_instr(const char **original_prgrm_pntr) {
         prgrm_pntr++;
         *original_prgrm_pntr = prgrm_pntr;
         return str_instr;
+      } else if (*prgrm_pntr == '#') {
+        while (*prgrm_pntr != '\n' && *prgrm_pntr != '\0') {
+          prgrm_pntr++;
+        }
+        continue;
       } else if (*prgrm_pntr == '\0') {
         *original_prgrm_pntr = prgrm_pntr;
         return str_instr;
@@ -66,6 +71,9 @@ String_Instruction *parse_instr(const char **original_prgrm_pntr) {
       case 3:
         (str_instr->opd3)[rel_idx] = *prgrm_pntr;
         break;
+      default:
+        perror("Error: Too many operands");
+        exit(EXIT_FAILURE);
       }
       rel_idx++;
       prgrm_pntr++;
