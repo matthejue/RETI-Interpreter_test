@@ -11,6 +11,9 @@
 #include <stdlib.h>
 #include <string.h>
 
+
+bool breakpoint_encountered = false;
+
 Mnemonic_to_String opcode_to_mnemonic[] = {
     {ADDI, "ADDI"},     {SUBI, "SUBI"},       {MULTI, "MULTI"},
     {DIVI, "DIVI"},     {MODI, "MODI"},       {OPLUSI, "OPLUSI"},
@@ -269,6 +272,9 @@ void print_sram_watchpoint(uint64_t sram_watchpoint_x) {
 }
 
 void cont(void) {
+  if (!breakpoint_encountered) {
+    return;
+  }
   print_array_with_idcs(REGS, NUM_REGISTERS, false);
   print_array_with_idcs(EPROM, num_instrs_start_prgrm, true);
   print_array_with_idcs(UART, NUM_UART_ADDRESSES, false);
@@ -302,7 +308,10 @@ void cont(void) {
     if (stdin == NULL) {
       ;
     } else if (strcmp(stdin[0], "n") == 0) {
-      break;
+      return;
+    } else if (strcmp(stdin[0], "c") == 0) {
+      breakpoint_encountered = false;
+      return;
     } else if (strcmp(stdin[0], "s") == 0) {
       break;
     } else if (strcmp(stdin[0], "q") == 0) {

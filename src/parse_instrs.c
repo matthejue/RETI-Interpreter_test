@@ -2,6 +2,8 @@
 #include "../include/globals.h"
 #include "../include/interpr.h"
 #include "../include/reti.h"
+#include "../include/error.h"
+#include "../include/utils.h"
 #include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -92,8 +94,11 @@ void parse_and_load_program(char *prgrm, Program_Type prgrm_type) {
   }
 
   while (*prgrm_pntr != '\0') {
+    error_context.error_code = extract_line(prgrm_pntr, prgrm);
     String_Instruction *str_instr = parse_instr(&prgrm_pntr);
     if (isalpha(*str_instr->op)) {
+      // TODO: Problem, dass es auch leere Zeilen geben kann
+      error_context.line_nr = i - num_instrs_isrs + 1;
       uint32_t machine_instr = assembly_to_machine(str_instr);
       switch (prgrm_type) {
       case SRAM_PRGRM:

@@ -77,4 +77,21 @@ char *read_stdin_content() {
 //   return result;
 // }
 
+// char *read_stdin() {
+//   size_t len = 0;
+//   size_t read;
+//   char *line = NULL;
+//   char *content = NULL;
+//   while ((read = getline(&line, &len, stdin)) != -1) {
+//     if (content == NULL) {
+//       content = strdup(line);
+//     } else {
+//       content = realloc(content, strlen(content) + read + 1);
+//       strcat(content, line);
+//     }
+//   }
+//   free(line);
+//   return content;
+// }
+
 #endif

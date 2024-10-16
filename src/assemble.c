@@ -1,5 +1,6 @@
 #include "../include/parse_instrs.h"
 #include "../include/utils.h"
+#include "../include/error.h"
 #include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -34,7 +35,8 @@ uint8_t get_register_code(char *reg) {
       return i;
     }
   }
-  perror("Error: Invalid register");
+
+  display_error_message("Syntax Error", "Invalid register: \"%s\"", reg);
   exit(EXIT_FAILURE);
 }
 
@@ -51,7 +53,8 @@ uint8_t get_mnemonic(char *mnemonic) {
       return (uint8_t)mnemonic_to_directive[i].value;
     }
   }
-  perror("Error: Invalid mnemonic");
+
+  display_error_message("Syntax Error", "Invalid mnemonic: \"%s\"", mnemonic);
   exit(EXIT_FAILURE);
 }
 
@@ -117,6 +120,7 @@ uint32_t assembly_to_machine(String_Instruction *str_instr) {
     machine_instr = 0b10 << 30 | opd1;
   } else {
     perror("Error: Invalid opcode");
+    exit(EXIT_FAILURE);
   }
 
   return machine_instr;

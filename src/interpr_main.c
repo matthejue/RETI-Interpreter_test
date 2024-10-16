@@ -1,4 +1,5 @@
 // #include <stdio.h>
+#include "../include/error.h"
 #include "../include/globals.h"
 #include "../include/interpr.h"
 #include "../include/parse_args.h"
@@ -14,13 +15,19 @@ int main(int argc, char *argv[]) {
   init_reti();
 
   if (strcmp(isrs_prgrm_path, "") != 0) {
+    error_context.filename = isrs_prgrm_path;
     parse_and_load_program(get_prgrm_content(isrs_prgrm_path), ISR_PRGRMS);
   } else {
     load_isrs();
   }
+
+  error_context.filename = sram_prgrm_path;
   parse_and_load_program(get_prgrm_content(sram_prgrm_path), SRAM_PRGRM);
+
   if (strcmp(eprom_prgrm_path, "") != 0) {
-    parse_and_load_program(get_prgrm_content(eprom_prgrm_path), EPROM_START_PRGRM);
+    error_context.filename = eprom_prgrm_path;
+    parse_and_load_program(get_prgrm_content(eprom_prgrm_path),
+                           EPROM_START_PRGRM);
   } else {
     load_adjusted_eprom_prgrm();
   }

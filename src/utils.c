@@ -135,19 +135,29 @@ char *allocate_and_copy_string(const char *original) {
   return copy;
 }
 
-// char *read_stdin() {
-//   size_t len = 0;
-//   size_t read;
-//   char *line = NULL;
-//   char *content = NULL;
-//   while ((read = getline(&line, &len, stdin)) != -1) {
-//     if (content == NULL) {
-//       content = strdup(line);
-//     } else {
-//       content = realloc(content, strlen(content) + read + 1);
-//       strcat(content, line);
-//     }
-//   }
-//   free(line);
-//   return content;
-// }
+char *extract_line(const char *ptr, const char *begin) {
+    // Find the start of the line
+    const char *start = ptr;
+    while (start >= begin && *(start - 1) != '\n') {
+        start--;
+    }
+
+    // Find the end of the line
+    const char *end = ptr;
+    while (*end != '\0' && *end != '\n') {
+        end++;
+    }
+
+    // Calculate the length of the line
+    size_t length = end - start;
+
+    // Allocate memory for the result and copy the line
+    char *result = (char*)malloc(length + 1);
+    if (result == NULL) {
+        return NULL; // Memory allocation failed
+    }
+    strncpy(result, start, length);
+    result[length] = '\0';
+
+    return result;
+}
