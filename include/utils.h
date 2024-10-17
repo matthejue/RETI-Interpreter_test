@@ -16,6 +16,7 @@ char *read_stdin_content();
 char *read_file_content(const char *file_path);
 char *get_prgrm_content(const char *prgrm_path);
 char *allocate_and_copy_string(const char *original);
-char *extract_line(const char *ptr, const char *begin);
+char *extract_line(const char *current, const char *begin) ;
+int count_lines(const char *current, const char *begin) ;
 
 #endif // UTILS_H

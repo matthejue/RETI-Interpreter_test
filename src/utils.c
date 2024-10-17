@@ -135,29 +135,43 @@ char *allocate_and_copy_string(const char *original) {
   return copy;
 }
 
-char *extract_line(const char *ptr, const char *begin) {
-    // Find the start of the line
-    const char *start = ptr;
-    while (start >= begin && *(start - 1) != '\n') {
-        start--;
+char *extract_line(const char *current, const char *begin) {
+  // Find the start of the line
+  const char *start = current;
+  while (start >= begin && *(start - 1) != '\n') {
+    start--;
+  }
+
+  // Find the end of the line
+  const char *end = current;
+  while (*end != '\0' && *end != '\n') {
+    end++;
+  }
+
+  // Calculate the length of the line
+  size_t length = end - start;
+
+  // Allocate memory for the result and copy the line
+  char *result = (char *)malloc(length + 1);
+  if (result == NULL) {
+    return NULL; // Memory allocation failed
+  }
+  strncpy(result, start, length);
+  result[length] = '\0';
+
+  return result;
+}
+
+int count_lines(const char *current, const char *begin) {
+  int line_count = 1;
+  const char *ptr = begin;
+
+  while (ptr < current) {
+    if (*ptr == '\n') {
+      line_count++;
     }
+    ptr++;
+  }
 
-    // Find the end of the line
-    const char *end = ptr;
-    while (*end != '\0' && *end != '\n') {
-        end++;
-    }
-
-    // Calculate the length of the line
-    size_t length = end - start;
-
-    // Allocate memory for the result and copy the line
-    char *result = (char*)malloc(length + 1);
-    if (result == NULL) {
-        return NULL; // Memory allocation failed
-    }
-    strncpy(result, start, length);
-    result[length] = '\0';
-
-    return result;
+  return line_count;
 }

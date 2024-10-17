@@ -1,7 +1,7 @@
 #include "../include/utils.h"
+#include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <assert.h>
 #include <string.h>
 
 void test_extract_line() {
@@ -13,8 +13,17 @@ void test_extract_line() {
   free(result);
 }
 
+void test_count_lines() {
+  const char *text = "Line 1\nLine 2\nLine 3\nLine 4\n";
+  const char *current = text + 15; // Arbitrary position in the string
+
+  int lines = count_lines(current, text);
+  assert(lines == 3);
+}
+
 int main() {
   test_extract_line();
+  test_count_lines();
 
   return 0;
 }

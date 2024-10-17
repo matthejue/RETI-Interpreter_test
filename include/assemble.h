@@ -54,7 +54,7 @@ typedef enum {
 } Unique_Opcode;
 
 typedef enum {
-  IM = 0b10000000
+  IVTE = 0b10000000
 } Directive;
 
 extern const char *register_name_to_code[];

@@ -24,7 +24,7 @@ String_to_Mnemonic mnemonic_to_opcode[] = {
     {"NOP", NOP}};
 
 String_to_Directive mnemonic_to_directive[] = {
-    {"IVTE", IM},    
+    {"IVTE", IVTE},    
 };
 
 uint8_t get_register_code(char *reg) {
@@ -67,6 +67,8 @@ uint32_t assembly_to_machine(String_Instruction *str_instr) {
       op += 8;
     }
   }
+
+  check_instr(op, str_instr);
 
   uint32_t opd1, opd2, opd3;
 
@@ -114,9 +116,11 @@ uint32_t assembly_to_machine(String_Instruction *str_instr) {
     machine_instr = op << 25 | opd1 << 22 | opd2 << 25 | opd3;
   } else if (op == MOVE) {
     machine_instr = op << 25 | opd1 << 25 | opd2 << 22;
-  } else if (NOP <= op && op <= JUMP) {
+  } else if ((JUMPGT <= op && op <= JUMP) || op == INT) {
     machine_instr = op << 25 | opd1;
-  } else if (op == IM) {
+  } else if (op == NOP || op == RTI) {
+    machine_instr = op << 25;
+  } else if (op == IVTE) {
     machine_instr = 0b10 << 30 | opd1;
   } else {
     perror("Error: Invalid opcode");
