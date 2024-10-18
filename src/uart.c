@@ -42,7 +42,7 @@ void uart_send() {
       if (remaining_bytes == 0) {
         if (datatype == INTEGER) {
           for (int i = 0; i < ceil((double)num_bytes / 4); i++) {
-            printf("%d ", (uint32_t)send_data[i * 4]);
+            printf("%d ", swap_endian_32(*((uint32_t *)(send_data + i * 4))));
           }
           printf("\n");
         } else { // dataype == STRING
