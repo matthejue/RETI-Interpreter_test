@@ -15,6 +15,8 @@ uint16_t page_size = 4096;
 uint32_t hdd_size = 4294967295;
 bool daemon_mode = false;
 uint8_t radius = 32;
+uint8_t max_waiting_instrs = 10;
+
 char *peripherals_dir = ".";
 char *eprom_prgrm_path = "";
 char *sram_prgrm_path = "";
@@ -23,7 +25,7 @@ char *isrs_prgrm_path = "";
 void parse_args(uint8_t argc, char *argv[]) {
   uint32_t opt;
 
-  while ((opt = getopt(argc, argv, "s:p:h:dr:f:e:i:")) != -1) {
+  while ((opt = getopt(argc, argv, "s:p:h:dr:f:e:i:w:")) != -1) {
     char *endptr;
     long tmp_val;
 
@@ -46,7 +48,7 @@ void parse_args(uint8_t argc, char *argv[]) {
         perror("Error: Invalid page size");
         exit(EXIT_FAILURE);
       }
-      if (page_size < 0 || page_size > UINT16_MAX) {
+      if (tmp_val < 0 || tmp_val > UINT16_MAX) {
         perror("Error: Page size must be between 0 and 65535");
         exit(EXIT_FAILURE);
       }
@@ -88,11 +90,24 @@ void parse_args(uint8_t argc, char *argv[]) {
     case 'i':
       isrs_prgrm_path = optarg;
       break;
+    case 'w':
+      tmp_val = strtol(optarg, &endptr, 10);
+      if (endptr == optarg || *endptr != '\0') {
+        perror("Error: Invalid max waiting instructions");
+        exit(EXIT_FAILURE);
+      }
+      if (tmp_val < 0 || tmp_val > UINT8_MAX) {
+        perror("Error: Max waiting instructions must be between 0 and 255");
+        exit(EXIT_FAILURE);
+      }
+      max_waiting_instrs = tmp_val;
+      break;
     default:
       fprintf(
           stderr,
           "Usage: %s -r ram_size -p page_size -h hdd_size -d (run as daemon)"
-          "-r radius -f file_dir -e eprom_prgrm_path -i isrs_prgrm_path input\n",
+          "-r radius -f file_dir -e eprom_prgrm_path -i isrs_prgrm_path "
+          "-w max_waiting_instrs input\n",
           argv[0]);
       exit(EXIT_FAILURE);
     }

@@ -2,6 +2,7 @@
 #include "../include/globals.h"
 #include "../include/reti.h"
 #include "../include/utils.h"
+#include "../include/parse_args.h"
 #include <ctype.h>
 #include <limits.h>
 #include <math.h>
@@ -9,8 +10,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
-#define MAX_WAITING_TIME 5
 
 uint8_t spec = 0;
 uint8_t remaining_bytes = 0;
@@ -55,7 +54,11 @@ void uart_send() {
         spec = 0;
       }
     }
-    sending_waiting_time = rand() % MAX_WAITING_TIME + 1;
+    if (max_waiting_instrs == 0) {
+      sending_waiting_time = 0;
+    } else {
+      sending_waiting_time = rand() % max_waiting_instrs + 1;
+    }
     sending_finished = true;
   } else if (sending_waiting_time > 0 && sending_finished) {
     sending_waiting_time--;
@@ -101,7 +104,11 @@ void uart_receive() {
         perror("Error: Invalid input.\n");
       }
     }
-    receiving_waiting_time = rand() % MAX_WAITING_TIME + 1;
+    if (max_waiting_instrs == 0) {
+      receiving_waiting_time = 0;
+    } else {
+      receiving_waiting_time = rand() % max_waiting_instrs + 1;
+    }
     receiving_finished = true;
   } else if (receiving_waiting_time > 0 && receiving_finished) {
     receiving_waiting_time--;

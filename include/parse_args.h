@@ -9,6 +9,7 @@ extern uint16_t page_size;
 extern uint32_t hdd_size;
 extern bool daemon_mode;
 extern uint8_t radius;
+extern uint8_t max_waiting_instrs;
 
 extern char *peripherals_dir;
 extern char *eprom_prgrm_path;
