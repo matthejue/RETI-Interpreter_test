@@ -14,12 +14,8 @@ int main(int argc, char *argv[]) {
 
   init_reti();
 
-  if (strcmp(isrs_prgrm_path, "") != 0) {
-    error_context.filename = isrs_prgrm_path;
-    parse_and_load_program(get_prgrm_content(isrs_prgrm_path), ISR_PRGRMS);
-  } else {
-    load_isrs();
-  }
+  error_context.filename = isrs_prgrm_path;
+  parse_and_load_program(get_prgrm_content(isrs_prgrm_path), ISR_PRGRMS);
 
   error_context.filename = sram_prgrm_path;
   parse_and_load_program(get_prgrm_content(sram_prgrm_path), SRAM_PRGRM);

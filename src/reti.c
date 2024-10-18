@@ -119,8 +119,6 @@ void load_adjusted_eprom_prgrm() {
   // TODO: Tobias, soll eprom schreiben ab hier gelockt sein?
 }
 
-void load_isrs() {}
-
 uint32_t read_array(void *stor, uint16_t addr, bool is_uart) {
   if (is_uart) {
     if (!(uart[2] & 0b00000010) && addr == 1) {

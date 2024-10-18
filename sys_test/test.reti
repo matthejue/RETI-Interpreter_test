@@ -1,7 +1,47 @@
-# aädf æsd: @asd; asdfasdf;
-INT 1 # A really important comment 
 INT 3
-INT 0;# A really close important comment   
-# Another really important comment
-JUMP 0# A really close important comment
-# Last very important comment
+INT 2
+INT 0
+# SAVE DS
+SUBI SP 1
+STOREIN SP DS 1 
+# Save letters for "Hello World"
+LOADI ACC 72 # H
+STOREIN DS ACC 0
+ADDI DS 1 
+LOADI ACC 101 # e
+STOREIN DS ACC 0
+ADDI DS 1 
+LOADI ACC 108 # l
+STOREIN DS ACC 0
+ADDI DS 1 
+LOADI ACC 108 # l
+STOREIN DS ACC 0
+ADDI DS 1 
+LOADI ACC 111 # o
+STOREIN DS ACC 0
+ADDI DS 1 
+LOADI ACC 32 # " "
+STOREIN DS ACC 0
+ADDI DS 1 
+LOADI ACC 87 # W
+STOREIN DS ACC 0
+ADDI DS 1 
+LOADI ACC 111 # o
+STOREIN DS ACC 0
+ADDI DS 1 
+LOADI ACC 114 # r
+STOREIN DS ACC 0
+ADDI DS 1 
+LOADI ACC 108 # l
+STOREIN DS ACC 0
+ADDI DS 1 
+LOADI ACC 100 # d
+STOREIN DS ACC 0
+ADDI DS 1 
+# RESTORE DS
+LOADIN SP DS 1 
+ADDI SP 1
+MOVE DS ACC
+# Print over uart
+INT 1
+JUMP 0

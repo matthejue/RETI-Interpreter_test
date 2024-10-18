@@ -4,6 +4,7 @@
 #include "../include/parse_args.h"
 #include "../include/reti.h"
 #include "../include/utils.h"
+#include "../include/uart.h"
 #include <math.h>
 #include <stdbool.h>
 #include <stdint.h>
@@ -271,6 +272,26 @@ void print_sram_watchpoint(uint64_t sram_watchpoint_x) {
       min(sram_watchpoint_x + radius, SRAM_MAX_IDX), false, false);
 }
 
+void print_uart_meta_data() {
+  printf("Send Data: ");
+  if (remaining_bytes == 0) {
+    // print array until str_idx
+    for (uint8_t i = 0; i < str_idx - 1; i++) {
+      printf("%c", send_data[i]);
+    }
+  } else {
+    // print array until num_bytes - remaining_bytes
+    for (uint8_t i = 0; i < ceil((double)(num_bytes - remaining_bytes) / 4); i++) {
+      printf("%d ", swap_endian_32(*((uint32_t *)(send_data + i * 4))));
+    }
+  }
+  printf("\n");
+  printf("Waiting time sending: ");
+  printf("%d\n", sending_waiting_time);
+  printf("Waiting time receiving: ");
+  printf("%d\n", receiving_waiting_time);
+}
+
 void cont(void) {
   if (!breakpoint_encountered) {
     return;
@@ -278,6 +299,7 @@ void cont(void) {
   print_array_with_idcs(REGS, NUM_REGISTERS, false);
   print_array_with_idcs(EPROM, num_instrs_start_prgrm, true);
   print_array_with_idcs(UART, NUM_UART_ADDRESSES, false);
+  print_uart_meta_data();
 
   uint64_t sram_watchpoint_cs_int =
       determine_watchpoint_value(sram_watchpoint_cs);

@@ -24,7 +24,6 @@ extern char *sram_watchpoint_stack;
 #define SRAM_MAX_IDX 2147483647
 
 void load_adjusted_eprom_prgrm();
-void load_isrs();
 
 uint32_t read_file(FILE *dev, uint64_t address);
 void write_file(FILE *dev, uint64_t address, uint32_t buffer);

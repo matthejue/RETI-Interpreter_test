@@ -11,9 +11,10 @@
 #include <stdlib.h>
 #include <string.h>
 
-uint8_t spec = 0;
 uint8_t remaining_bytes = 0;
 uint8_t num_bytes = 0;
+
+uint16_t str_idx = 0;
 
 uint8_t *send_data;
 char received_num = '\0';
@@ -24,36 +25,46 @@ uint8_t receiving_waiting_time = 0;
 bool sending_finished = false;
 bool receiving_finished = false;
 
-typedef enum { INTEGER, STRING } Datatype;
-
-Datatype datatype;
+bool init_finished = false;
 
 void uart_send() {
   if (!(read_array(uart, 2, true) & 0b00000001) && !sending_finished) {
-    if (spec == 0) {
-      spec = uart[0];
-      remaining_bytes = spec & 0b01111111;
-      num_bytes = remaining_bytes;
-      datatype = (spec & 0b10000000) >> 7;
-      send_data = malloc(remaining_bytes);
+    if (!init_finished) {
+      remaining_bytes = uart[0];
+      if (remaining_bytes == 0) {
+        send_data = NULL;
+      } else {
+        num_bytes = remaining_bytes;
+        send_data = malloc(remaining_bytes);
+      }
+
+      init_finished = true;
     } else if (remaining_bytes > 0) {
       send_data[num_bytes - remaining_bytes] = uart[0];
       remaining_bytes--;
       if (remaining_bytes == 0) {
-        if (datatype == INTEGER) {
-          for (int i = 0; i < ceil((double)num_bytes / 4); i++) {
-            printf("%d ", swap_endian_32(*((uint32_t *)(send_data + i * 4))));
-          }
-          printf("\n");
-        } else { // dataype == STRING
-          for (int i = 0; i < num_bytes; i++) {
-            printf("%c", send_data[i]);
-          }
-          printf("\n");
+        for (int i = 0; i < ceil((double)num_bytes / 4); i++) {
+          printf("%d ", swap_endian_32(*((uint32_t *)(send_data + i * 4))));
         }
-        spec = 0;
+        printf("\n");
+
+        remaining_bytes = 0;
+        init_finished = false;
+      }
+    } else { // (datatype == STRING)
+      send_data = realloc(send_data, 1);
+      uint8_t data = uart[0];
+      send_data[str_idx] = data;
+      str_idx++;
+      if (data == 0) {
+        printf("%s\n", send_data);
+
+        remaining_bytes = 0;
+        str_idx = 0;
+        init_finished = false;
       }
     }
+
     if (max_waiting_instrs == 0) {
       goto sending_finished;
     } else {
@@ -116,7 +127,7 @@ void uart_receive() {
   } else if (receiving_finished) {
   receiving_finished:
     receiving_waiting_time--;
-  if (receiving_waiting_time == 0) {
+    if (receiving_waiting_time == 0) {
       uart[1] = received_num; // & 0xFF; not necessary
       uart[2] = uart[2] | 0b00000010;
       receiving_finished = false;
