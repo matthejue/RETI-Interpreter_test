@@ -1,8 +1,8 @@
 #include "../include/uart.h"
 #include "../include/globals.h"
+#include "../include/parse_args.h"
 #include "../include/reti.h"
 #include "../include/utils.h"
-#include "../include/parse_args.h"
 #include <ctype.h>
 #include <limits.h>
 #include <math.h>
@@ -55,16 +55,18 @@ void uart_send() {
       }
     }
     if (max_waiting_instrs == 0) {
-      sending_waiting_time = 0;
+      goto sending_finished;
     } else {
       sending_waiting_time = rand() % max_waiting_instrs + 1;
     }
     sending_finished = true;
-  } else if (sending_waiting_time > 0 && sending_finished) {
+  } else if (sending_finished) {
+  sending_finished:
     sending_waiting_time--;
-  } else if (sending_waiting_time == 0 && sending_finished) {
-    uart[2] = uart[2] | 0b00000001;
-    sending_finished = false;
+    if (sending_waiting_time == 0) {
+      uart[2] = uart[2] | 0b00000001;
+      sending_finished = false;
+    }
   }
 }
 
@@ -74,7 +76,8 @@ void uart_receive() {
 
     while (true) {
       printf("Please enter a number or a character: ");
-      // TODO: What happens if more than 4 characters are entered? Error needed for that
+      // TODO: What happens if more than 4 characters are entered? Error needed
+      // for that
       if (fgets(input, sizeof(input), stdin) == NULL) {
         perror("Error: Couldn't read input.\n");
       }
@@ -105,16 +108,18 @@ void uart_receive() {
       }
     }
     if (max_waiting_instrs == 0) {
-      receiving_waiting_time = 0;
+      goto receiving_finished;
     } else {
       receiving_waiting_time = rand() % max_waiting_instrs + 1;
     }
     receiving_finished = true;
-  } else if (receiving_waiting_time > 0 && receiving_finished) {
+  } else if (receiving_finished) {
+  receiving_finished:
     receiving_waiting_time--;
-  } else if (receiving_waiting_time == 0 && receiving_finished) {
-    uart[1] = received_num; // & 0xFF; not necessary
-    uart[2] = uart[2] | 0b00000010;
-    receiving_finished = false;
+  if (receiving_waiting_time == 0) {
+      uart[1] = received_num; // & 0xFF; not necessary
+      uart[2] = uart[2] | 0b00000010;
+      receiving_finished = false;
+    }
   }
 }
