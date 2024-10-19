@@ -1,20 +1,14 @@
 #!/usr/bin/env bash
 
 if [[ $1 == "all" ]]; then
-  paths=(./tests/*.picoc)
-elif [[ $1 == "default" ]]; then
-  paths=(./tests/{basic,advanced,example,error,exclude,hard,thesis,tobias}*.picoc)
+  paths=(./sys_test/*.reti)
 elif [[ -n "$1" ]]; then
-  paths=(./tests/*$1*.picoc)
+  paths=(./sys_test/*$1*.reti)
 else
-  paths=(./tests/{basic,advanced,example,error,exclude,hard,thesis,tobias}*.picoc)
+  paths=(./sys_test/{basic,advanced,special,example,error,tobias}*.reti)
 fi
 
 for test in "${paths[@]}"; do
-  sed -n '1p' "$test" | sed -e 's/^\/\/ in://' > "${test%.picoc}.in"
-  sed -n '2p' "$test" | sed -e 's/^\/\/ expected://' > "${test%.picoc}.out_expected"
-  line3=$(sed -n '3p' "$test")
-  if [[ "$line3" == *datasegment* ]]; then
-    sed -n '3p' "$test" | sed -e 's/^\/\/ datasegment://' > "${test%.picoc}.datasegment_size"
-  fi
+  sed -n '1p' "$test" | sed -e 's/^\/\/ input://' > "${test%.reti}.input"
+  sed -n '2p' "$test" | sed -e 's/^\/\/ expected://' > "${test%.reti}.expected"
 done

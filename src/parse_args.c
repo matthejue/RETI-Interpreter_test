@@ -14,18 +14,27 @@ uint32_t sram_size = 4294967295;
 uint16_t page_size = 4096;
 uint32_t hdd_size = 4294967295;
 bool daemon_mode = false;
-uint8_t radius = 32;
+uint8_t radius = 2;
 uint8_t max_waiting_instrs = 10;
+bool verbose = false;
 
 char *peripherals_dir = ".";
 char *eprom_prgrm_path = "";
 char *sram_prgrm_path = "";
 char *isrs_prgrm_path = "";
 
+void print_help(char *bin_name) {
+  fprintf(stderr,
+          "Usage: %s -r ram_size -p page_size -h hdd_size -d (run as daemon)"
+          "-r radius -f file_dir -e eprom_prgrm_path -i isrs_prgrm_path "
+          "-w max_waiting_instrs input\n",
+          bin_name);
+}
+
 void parse_args(uint8_t argc, char *argv[]) {
   uint32_t opt;
 
-  while ((opt = getopt(argc, argv, "s:p:h:dr:f:e:i:w:")) != -1) {
+  while ((opt = getopt(argc, argv, "s:p:H:dr:f:e:i:w:hv")) != -1) {
     char *endptr;
     long tmp_val;
 
@@ -54,7 +63,7 @@ void parse_args(uint8_t argc, char *argv[]) {
       }
       page_size = tmp_val;
       break;
-    case 'h':
+    case 'H':
       tmp_val = strtol(optarg, &endptr, 10);
       if (endptr == optarg || *endptr != '\0') {
         perror("Error: Invalid hdd size");
@@ -102,19 +111,21 @@ void parse_args(uint8_t argc, char *argv[]) {
       }
       max_waiting_instrs = tmp_val;
       break;
+    case 'v':
+      verbose = true;
+      break;
+    case 'h':
+      print_help(argv[0]);
+      exit(EXIT_SUCCESS);
     default:
-      fprintf(
-          stderr,
-          "Usage: %s -r ram_size -p page_size -h hdd_size -d (run as daemon)"
-          "-r radius -f file_dir -e eprom_prgrm_path -i isrs_prgrm_path "
-          "-w max_waiting_instrs input\n",
-          argv[0]);
+      print_help(argv[0]);
       exit(EXIT_FAILURE);
     }
   }
 
   if (optind >= argc) {
     fprintf(stderr, "Expected argument after options\n");
+    print_help(argv[0]);
     exit(EXIT_FAILURE);
   }
 

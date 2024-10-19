@@ -1,21 +1,17 @@
 #!/usr/bin/env bash
 
-./space_replacer.py
 ./extract_input_and_expected.sh $2
-verification_res=$(./verify_tests.sh $1 $2)
 
 num_tests=0;
 not_running_through=();
 not_passed=();
 
 if [[ $2 == "all" ]]; then
-  paths=(./tests/*.picoc)
-elif [[ $2 == "default" ]]; then
-  paths=(./tests/{basic,special,example,error,tobias}*.picoc)
+  paths=(./syt_test/*.reti)
 elif [[ -n "$2" ]]; then
-  paths=(./tests/*$2*.picoc)
+  paths=(./sys_test/*$2*.reti)
 else
-  paths=(./tests/{basic,special,example,error,tobias}*.picoc)
+  paths=(./sys_test/{basic,advanced,special,example,error,tobias}*.reti)
 fi
 
 if [ ! -f "${paths[0]}" ]; then
@@ -24,24 +20,22 @@ fi
 
 for test in "${paths[@]}"; do
   ./heading_subheadings.py "heading" "$test" "$1" "="
-  ./src/main.py $(cat ./most_used_compile_opts.txt) $3 $4 "$test";
-  ./src/main.py $(cat ./most_used_interpret_opts.txt) $3 $4 "${test%.picoc}.reti";
+  ./bin/reti_interpreter_main $(cat ./run/test_opts.txt) $3 $4 "$test";
 
   if [[ $? != 0 ]]; then
     not_running_through+=("$test");
   fi;
 
-  diff "${test%.picoc}.out_expected" "${test%.picoc}.out"
+  diff "${test%.reti}.expected" "${test%.reti}.output"
   if [[ $? != 0 ]]; then
     not_passed+=("$test");
   fi
   ((num_tests++));
 done;
-echo "$verification_res" | tee ./tests/tests.res
-echo Running through: $(($num_tests-${#not_running_through[@]})) / $num_tests | tee -a ./tests/tests.res
-echo Not running through: ${not_running_through[*]} | tee -a ./tests/tests.res
-echo Passed: $(($num_tests-${#not_passed[@]})) / $num_tests | tee -a ./tests/tests.res
-echo Not passed: ${not_passed[*]} | tee -a ./tests/tests.res
+echo Running through: $(($num_tests-${#not_running_through[@]})) / $num_tests | tee -a ./sys_test/test_results
+echo Not running through: ${not_running_through[*]} | tee -a ./sys_test/test_results
+echo Passed: $(($num_tests-${#not_passed[@]})) / $num_tests | tee -a ./sys_test/test_results
+echo Not passed: ${not_passed[*]} | tee -a ./sys_test/test_results
 
 if [[ ${#not_passed[@]} != 0 ]]; then
     exit 1

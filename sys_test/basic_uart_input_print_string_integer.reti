@@ -1,6 +1,9 @@
-INT 3
+# == User input over UARt ==
 INT 2
+# == Print over UART ==
+ADDI ACC 2000000
 INT 0
+# == Print Hello World over UART ==
 # SAVE DS
 SUBI SP 1
 STOREIN SP DS 1 
@@ -44,4 +47,5 @@ ADDI SP 1
 MOVE DS ACC
 # Print over uart
 INT 1
+# == Print several integers over UART ==
 JUMP 0

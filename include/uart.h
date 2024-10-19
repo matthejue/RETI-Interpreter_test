@@ -11,6 +11,11 @@ extern uint16_t str_idx;
 extern uint8_t sending_waiting_time;
 extern uint8_t receiving_waiting_time;
 
+
+typedef enum { STRING, INTEGER } DataType;
+
+extern DataType datatype;
+
 void uart_send();
 void uart_receive();
 

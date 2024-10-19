@@ -10,7 +10,9 @@
 
 int main(int argc, char *argv[]) {
   parse_args(argc, argv);
-  print_args();
+  if (verbose) {
+    print_args();
+  }
 
   init_reti();
 

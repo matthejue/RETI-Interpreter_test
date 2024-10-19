@@ -1,0 +1,4 @@
+Running through: 3 / 3
+Not running through:
+Passed: 0 / 3
+Not passed: ./sys_test/basic_arith_ops.reti ./sys_test/basic_comments.reti ./sys_test/basic_uart_input_print_string_integer.reti

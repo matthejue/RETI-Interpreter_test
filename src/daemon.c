@@ -3,8 +3,8 @@
 #include "../include/globals.h"
 #include "../include/parse_args.h"
 #include "../include/reti.h"
-#include "../include/utils.h"
 #include "../include/uart.h"
+#include "../include/utils.h"
 #include <math.h>
 #include <stdbool.h>
 #include <stdint.h>
@@ -12,8 +12,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-
-bool breakpoint_encountered = false;
+bool breakpoint_encountered = true;
 
 Mnemonic_to_String opcode_to_mnemonic[] = {
     {ADDI, "ADDI"},     {SUBI, "SUBI"},       {MULTI, "MULTI"},
@@ -104,12 +103,15 @@ char *reg_to_mem_pntr(uint64_t idx, MemType mem_type) {
     uint32_t addr = read_array(regs, i, false);
     uint8_t addr_mem_type = addr >> 30;
     uint32_t addr_idx;
-    if(mem_type == SRAM) {
+    if (mem_type == SRAM) {
       addr_idx = addr & 0x7FFFFFFF;
     } else {
       addr_idx = addr & 0x3FFFFFFF;
     }
-    if ((addr_mem_type == 0b11 ? mem_type_to_constant[mem_type] == 0b10 : addr_mem_type == mem_type_to_constant[mem_type]) && addr_idx == idx) {
+    if ((addr_mem_type == 0b11
+             ? mem_type_to_constant[mem_type] == 0b10
+             : addr_mem_type == mem_type_to_constant[mem_type]) &&
+        addr_idx == idx) {
       active_regs = proper_str_cat(active_regs, register_name_to_code[i]);
       active_regs = proper_str_cat(active_regs, " ");
       at_least_one_reg = true;
@@ -134,21 +136,35 @@ void print_mem_content_with_idx(uint64_t idx, uint32_t mem_content,
                                 MemType mem_type) {
   char idx_str[20];
   switch (mem_type) {
-    case SRAM:
-      snprintf(idx_str, sizeof(idx_str), proper_str_cat(proper_str_cat("%0", num_digits_for_idx_str(sram_size)), "zu"), idx);
-      break;
-    case HDD:
-      snprintf(idx_str, sizeof(idx_str), proper_str_cat(proper_str_cat("%0", num_digits_for_idx_str(hdd_size)), "zu"), idx);
-      break;
-    case EPROM:
-      snprintf(idx_str, sizeof(idx_str), proper_str_cat(proper_str_cat("%0", num_digits_for_idx_str(num_instrs_start_prgrm)), "zu"), idx);
-      break;
-    case UART:
-      snprintf(idx_str, sizeof(idx_str), proper_str_cat(proper_str_cat("%0", num_digits_for_idx_str(NUM_UART_ADDRESSES)), "zu"), idx);
-      break;
-    default:
-      perror("Error: Invalid memory type");
-      exit(EXIT_FAILURE);
+  case SRAM:
+    snprintf(idx_str, sizeof(idx_str),
+             proper_str_cat(
+                 proper_str_cat("%0", num_digits_for_idx_str(sram_size)), "zu"),
+             idx);
+    break;
+  case HDD:
+    snprintf(idx_str, sizeof(idx_str),
+             proper_str_cat(
+                 proper_str_cat("%0", num_digits_for_idx_str(hdd_size)), "zu"),
+             idx);
+    break;
+  case EPROM:
+    snprintf(idx_str, sizeof(idx_str),
+             proper_str_cat(proper_str_cat("%0", num_digits_for_idx_str(
+                                                     num_instrs_start_prgrm)),
+                            "zu"),
+             idx);
+    break;
+  case UART:
+    snprintf(idx_str, sizeof(idx_str),
+             proper_str_cat(proper_str_cat("%0", num_digits_for_idx_str(
+                                                     NUM_UART_ADDRESSES)),
+                            "zu"),
+             idx);
+    break;
+  default:
+    perror("Error: Invalid memory type");
+    exit(EXIT_FAILURE);
   }
   const char *mem_content_str;
   if (are_instrs) {
@@ -168,20 +184,24 @@ void print_reg_content_with_reg(uint8_t idx, uint32_t mem_content) {
 }
 
 void print_array_with_idcs(MemType mem_type, uint8_t length, bool are_instrs) {
+  print_array_with_idcs_from_to(mem_type, 0, length-1, are_instrs);
+}
+
+void print_array_with_idcs_from_to(MemType mem_type, uint64_t start, uint64_t end, bool are_instrs) {
   switch (mem_type) {
   case REGS:
-    for (uint8_t i = 0; i < length; i++) {
+    for (uint8_t i = start; i <= end; i++) {
       print_reg_content_with_reg(i, ((uint32_t *)regs)[i]);
     }
     break;
   case EPROM:
-    for (uint16_t i = 0; i < length; i++) {
+    for (uint64_t i = start; i <= end; i++) {
       print_mem_content_with_idx(i, ((uint32_t *)eprom)[i], false, are_instrs,
                                  EPROM);
     }
     break;
   case UART:
-    for (uint8_t i = 0; i < length; i++) {
+    for (uint8_t i = start; i <= end; i++) {
       print_mem_content_with_idx(i, ((uint8_t *)uart)[i], false, are_instrs,
                                  UART);
     }
@@ -259,7 +279,7 @@ uint64_t determine_watchpoint_value(char *watchpoint_str) {
 }
 
 void print_sram_watchpoint(uint64_t sram_watchpoint_x) {
-  sram_watchpoint_x = max(0, sram_watchpoint_x & 0x7FFFFFFF);
+  sram_watchpoint_x = sram_watchpoint_x & 0x7FFFFFFF;
   print_file_with_idcs(SRAM, max(0, sram_watchpoint_x - radius),
                        min(sram_watchpoint_x + radius, ivt_max_idx), true,
                        false);
@@ -274,14 +294,15 @@ void print_sram_watchpoint(uint64_t sram_watchpoint_x) {
 
 void print_uart_meta_data() {
   printf("Send Data: ");
-  if (remaining_bytes == 0) {
+  if (datatype == STRING) {
     // print array until str_idx
-    for (uint8_t i = 0; i < str_idx - 1; i++) {
+    for (uint8_t i = 0; i < str_idx; i++) {
       printf("%c", send_data[i]);
     }
-  } else {
+  } else { // (datatype == INTEGER)
     // print array until num_bytes - remaining_bytes
-    for (uint8_t i = 0; i < ceil((double)(num_bytes - remaining_bytes) / 4); i++) {
+    for (uint8_t i = 0; i < ceil((double)(num_bytes - remaining_bytes) / 4);
+         i++) {
       printf("%d ", swap_endian_32(*((uint32_t *)(send_data + i * 4))));
     }
   }
@@ -296,8 +317,16 @@ void cont(void) {
   if (!breakpoint_encountered) {
     return;
   }
+  printf("All Registers:\n");
   print_array_with_idcs(REGS, NUM_REGISTERS, false);
-  print_array_with_idcs(EPROM, num_instrs_start_prgrm, true);
+
+  uint64_t eprom_watchpoint_int = determine_watchpoint_value(eprom_watchpoint);
+  printf("EPROM Watchpoint: %s (%lu)\n", eprom_watchpoint, eprom_watchpoint_int);
+  print_array_with_idcs_from_to(
+      EPROM, max(0, eprom_watchpoint_int - radius),
+      min(eprom_watchpoint_int + radius, num_instrs_start_prgrm - 1), true);
+
+  printf("All UART addresses:\n");
   print_array_with_idcs(UART, NUM_UART_ADDRESSES, false);
   print_uart_meta_data();
 
@@ -308,11 +337,11 @@ void cont(void) {
   uint64_t sram_watchpoint_stack_int =
       determine_watchpoint_value(sram_watchpoint_stack);
 
-  printf("SRAM Watchpoint Codesegment: %s\n", sram_watchpoint_cs);
+  printf("SRAM Watchpoint Codesegment: %s (%lu)\n", sram_watchpoint_cs, sram_watchpoint_cs_int);
   print_sram_watchpoint(sram_watchpoint_cs_int);
-  printf("SRAM Watchpoint Datasegment: %s\n", sram_watchpoint_ds);
+  printf("SRAM Watchpoint Datasegment: %s (%lu)\n", sram_watchpoint_ds, sram_watchpoint_ds_int);
   print_sram_watchpoint(sram_watchpoint_ds_int);
-  printf("SRAM Watchpoint Stack: %s\n", sram_watchpoint_stack);
+  printf("SRAM Watchpoint Stack: %s (%lu)\n", sram_watchpoint_stack, sram_watchpoint_stack_int);
   print_sram_watchpoint(sram_watchpoint_stack_int);
 
   // print_file_idcs(hdd, max(0, hdd_view_pos - radius),
@@ -336,6 +365,8 @@ void cont(void) {
       return;
     } else if (strcmp(stdin[0], "s") == 0) {
       break;
+    } else if (strcmp(stdin[0], "D") == 0) {
+      __asm__("int3"); // ../.gdbinit
     } else if (strcmp(stdin[0], "q") == 0) {
       exit(EXIT_SUCCESS);
     }

@@ -27,19 +27,24 @@ bool receiving_finished = false;
 
 bool init_finished = false;
 
+DataType datatype;
+
 void uart_send() {
   if (!(read_array(uart, 2, true) & 0b00000001) && !sending_finished) {
     if (!init_finished) {
       remaining_bytes = uart[0];
       if (remaining_bytes == 0) {
+        datatype = STRING;
         send_data = NULL;
       } else {
+        datatype = INTEGER;
         num_bytes = remaining_bytes;
         send_data = malloc(remaining_bytes);
+        memset(send_data, 0, remaining_bytes);
       }
 
       init_finished = true;
-    } else if (remaining_bytes > 0) {
+    } else if (datatype == INTEGER) {
       send_data[num_bytes - remaining_bytes] = uart[0];
       remaining_bytes--;
       if (remaining_bytes == 0) {

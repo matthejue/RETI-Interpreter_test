@@ -18,6 +18,7 @@ uint32_t num_instrs_prgrm = 0;
 uint32_t num_instrs_start_prgrm = 0;
 uint32_t num_instrs_isrs = 0;
 
+char *eprom_watchpoint = "PC";
 char *sram_watchpoint_cs = "PC";
 char *sram_watchpoint_ds = "DS";
 char *sram_watchpoint_stack = "SP";

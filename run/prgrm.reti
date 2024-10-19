@@ -1,0 +1,4 @@
+INT 3
+INT 2
+INT 0
+JUMP 0
