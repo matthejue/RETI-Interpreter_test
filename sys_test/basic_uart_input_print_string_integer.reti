@@ -1,7 +1,9 @@
+# input: 2097151
+# expected: 4194302 Hello World
 # == User input over UARt ==
 INT 2
 # == Print over UART ==
-ADDI ACC 2000000
+ADDI ACC 2097151
 INT 0
 # == Print Hello World over UART ==
 # SAVE DS

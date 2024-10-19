@@ -32,31 +32,29 @@ DataType datatype;
 void uart_send() {
   if (!(read_array(uart, 2, true) & 0b00000001) && !sending_finished) {
     if (!init_finished) {
-      remaining_bytes = uart[0];
-      if (remaining_bytes == 0) {
-        datatype = STRING;
+      datatype = uart[0];
+      switch (datatype) {
+      case STRING:
+        remaining_bytes = 0;
         send_data = NULL;
-      } else {
+        break;
+      case INTEGER:
         datatype = INTEGER;
-        num_bytes = remaining_bytes;
+        num_bytes = remaining_bytes = 4;
         send_data = malloc(remaining_bytes);
         memset(send_data, 0, remaining_bytes);
+        break;
       }
-
       init_finished = true;
     } else if (datatype == INTEGER) {
       send_data[num_bytes - remaining_bytes] = uart[0];
       remaining_bytes--;
       if (remaining_bytes == 0) {
-        for (int i = 0; i < ceil((double)num_bytes / 4); i++) {
-          printf("%d ", swap_endian_32(*((uint32_t *)(send_data + i * 4))));
-        }
-        printf("\n");
+        printf("%d\n", swap_endian_32(*((uint32_t *)(send_data))));
 
-        remaining_bytes = 0;
         init_finished = false;
       }
-    } else { // (datatype == STRING)
+    } else if (datatype == STRING) {
       send_data = realloc(send_data, 1);
       uint8_t data = uart[0];
       send_data[str_idx] = data;
@@ -64,10 +62,12 @@ void uart_send() {
       if (data == 0) {
         printf("%s\n", send_data);
 
-        remaining_bytes = 0;
         str_idx = 0;
         init_finished = false;
       }
+    } else {
+      perror("Error: Invalid datatype.\n");
+      exit(EXIT_FAILURE);
     }
 
     if (max_waiting_instrs == 0) {

@@ -8,4 +8,4 @@ sram.bin
 *.expected
 *.input
 *.output
-rest_reults
+test_results

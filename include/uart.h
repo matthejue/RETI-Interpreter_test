@@ -12,7 +12,7 @@ extern uint8_t sending_waiting_time;
 extern uint8_t receiving_waiting_time;
 
 
-typedef enum { STRING, INTEGER } DataType;
+typedef enum { STRING, INTEGER = 4 } DataType;
 
 extern DataType datatype;
 
