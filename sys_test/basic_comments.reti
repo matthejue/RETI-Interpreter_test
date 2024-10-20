@@ -1,5 +1,5 @@
 # input: 10
-# expected: 10
+# output: 10
 # aädf æsd: @asd; asdfasdf;
 INT 2 # A really important comment 
 INT 3

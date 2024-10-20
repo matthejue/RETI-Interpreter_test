@@ -1,5 +1,5 @@
-# input: 2097151
-# expected: 4194302 Hello World
+# input: 127
+# output: 2097278 Hello World
 # == User input over UARt ==
 INT 2
 # == Print over UART ==

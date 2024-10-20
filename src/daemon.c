@@ -301,22 +301,28 @@ void print_sram_watchpoint(uint64_t sram_watchpoint_x) {
 void print_uart_meta_data() {
   printf("Send Data: ");
   if (datatype == STRING) {
-    // print array until str_idx
-    for (uint8_t i = 0; i < str_idx; i++) {
+    // print array until send_idx
+    for (uint8_t i = 0; i < send_idx; i++) {
       printf("%c", send_data[i]);
     }
-  } else { // (datatype == INTEGER)
-    // print array until num_bytes - remaining_bytes
-    for (uint8_t i = 0; i < ceil((double)(num_bytes - remaining_bytes) / 4);
-         i++) {
-      printf("%d ", swap_endian_32(*((uint32_t *)(send_data + i * 4))));
-    }
+  } else if (datatype == INTEGER) {
+    printf("%d ", swap_endian_32(*((uint32_t *)send_data)));
+  } else {
+    perror("Error: Invalid datatype.\n");
+    exit(EXIT_FAILURE);
   }
   printf("\n");
   printf("Waiting time sending: ");
   printf("%d\n", sending_waiting_time);
   printf("Waiting time receiving: ");
   printf("%d\n", receiving_waiting_time);
+  if (test_mode) {
+    printf("UART input: ");
+    for (uint8_t i = input_idx; i < input_len; i++) {
+      printf("%d ", uart_input[i]);
+    }
+    printf("\n");
+  }
 }
 
 void cont(void) {

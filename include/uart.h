@@ -5,12 +5,15 @@
 
 extern uint8_t remaining_bytes;
 extern uint8_t num_bytes;
+extern uint16_t send_idx;
 extern uint8_t *send_data;
-extern uint16_t str_idx;
+
+extern int8_t *uart_input;
+extern uint8_t input_len;
+extern uint8_t input_idx;
 
 extern uint8_t sending_waiting_time;
 extern uint8_t receiving_waiting_time;
-
 
 typedef enum { STRING, INTEGER = 4 } DataType;
 

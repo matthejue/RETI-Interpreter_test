@@ -13,11 +13,14 @@
 
 uint8_t remaining_bytes = 0;
 uint8_t num_bytes = 0;
-
-uint16_t str_idx = 0;
-
+uint16_t send_idx = 0;
 uint8_t *send_data;
-char received_num = '\0';
+
+int8_t *uart_input = NULL;
+uint8_t input_len = 0;
+uint8_t input_idx = 0;
+
+int8_t received_num = '\0';
 
 uint8_t sending_waiting_time = 0;
 uint8_t receiving_waiting_time = 0;
@@ -44,25 +47,28 @@ void uart_send() {
         send_data = malloc(remaining_bytes);
         memset(send_data, 0, remaining_bytes);
         break;
+      default:
+        perror("Error: Invalid datatype.\n");
+        exit(EXIT_FAILURE);
       }
       init_finished = true;
     } else if (datatype == INTEGER) {
       send_data[num_bytes - remaining_bytes] = uart[0];
       remaining_bytes--;
       if (remaining_bytes == 0) {
-        printf("%d\n", swap_endian_32(*((uint32_t *)(send_data))));
+        printf("%d\n", swap_endian_32(*((uint32_t *)send_data)));
 
         init_finished = false;
       }
     } else if (datatype == STRING) {
       send_data = realloc(send_data, 1);
       uint8_t data = uart[0];
-      send_data[str_idx] = data;
-      str_idx++;
+      send_data[send_idx] = data;
+      send_idx++;
       if (data == 0) {
         printf("%s\n", send_data);
 
-        str_idx = 0;
+        send_idx = 0;
         init_finished = false;
       }
     } else {
@@ -86,43 +92,57 @@ void uart_send() {
   }
 }
 
+void ask_for_user_input() {
+  int8_t input[4];
+
+  while (true) {
+    printf("Please enter a number or a character: ");
+    if (fgets((char *)input, sizeof(input), stdin) == NULL) {
+      perror("Error: Couldn't read input.\n");
+    }
+    uint8_t idx_of_newline = strcspn((char *)input, "\n");
+    if (idx_of_newline > 3) {
+      perror("Error: Input with more than 3 characters not possible, the "
+             "resuliting number would definitely by out of range.\n");
+      exit(EXIT_FAILURE);
+    }
+    input[idx_of_newline] = '\0';
+
+    if (isalpha(input[0]) && !receiving_finished) {
+      if (strlen((char *)input) > 1) {
+        perror("Error: Only one character allowed.\n");
+      } else {
+        received_num = input[0];
+        break;
+      }
+    } else if (isdigit(input[0])) {
+      char *endptr;
+      received_num = strtol((char *)input, &endptr, 10);
+      if (*endptr != '\0') {
+        const char *str = "Error: Further characters after number: ";
+        const char *str2 = proper_str_cat(str, endptr);
+        const char *str3 = proper_str_cat(str2, ".\n");
+        perror(str3);
+      } else if (received_num < INT8_MIN && received_num > INT8_MAX) {
+        perror("Error: Number out of range, must be between -128 and 127.\n");
+      } else {
+        break;
+      }
+    } else {
+      perror("Error: Invalid input.\n");
+    }
+  }
+}
+
 void uart_receive() {
   if (!(read_array(uart, 2, true) & 0b00000010) && !receiving_finished) {
-    char input[4]; // Buffer to store the input
-
-    while (true) {
-      printf("Please enter a number or a character: ");
-      // TODO: What happens if more than 4 characters are entered? Error needed
-      // for that
-      if (fgets(input, sizeof(input), stdin) == NULL) {
-        perror("Error: Couldn't read input.\n");
-      }
-      input[strcspn(input, "\n")] = '\0';
-
-      if (isalpha(input[0]) && !receiving_finished) {
-        if (strlen(input) > 1) {
-          perror("Error: Only one character allowed.\n");
-        } else {
-          received_num = input[0];
-          break;
-        }
-      } else if (isdigit(input[0])) {
-        char *endptr;
-        received_num = strtol(input, &endptr, 10);
-        if (*endptr != '\0') {
-          const char *str = "Error: Further characters after number: ";
-          const char *str2 = proper_str_cat(str, endptr);
-          const char *str3 = proper_str_cat(str2, ".\n");
-          perror(str3);
-        } else if (received_num < INT8_MIN && received_num > INT8_MAX) {
-          perror("Error: Number out of range, must be between -128 and 127.\n");
-        } else {
-          break;
-        }
-      } else {
-        perror("Error: Invalid input.\n");
-      }
+    if (test_mode && input_idx < input_len) {
+      received_num = uart_input[input_idx];
+      input_idx++;
+    } else {
+      ask_for_user_input();
     }
+
     if (max_waiting_instrs == 0) {
       goto receiving_finished;
     } else {

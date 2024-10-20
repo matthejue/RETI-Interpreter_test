@@ -1,4 +1,3 @@
-// #include <stdio.h>
 #include "../include/error.h"
 #include "../include/globals.h"
 #include "../include/interpr.h"
@@ -6,6 +5,8 @@
 #include "../include/parse_instrs.h"
 #include "../include/reti.h"
 #include "../include/utils.h"
+#include "../include/test_mode.h"
+#include "../include/uart.h"
 #include <string.h>
 
 int main(int argc, char *argv[]) {
@@ -13,7 +14,9 @@ int main(int argc, char *argv[]) {
   if (verbose) {
     print_args();
   }
-  // extract_comment_metadata(sram_prgrm_path);
+  if (test_mode) {
+    uart_input = extract_comment_metadata(sram_prgrm_path, &input_len);
+  }
 
   init_reti();
 
