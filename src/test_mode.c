@@ -6,8 +6,12 @@
 #include <string.h>
 
 int8_t *extract_input_from_comment(const char *line, uint8_t *len) {
-  const char *prefix = "# input:";
-  if (strncmp(line, prefix, strlen(prefix)) != 0) {
+  const char *prefix;
+  if (strncmp(line, "# input:", strlen("# input:")) == 0) {
+    prefix = "# input:";
+  } else if (strncmp(line, "#input:", strlen("#input:")) == 0) {
+    prefix = "#input:";
+  } else {
     return NULL;
   }
 
