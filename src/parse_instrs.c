@@ -11,7 +11,7 @@
 // TODO: Irgendwie durch untere Funktionen dafür sorgen, dass immer nur ein
 // TODO: nen check machen, ob Zahl nicht zu lang, später in ner anderen
 
-uint32_t ivt_max_idx = 0;
+uint32_t ivt_max_idx = -1;
 
 String_Instruction *parse_instr(const char **original_prgrm_pntr) {
   const char *prgrm_pntr = *original_prgrm_pntr;

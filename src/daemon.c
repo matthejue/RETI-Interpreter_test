@@ -284,9 +284,11 @@ void print_sram_watchpoint(uint64_t sram_watchpoint_x) {
     return;
   }
   sram_watchpoint_x = sram_watchpoint_x & 0x7FFFFFFF;
-  print_file_with_idcs(SRAM, max(0, sram_watchpoint_x - radius),
-                       min(sram_watchpoint_x + radius, ivt_max_idx), true,
-                       false);
+  if (ivt_max_idx != -1) {
+    print_file_with_idcs(SRAM, max(0, sram_watchpoint_x - radius),
+                         min(sram_watchpoint_x + radius, ivt_max_idx), true,
+                         false);
+  }
   print_file_with_idcs(
       SRAM, max(ivt_max_idx + 1, sram_watchpoint_x - radius),
       min(sram_watchpoint_x + radius, num_instrs_isrs + num_instrs_prgrm - 1),
