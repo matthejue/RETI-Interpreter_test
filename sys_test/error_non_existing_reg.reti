@@ -1,2 +1,3 @@
+# expected: 1
 LOADIN AC2 IN2 2
 JUMP 0

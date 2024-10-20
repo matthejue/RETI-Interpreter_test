@@ -13,11 +13,14 @@ int main(int argc, char *argv[]) {
   if (verbose) {
     print_args();
   }
+  // extract_comment_metadata(sram_prgrm_path);
 
   init_reti();
 
-  error_context.filename = isrs_prgrm_path;
-  parse_and_load_program(get_prgrm_content(isrs_prgrm_path), ISR_PRGRMS);
+  if (strcmp(isrs_prgrm_path, "") != 0) {
+    error_context.filename = isrs_prgrm_path;
+    parse_and_load_program(get_prgrm_content(isrs_prgrm_path), ISR_PRGRMS);
+  }
 
   error_context.filename = sram_prgrm_path;
   parse_and_load_program(get_prgrm_content(sram_prgrm_path), SRAM_PRGRM);

@@ -184,10 +184,11 @@ void print_reg_content_with_reg(uint8_t idx, uint32_t mem_content) {
 }
 
 void print_array_with_idcs(MemType mem_type, uint8_t length, bool are_instrs) {
-  print_array_with_idcs_from_to(mem_type, 0, length-1, are_instrs);
+  print_array_with_idcs_from_to(mem_type, 0, length - 1, are_instrs);
 }
 
-void print_array_with_idcs_from_to(MemType mem_type, uint64_t start, uint64_t end, bool are_instrs) {
+void print_array_with_idcs_from_to(MemType mem_type, uint64_t start,
+                                   uint64_t end, bool are_instrs) {
   switch (mem_type) {
   case REGS:
     for (uint8_t i = start; i <= end; i++) {
@@ -279,6 +280,9 @@ uint64_t determine_watchpoint_value(char *watchpoint_str) {
 }
 
 void print_sram_watchpoint(uint64_t sram_watchpoint_x) {
+  if (!(sram_watchpoint_x & 0x80000000)) {
+    return;
+  }
   sram_watchpoint_x = sram_watchpoint_x & 0x7FFFFFFF;
   print_file_with_idcs(SRAM, max(0, sram_watchpoint_x - radius),
                        min(sram_watchpoint_x + radius, ivt_max_idx), true,
@@ -317,11 +321,13 @@ void cont(void) {
   if (!breakpoint_encountered) {
     return;
   }
+
   printf("All Registers:\n");
   print_array_with_idcs(REGS, NUM_REGISTERS, false);
 
   uint64_t eprom_watchpoint_int = determine_watchpoint_value(eprom_watchpoint);
-  printf("EPROM Watchpoint: %s (%lu)\n", eprom_watchpoint, eprom_watchpoint_int);
+  printf("EPROM Watchpoint: %s (%lu)\n", eprom_watchpoint,
+         eprom_watchpoint_int);
   print_array_with_idcs_from_to(
       EPROM, max(0, eprom_watchpoint_int - radius),
       min(eprom_watchpoint_int + radius, num_instrs_start_prgrm - 1), true);
@@ -337,11 +343,14 @@ void cont(void) {
   uint64_t sram_watchpoint_stack_int =
       determine_watchpoint_value(sram_watchpoint_stack);
 
-  printf("SRAM Watchpoint Codesegment: %s (%lu)\n", sram_watchpoint_cs, sram_watchpoint_cs_int);
+  printf("SRAM Watchpoint Codesegment: %s (%lu)\n", sram_watchpoint_cs,
+         sram_watchpoint_cs_int);
   print_sram_watchpoint(sram_watchpoint_cs_int);
-  printf("SRAM Watchpoint Datasegment: %s (%lu)\n", sram_watchpoint_ds, sram_watchpoint_ds_int);
+  printf("SRAM Watchpoint Datasegment: %s (%lu)\n", sram_watchpoint_ds,
+         sram_watchpoint_ds_int);
   print_sram_watchpoint(sram_watchpoint_ds_int);
-  printf("SRAM Watchpoint Stack: %s (%lu)\n", sram_watchpoint_stack, sram_watchpoint_stack_int);
+  printf("SRAM Watchpoint Stack: %s (%lu)\n", sram_watchpoint_stack,
+         sram_watchpoint_stack_int);
   print_sram_watchpoint(sram_watchpoint_stack_int);
 
   // print_file_idcs(hdd, max(0, hdd_view_pos - radius),

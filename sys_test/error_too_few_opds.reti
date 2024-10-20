@@ -1,2 +1,3 @@
+# expected: 1
 INT
 JUMP 0

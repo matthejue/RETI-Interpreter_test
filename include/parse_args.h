@@ -20,4 +20,7 @@ extern char *isrs_prgrm_path;
 void parse_args(uint8_t argc, char *argv[]);
 void print_args() ;
 
+/*uint8_t* extract_comment_metadata(const char *prgrm_path, size_t *size) ;*/
+/*uint8_t* extract_input_from_comment(const char *line, size_t *size) ;*/
+
 #endif // PARSE_ARGS_H
