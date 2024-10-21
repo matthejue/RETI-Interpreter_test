@@ -5,7 +5,6 @@ bin/
 compile_commands.json
 hdd.bin
 sram.bin
-*.expected
-*.input
+*.expected_output
 *.output
 test_results
