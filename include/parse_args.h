@@ -9,6 +9,7 @@ extern uint16_t page_size;
 extern uint32_t hdd_size;
 extern bool daemon_mode;
 extern bool test_mode;
+extern bool read_metadata;
 extern uint8_t radius;
 extern uint8_t max_waiting_instrs;
 extern bool verbose;

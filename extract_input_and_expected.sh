@@ -10,10 +10,10 @@ fi
 
 for test in "${paths[@]}"; do
   if [[ $(sed -n "1p" "$test") =~ ^#\ output:\  ]]; then
-    sed -n '1p' "$test" | sed -e 's/^# output: //' > "${test%.reti}.expected_output"
+    sed -n '1p' "$test" | sed -e 's/^# output: //' | tr '\n' ' ' > "${test%.reti}.expected_output"
   elif [[ $(sed -n "2p" "$test") =~ ^#\ output:\  ]]; then
-    sed -n '2p' "$test" | sed -e 's/^# output: //' > "${test%.reti}.expected_output"
+    sed -n '2p' "$test" | sed -e 's/^# output: //' | tr '\n' ' ' > "${test%.reti}.expected_output"
   elif [[ $(sed -n "3p" "$test") =~ ^#\ output:\  ]]; then
-    sed -n '3p' "$test" | sed -e 's/^# output: //' > "${test%.reti}.expected_output"
+    sed -n '3p' "$test" | sed -e 's/^# output: //' | tr '\n' ' ' > "${test%.reti}.expected_output"
   fi
 done

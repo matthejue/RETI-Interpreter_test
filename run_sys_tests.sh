@@ -26,7 +26,7 @@ for test in "${paths[@]}"; do
     not_running_through+=("$test");
   fi;
 
-  diff "${test%.reti}.expected" "${test%.reti}.output"
+  diff "${test%.reti}.expected_output" "${test%.reti}.output"
   if [[ $? != 0 ]]; then
     not_passed+=("$test");
   fi

@@ -316,7 +316,7 @@ void print_uart_meta_data() {
   printf("%d\n", sending_waiting_time);
   printf("Waiting time receiving: ");
   printf("%d\n", receiving_waiting_time);
-  if (test_mode) {
+  if (read_metadata) {
     printf("UART input: ");
     for (uint8_t i = input_idx; i < input_len; i++) {
       printf("%d ", uart_input[i]);

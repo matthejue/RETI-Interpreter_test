@@ -1,4 +1,4 @@
-#include "../include/test_mode.h"
+#include "../include/special_opts.h"
 #include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>

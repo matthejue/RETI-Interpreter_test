@@ -3,9 +3,9 @@
 #include "../include/parse_args.h"
 #include "../include/reti.h"
 #include "../include/utils.h"
+#include "../include/special_opts.h"
 #include <ctype.h>
 #include <limits.h>
-#include <math.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -56,7 +56,7 @@ void uart_send() {
       send_data[num_bytes - remaining_bytes] = uart[0];
       remaining_bytes--;
       if (remaining_bytes == 0) {
-        printf("%d\n", swap_endian_32(*((uint32_t *)send_data)));
+        adjust_print(true, "%d\n", "%d ", swap_endian_32(*((uint32_t *)send_data)));
 
         init_finished = false;
       }
@@ -66,7 +66,7 @@ void uart_send() {
       send_data[send_idx] = data;
       send_idx++;
       if (data == 0) {
-        printf("%s\n", send_data);
+        adjust_print(true, "%s\n", "%s ", send_data);
 
         send_idx = 0;
         init_finished = false;
@@ -136,7 +136,7 @@ void ask_for_user_input() {
 
 void uart_receive() {
   if (!(read_array(uart, 2, true) & 0b00000010) && !receiving_finished) {
-    if (test_mode && input_idx < input_len) {
+    if (read_metadata && input_idx < input_len) {
       received_num = uart_input[input_idx];
       input_idx++;
     } else {

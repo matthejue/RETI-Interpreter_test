@@ -5,7 +5,7 @@
 #include "../include/parse_instrs.h"
 #include "../include/reti.h"
 #include "../include/utils.h"
-#include "../include/test_mode.h"
+#include "../include/special_opts.h"
 #include "../include/uart.h"
 #include <string.h>
 
@@ -14,8 +14,11 @@ int main(int argc, char *argv[]) {
   if (verbose) {
     print_args();
   }
-  if (test_mode) {
+  if (read_metadata) {
     uart_input = extract_comment_metadata(sram_prgrm_path, &input_len);
+  }
+  if (test_mode) {
+    create_output_file();
   }
 
   init_reti();
@@ -39,28 +42,8 @@ int main(int argc, char *argv[]) {
   interpr_prgrm();
 
   fin_reti();
+  if (test_mode) {
+    close_output_file();
+  }
   return 0;
 }
-
-// TODO:
-// - cli options:
-//   - RAM size
-//   - page size
-// - reti, eprom, uart, sram, sata
-//   - Befehle am Anfang reinladen ins CS
-// - paging table generieren
-// - eprom, regs und uart keine Dateien, nur sram und hdd
-// - Startprogram bei der Kompilierung schon vorher erstellen
-// - Kommentare supporten
-// - INT und RETI
-// - Test machen, der alle Instructions einmal ausführt
-// - Memory Map über DS Register steuerbar machen
-// - Error cases, division by zero usw. hinzufügen
-// - eigene utils.c und utils.h mit mod, max und min und sign extension
-// - vergessen, dass längster 22 bit Integer -4194304 bis 9 characters braucht
-// TODO: Tobias fragen wegen strings und readonly data segment
-// TODO: Tobias fragen, ob padding und alignment für structs notwendig
-// TODO: Tobias: memory contant that corresponds to utf8 / ascii letter print as
-// ascii or just number?
-// TODO: Tobias: Was wenn man negative 22 Bit 2er Komplementzahl bitwise, xor,
-// and oder or nimmt?

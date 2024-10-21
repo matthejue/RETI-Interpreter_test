@@ -15,6 +15,7 @@ uint16_t page_size = 4096;
 uint32_t hdd_size = 4294967295;
 bool daemon_mode = false;
 bool test_mode = false;
+bool read_metadata = false;
 uint8_t radius = 2;
 uint8_t max_waiting_instrs = 10;
 bool verbose = false;
@@ -28,7 +29,8 @@ void print_help(char *bin_name) {
   fprintf(stderr,
           "Usage: %s -r ram_size -p page_size -H hdd_size -d (daemon mode) "
           "-r radius -f file_dir -e eprom_prgrm_path -i isrs_prgrm_path "
-          "-w max_waiting_instrs -t (test mode) -v (verbose) -h (help page) "
+          "-w max_waiting_instrs -t (test mode) -m (read metadata) -v "
+          "(verbose) -h (help page) "
           "prgrm_path\n",
           bin_name);
 }
@@ -36,7 +38,7 @@ void print_help(char *bin_name) {
 void parse_args(uint8_t argc, char *argv[]) {
   uint32_t opt;
 
-  while ((opt = getopt(argc, argv, "s:p:H:dr:f:e:i:w:hvt")) != -1) {
+  while ((opt = getopt(argc, argv, "s:p:H:dr:f:e:i:w:hvtm")) != -1) {
     char *endptr;
     long tmp_val;
 
@@ -119,6 +121,9 @@ void parse_args(uint8_t argc, char *argv[]) {
     case 't':
       test_mode = true;
       break;
+    case 'm':
+      read_metadata = true;
+      break;
     case 'h':
       print_help(argv[0]);
       exit(EXIT_SUCCESS);
@@ -143,6 +148,7 @@ void print_args() {
   printf("HDD Size: %u\n", hdd_size);
   printf("Maximum number of waiting instructions: %u\n", max_waiting_instrs);
   printf("Daemon Mode: %s\n", daemon_mode ? "true" : "false");
+  printf("Read Metadata: %s\n", read_metadata ? "true" : "false");
   printf("Test Mode: %s\n", test_mode ? "true" : "false");
   printf("Verbose: %s\n", verbose ? "true" : "false");
   printf("Radius: %u\n", radius);
