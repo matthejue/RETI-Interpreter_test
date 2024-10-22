@@ -103,7 +103,8 @@ void adjust_print(bool is_stdout, const char *format, const char *format_no_newl
     if (output_file != NULL) {
       vfprintf(output_file, format_no_newline, args);
     } else {
-      fprintf(stderr, "Error: File not opened for output\n");
+      perror("Error: File not opened for output\n");
+      exit(EXIT_FAILURE);
     }
   } else {
     if (is_stdout) {

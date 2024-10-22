@@ -1,0 +1,14 @@
+# input: 41
+# output: 42
+INT 2
+
+DIVI ACC 2; ; # don't care about readable code
+
+
+MULTI ACC 3; SUBI ACC 18
+
+INT 0
+
+     JUMP 0
+
+# end of the program

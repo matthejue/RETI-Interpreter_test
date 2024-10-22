@@ -14,8 +14,8 @@ SRC := $(filter-out %_main.c %_test.c, $(wildcard $(SRC_DIR)/*.c))
 OBJ_SRC := $(SRC:$(SRC_DIR)/%.c=$(OBJ_DIR)/%.o)
 
 CPPFLAGS := -I$(INCLUDE_DIR) -MMD -MP
-CFLAGS   := -Wall -g # -O2
-LDFLAGS  := -L$(LIB_DIR)
+CFLAGS   := -Wall # -g -O2
+LDFLAGS  := -L$(LIB_DIR) # -static
 LDLIBS   := -lm
 
 .PRECIOUS: $(OBJ_DIR)/%.o $(OBJ_TEST_DIR)/%.o
@@ -71,7 +71,7 @@ DEB_BIN := reti_interpreter_main
 debug: $(BIN_SRC) $(BIN_TEST)
 	gdb --tui -n -x ./.gdbinit --args ./bin/$(DEB_BIN) $(shell cat ./run/deb_opts.txt) $(EXTRA_ARGS) $(RUN_PRGRM)
 
-install-linux:
+install-linux: $(BIN_SRC)
 	@sudo bash -c "([[ ! -f /usr/local/bin/reti_interpreter ]] || rm /usr/local/bin/reti_interpreter) && chmod 755 ./bin/reti_interpreter_main && sudo ln -s $(realpath .)/bin/reti_interpreter_main /usr/local/bin/reti_interpreter"
 
 -include $(OBJ:.o=.d)

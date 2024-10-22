@@ -1,4 +1,3 @@
-// #include <stdio.h>
 #include "../include/parse_args.h"
 #include "../include/globals.h"
 #include "../include/interpr.h"

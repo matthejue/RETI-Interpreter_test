@@ -97,7 +97,7 @@ void parse_and_load_program(char *prgrm, Program_Type prgrm_type) {
     error_context.code_current = prgrm_pntr;
     String_Instruction *str_instr = parse_instr(&prgrm_pntr);
     if (isalpha(*str_instr->op)) {
-      // TODO: Problem, dass es auch leere Zeilen geben kann
+      // the if solves the problem of empty lines or empty space between ';'
       uint32_t machine_instr = assembly_to_machine(str_instr);
       switch (prgrm_type) {
       case SRAM_PRGRM:

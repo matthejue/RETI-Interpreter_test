@@ -1,6 +1,7 @@
 #include "../include/error.h"
 #include "../include/assemble.h"
 #include "../include/utils.h"
+#include "../include/special_opts.h"
 #include <ctype.h>
 #include <stdint.h>
 #include <stdio.h>
