@@ -330,8 +330,10 @@ void cont(void) {
     return;
   }
 
+  printf("\n\n");
   printf("All Registers:\n");
   print_array_with_idcs(REGS, NUM_REGISTERS, false);
+  printf("\n");
 
   uint64_t eprom_watchpoint_int = determine_watchpoint_value(eprom_watchpoint);
   printf("EPROM Watchpoint: %s (%lu)\n", eprom_watchpoint,
@@ -339,10 +341,12 @@ void cont(void) {
   print_array_with_idcs_from_to(
       EPROM, max(0, eprom_watchpoint_int - radius),
       min(eprom_watchpoint_int + radius, num_instrs_start_prgrm - 1), true);
+  printf("\n");
 
   printf("All UART addresses:\n");
   print_array_with_idcs(UART, NUM_UART_ADDRESSES, false);
   print_uart_meta_data();
+  printf("\n");
 
   uint64_t sram_watchpoint_cs_int =
       determine_watchpoint_value(sram_watchpoint_cs);
@@ -360,6 +364,11 @@ void cont(void) {
   printf("SRAM Watchpoint Stack: %s (%lu)\n", sram_watchpoint_stack,
          sram_watchpoint_stack_int);
   print_sram_watchpoint(sram_watchpoint_stack_int);
+
+  printf("\n");
+  printf("(n)ext line, (q)uit,\n");
+  printf("(c)ontinue to breakpoint\n");
+  printf("========================\n");
 
   // print_file_idcs(hdd, max(0, hdd_view_pos - radius),
   //                 min(hdd_view_pos + radius, hdd_size-1), false);
