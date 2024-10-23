@@ -1,6 +1,5 @@
 #include "../include/daemon.h"
 #include "../include/assemble.h"
-#include "../include/globals.h"
 #include "../include/parse_args.h"
 #include "../include/reti.h"
 #include "../include/uart.h"
@@ -81,7 +80,7 @@ char *assembly_to_str(Instruction *instr) {
     dest = copy_im_into_str(dest, instr->opd1);
   } else if (instr->op == RTI || instr->op == NOP) {
   } else {
-    perror("Invalid instruction");
+    fprintf(stderr, "Invalid instruction");
     exit(EXIT_FAILURE);
   }
   return instr_str;
@@ -163,7 +162,7 @@ void print_mem_content_with_idx(uint64_t idx, uint32_t mem_content,
              idx);
     break;
   default:
-    perror("Error: Invalid memory type");
+    fprintf(stderr, "Error: Invalid memory type");
     exit(EXIT_FAILURE);
   }
   const char *mem_content_str;
@@ -208,7 +207,7 @@ void print_array_with_idcs_from_to(MemType mem_type, uint64_t start,
     }
     break;
   default:
-    perror("Error: Invalid memory type");
+    fprintf(stderr, "Error: Invalid memory type");
     exit(EXIT_FAILURE);
   }
 }
@@ -229,7 +228,7 @@ void print_file_with_idcs(MemType mem_type, uint64_t start, uint64_t end,
     }
     break;
   default:
-    perror("Error: Invalid memory type");
+    fprintf(stderr, "Error: Invalid memory type");
     exit(EXIT_FAILURE);
   }
 }
@@ -268,9 +267,9 @@ uint64_t determine_watchpoint_value(char *watchpoint_str) {
     const char *str = "Error: Further characters after number: ";
     const char *str2 = proper_str_cat(str, endptr);
     const char *str3 = proper_str_cat(str2, ".\n");
-    perror(str3);
+    fprintf(stderr, "%s", str3);
   } else if (watchpoint_val < 0 && watchpoint_val > UINT64_MAX) {
-    perror("Error: Number out of range, must be between 0 and "
+    fprintf(stderr, "Error: Number out of range, must be between 0 and "
            "18446744073709551615.\n");
   }
 
@@ -308,7 +307,7 @@ void print_uart_meta_data() {
   } else if (datatype == INTEGER) {
     printf("%d ", swap_endian_32(*((uint32_t *)send_data)));
   } else {
-    perror("Error: Invalid datatype.\n");
+    fprintf(stderr, "Error: Invalid datatype.\n");
     exit(EXIT_FAILURE);
   }
   printf("\n");
@@ -368,7 +367,7 @@ void cont(void) {
   char buffer[26];
   while (true) {
     if (fgets(buffer, sizeof(buffer), stdin) == NULL) {
-      perror("Error: Reading input not successful\n");
+      fprintf(stderr, "Error: Reading input not successful\n");
     }
     printf("\033[A\033[K");
 
