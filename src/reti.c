@@ -179,15 +179,15 @@ uint32_t read_storage_sram_constant_fill(uint32_t addr) {
 uint32_t read_storage(uint32_t addr) {
   uint8_t stor_mode = addr >> 30;
   switch (stor_mode) {
-  case 0b00:
-    addr = addr & 0x3FFFFFFF;
+  case EPROM_CONST:
+    // addr = addr & 0x3FFFFFFF; makes no sense because it already is 0b00
     return read_array(eprom, addr, false);
     break;
-  case 0b01:
+  case UART_CONST:
     addr = addr & 0x3FFFFFFF;
     return read_array(uart, addr, true);
     break;
-  default:
+  default: // SRAM_CONST
     addr = addr & 0x7FFFFFFF;
     return read_file(sram, addr);
     break;
@@ -203,7 +203,7 @@ void write_storage(uint32_t addr, uint32_t buffer) {
   uint8_t stor_mode = addr >> 30;
   switch (stor_mode) {
   case EPROM_CONST:
-    // addr = addr & 0x3FFFFFFF; maes no ense because it already is 0b00
+    // addr = addr & 0x3FFFFFFF; makes no sense because it already is 0b00
     write_array(eprom, addr, buffer, false);
     break;
   case UART_CONST:

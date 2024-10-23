@@ -108,7 +108,7 @@ char *reg_to_mem_pntr(uint64_t idx, MemType mem_type) {
       addr_idx = addr & 0x3FFFFFFF;
     }
     if ((addr_mem_type == 0b11
-             ? mem_type_to_constant[mem_type] == 0b10
+             ? mem_type_to_constant[mem_type] == SRAM_CONST
              : addr_mem_type == mem_type_to_constant[mem_type]) &&
         addr_idx == idx) {
       active_regs = proper_str_cat(active_regs, register_name_to_code[i]);
@@ -270,7 +270,7 @@ uint64_t determine_watchpoint_value(char *watchpoint_str) {
     fprintf(stderr, "%s", str3);
   } else if (watchpoint_val < 0 && watchpoint_val > UINT64_MAX) {
     fprintf(stderr, "Error: Number out of range, must be between 0 and "
-           "18446744073709551615.\n");
+                    "18446744073709551615.\n");
   }
 
   // TODO: later also add in paging physical addresses
