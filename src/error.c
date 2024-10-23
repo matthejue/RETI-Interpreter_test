@@ -32,22 +32,22 @@ void display_error_message(const char *error_type, const char *error_message,
     case EPROM_CONST:
       rel_addr = addr;
       adjust_print(false, "%s:", NULL, eprom_prgrm_path);
-      adjust_print(false, "%d: ", NULL, addr + 1);
+      adjust_print(false, "i%d: ", NULL, addr + 1);
       break;
     case UART_CONST:
       rel_addr = addr & 0x3FFFFFFF;
       adjust_print(false,
                    "UART content of register %s interpreted as instruction: ",
-                   NULL, rel_addr + 1);
+                   NULL, rel_addr);
       break;
     default: // SRAM_CONSt
       rel_addr = addr & 0x7FFFFFFF;
       if (rel_addr < num_instrs_isrs) {
         adjust_print(false, "%s:", NULL, isrs_prgrm_path);
-        adjust_print(false, "%d: ", NULL, rel_addr + 1);
+        adjust_print(false, "i%d: ", NULL, rel_addr + 1);
       } else {
         adjust_print(false, "%s:", NULL, sram_prgrm_path);
-        adjust_print(false, "%d: ", NULL, rel_addr - num_instrs_isrs + 1);
+        adjust_print(false, "i%d: ", NULL, rel_addr - num_instrs_isrs + 1);
       }
       break;
     }
