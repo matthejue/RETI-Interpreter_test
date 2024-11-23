@@ -67,6 +67,6 @@ jobs:
         files: |
           ./reti_interpreter-linux/reti_interpreter-linux
           ./reti_interpreter-macos/reti_interpreter-macos
-          ./reti_interpreter-windows/reti_interpreter-windows.exe
+          ./reti_interpreter-windows.exe/reti_interpreter-windows.exe
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
