@@ -23,8 +23,17 @@ jobs:
     steps:
     - uses: actions/checkout@v3
 
-    - name: Set up GCC
-      uses: egor-tensin/setup-gcc@v1
+    - name: Set up environment
+      if: matrix.os == 'ubuntu-latest'
+      run: sudo apt-get update && sudo apt-get install -y gcc
+
+    - name: Set up environment
+      if: matrix.os == 'macos-latest'
+      run: brew install gcc
+
+    - name: Set up environment
+      if: matrix.os == 'windows-latest'
+      run: choco install mingw
 
     - name: Build with Make
       run: |
