@@ -60,15 +60,13 @@ jobs:
     steps:
     - name: Download artifacts
       uses: actions/download-artifact@v3
-      with:
-        path: ./artifacts
 
     - name: Create Release
       uses: softprops/action-gh-release@v1
       with:
         files: |
-          ./artifacts/reti_interpreter-linux
-          ./artifacts/reti_interpreter-macos
-          ./artifacts/reti_interpreter-windows.exe
+          ./reti_interpreter-linux/reti_interpreter-linux
+          ./reti_interpreter-macos/reti_interpreter-macos
+          ./reti_interpreter-windows/reti_interpreter-windows.exe
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
