@@ -33,7 +33,6 @@ jobs:
       if: matrix.os == 'macos-latest'
       run: |
         brew install gcc
-        xcode-select --install
 
     - name: Set up environment
       if: matrix.os == 'windows-latest'
@@ -45,7 +44,11 @@ jobs:
 
     - name: Build with Make
       run: |
-        make STATIC=1
+        if [ "${{ matrix.os }}" = "macos-latest" ]; then
+          make
+        else
+          make STATIC=1
+        fi
         mv ./bin/reti_interpreter_main ./bin/${{ matrix.output }}
       shell: bash
 
