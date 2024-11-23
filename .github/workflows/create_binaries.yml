@@ -35,8 +35,8 @@ jobs:
       if: matrix.os == 'windows-latest'
       run: |
         choco install mingw
-        dir "C:\ProgramData\chocolatey\lib\mingw\tools\install\mingw64\bin"
-        echo "C:\ProgramData\chocolatey\lib\mingw\tools\install\mingw64\bin" >> $GITHUB_PATH
+        dir "C:\ProgramData\mingw64\mingw64\bin"
+        echo "C:\ProgramData\mingw64\mingw64\bin" >> $GITHUB_PATH
       shell: bash
 
     - name: Build with Make
