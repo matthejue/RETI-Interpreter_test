@@ -6,6 +6,9 @@ on:
       - 'v*'
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   build:
     runs-on: ${{ matrix.os }}
@@ -57,13 +60,15 @@ jobs:
     steps:
     - name: Download artifacts
       uses: actions/download-artifact@v3
+      with:
+        path: ./artifacts
 
     - name: Create Release
       uses: softprops/action-gh-release@v1
       with:
         files: |
-          reti_interpreter-linux
-          reti_interpreter-macos
-          reti_interpreter-windows.exe
+          ./artifacts/reti_interpreter-linux
+          ./artifacts/reti_interpreter-macos
+          ./artifacts/reti_interpreter-windows.exe
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
