@@ -37,6 +37,7 @@ jobs:
           elif [[ "${{ matrix.os }}" == "macos-latest" ]]; then
             brew install make
           fi
+          shell: bash
 
       - name: Build Static Binary
         run: |
