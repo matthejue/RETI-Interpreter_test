@@ -31,7 +31,9 @@ jobs:
 
     - name: Set up environment
       if: matrix.os == 'macos-latest'
-      run: brew install gcc
+      run: |
+        brew install gcc
+        xcode-select --install
 
     - name: Set up environment
       if: matrix.os == 'windows-latest'
