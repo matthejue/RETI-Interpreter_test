@@ -4,7 +4,6 @@ on:
   push:
     tags:
       - 'v*'
-  workflow_dispatch:
 
 permissions:
   contents: write
@@ -44,7 +43,7 @@ jobs:
 
     - name: Build with Make
       run: |
-        make
+        make STATIC=1
         mv ./bin/reti_interpreter_main ./bin/${{ matrix.output }}
       shell: bash
 
