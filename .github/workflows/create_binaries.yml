@@ -33,7 +33,10 @@ jobs:
 
     - name: Set up environment
       if: matrix.os == 'windows-latest'
-      run: choco install mingw
+      run: |
+        choco install mingw
+        echo "C:\ProgramData\chocolatey\lib\mingw\tools\install\mingw64\bin" >> $GITHUB_PATH
+      shell: bash
 
     - name: Build with Make
       run: |
