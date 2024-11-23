@@ -45,7 +45,7 @@ jobs:
     - name: Build with Make
       run: |
         if [ "${{ matrix.os }}" = "macos-latest" ]; then
-          make
+          make MACOS=1
         else
           make STATIC=1
         fi

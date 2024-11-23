@@ -20,7 +20,7 @@ LDLIBS   := -lm
 
 ifeq ($(STATIC), 1)
     LDFLAGS += -static
-else
+else ifneq ($(MACOS, 1)
     CFLAGS += -g
 endif
 
