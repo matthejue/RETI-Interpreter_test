@@ -1,0 +1,91 @@
+name: Build and Release
+
+on:
+  push:
+    tags:
+      - 'v*'  # Trigger on tags like v1.0.0
+
+jobs:
+  build:
+    name: Build Binaries
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        include:
+          - os: ubuntu-latest
+            ext: ""
+            target: "linux"
+          - os: windows-latest
+            ext: ".exe"
+            target: "windows"
+          - os: macos-latest
+            ext: ""
+            target: "macos"
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set Up Build Tools
+        run: |
+          if [[ "${{ matrix.os }}" == "ubuntu-latest" ]]; then
+            sudo apt-get update
+            sudo apt-get install -y build-essential
+          elif [[ "${{ matrix.os }}" == "windows-latest" ]]; then
+            choco install make mingw
+          elif [[ "${{ matrix.os }}" == "macos-latest" ]]; then
+            brew install make
+          fi
+
+      - name: Build Static Binary
+        run: |
+          if [[ "${{ matrix.target }}" == "windows" ]]; then
+            make CC=x86_64-w64-mingw32-gcc
+          else
+            make
+          fi
+        env:
+          TARGET: ${{ matrix.target }}
+
+      - name: Rename Output Binary
+        run: mv ./bin/reti_interpreter_main ./bin/reti_interpreter${{ matrix.ext }}
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ matrix.target }}-binary
+          path: ./bin/reti_interpreter${{ matrix.ext }}
+
+  release:
+    name: Create Release
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Download Binaries
+        uses: actions/download-artifact@v3
+        with:
+          name: linux-binary
+          path: ./linux-binary
+          if-no-files-found: error
+      - name: Download Binaries (Windows)
+        uses: actions/download-artifact@v3
+        with:
+          name: windows-binary
+          path: ./windows-binary
+          if-no-files-found: error
+      - name: Download Binaries (macOS)
+        uses: actions/download-artifact@v3
+        with:
+          name: macos-binary
+          path: ./macos-binary
+          if-no-files-found: error
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            ./linux-binary/your_program_name
+            ./windows-binary/your_program_name.exe
+            ./macos-binary/your_program_name
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

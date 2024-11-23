@@ -14,9 +14,15 @@ SRC := $(filter-out %_main.c %_test.c, $(wildcard $(SRC_DIR)/*.c))
 OBJ_SRC := $(SRC:$(SRC_DIR)/%.c=$(OBJ_DIR)/%.o)
 
 CPPFLAGS := -I$(INCLUDE_DIR) -MMD -MP
-CFLAGS   := -Wall -g # -O2
-LDFLAGS  := -L$(LIB_DIR) #-static
+CFLAGS   := -Wall
+LDFLAGS  := -L$(LIB_DIR)
 LDLIBS   := -lm
+
+ifeq ($(STATIC), 1)
+    LDFLAGS += -static
+else
+    CFLAGS += -g
+endif
 
 .PRECIOUS: $(OBJ_DIR)/%.o $(OBJ_TEST_DIR)/%.o
 .PHONY: all sys-test unit-test run clean clean-directories clean-files debug install-linux
