@@ -20,8 +20,10 @@ LDLIBS   := -lm
 
 ifeq ($(STATIC), 1)
     LDFLAGS += -static
-else ifneq ($(MACOS, 1)
+else 
+	ifneq ($(MACOS), 1)
     CFLAGS += -g
+	endif
 endif
 
 .PRECIOUS: $(OBJ_DIR)/%.o $(OBJ_TEST_DIR)/%.o
